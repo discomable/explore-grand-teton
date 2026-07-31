@@ -1,9 +1,9 @@
 name: Test
 
 # Runs on every push and every pull request, including from forks. Deliberately
-# needs NO secrets, so an outside contributor's PR gets a real green check —
-# deploy.yml cannot do that, because fork PRs are not given the Cloudflare
-# credentials it needs and would fail at the publish step.
+# needs NO secrets, so an outside contributor's PR gets a real green check.
+# This is the only workflow: publishing is manual and intentionally not automated
+# (wrangler prints the Cloudflare account name into public logs — see DEPLOY.md).
 on:
   push:
   pull_request:

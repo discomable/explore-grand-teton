@@ -118,9 +118,9 @@ Two paths, pick per change:
 
 **Fast path (only documentation or low-risk tooling):**
 ```bash
-git add -A && git commit -m "…" && git push        # push to main
+git add -A && git commit -m "…" && git push
 ```
-→ GitHub Actions builds `dist/` and publishes to **production**: https://grand-teton.pages.dev
+→ `test.yml` runs `npm run verify` (tests + asset provenance + build).
 
 **Review path (all visual/runtime slices):**
 ```bash
@@ -128,12 +128,19 @@ git switch -c feature/short-name
 git add -A && git commit -m "…" && git push -u origin feature/short-name
 gh pr create --fill
 ```
-→ Actions deploys a **preview** at `https://<branch>.grand-teton.pages.dev` and posts the URL as
-a PR comment (updated on every push to the PR). Review the diff + the live preview + the
-before/after shots, then `gh pr merge` → merging to `main` publishes to production.
+→ same CI gate on the PR. Review the diff, the captured before/after shots, and a local build
+(`npm run dev`), then `gh pr merge`.
 
-Preview deploys are the natural stakeholder-review gate: a shareable live build of exactly the
-proposed change, with production untouched until merge.
+**Publishing is a separate, manual step** — see `DEPLOY.md`. It is intentionally not wired into
+Actions, because `wrangler` prints the Cloudflare account name (which defaults to an email address)
+into logs that are public on a public repository. Deploy from a checkout:
+
+```bash
+./build-web.sh && npx wrangler pages deploy dist --project-name <your-project> --branch main
+```
+
+Since there are no automatic preview URLs, a local build plus fixed-pose captures
+(`python3 snap.py --views <suite>`) is the review evidence for a visual change.
 
 ---
 

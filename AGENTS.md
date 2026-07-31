@@ -16,7 +16,7 @@ python3 snap.py                                  # headless capture suite (needs
 python3 terrain/pipeline/buildings/hero_batch.py audit --run-id <run-id>
 ```
 
-`npm run verify` is the exact CI gate in `.github/workflows/deploy.yml`. Run it before claiming a
+`npm run verify` is the exact CI gate in `.github/workflows/test.yml`. Run it before claiming a
 change is green. `npm test` is `node --test` (no glob), `test:py` is `unittest discover -s test`.
 
 ## Two-server local model
@@ -97,10 +97,11 @@ tiles to R2 (see `DEPLOY.md`) or deployed builds serve stale tiles.
 
 ## Deploy
 
-Push `main` → Cloudflare Pages production (`grand-teton.pages.dev`). PR → preview at
-`<branch>.grand-teton.pages.dev` (auto-commented on the PR). CI runs `npm run test:all && npm run
-validate:assets && bash build-web.sh`. `build-web.sh` produces a trimmed `dist/` (no pipeline, raw
-atlas sources, shots, or dev tooling). Don't commit `dist/`.
+CI (`test.yml`) runs `npm run verify` on every push and PR: `npm run test:all && npm run
+validate:assets && vite build`. Publishing is manual and deliberately not a workflow — see
+`DEPLOY.md` (wrangler leaks the Cloudflare account name into public Actions logs). Deploy with
+`./build-web.sh && npx wrangler pages deploy dist`. `build-web.sh` produces a trimmed `dist/` (no
+pipeline, raw atlas sources, shots, or dev tooling). Don't commit `dist/`.
 
 ## Commit & branch
 

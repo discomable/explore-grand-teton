@@ -10,26 +10,24 @@ npx wrangler pages deploy dist --project-name grand-teton --branch main
 ```
 `wrangler login` auth persists locally, so no re-login needed.
 
-## Auto-deploy on git push (GitHub Actions)
-`.github/workflows/deploy.yml`:
-- **push to `main`** → production deploy → https://grand-teton.pages.dev
-- **pull request** → preview deploy → `https://<branch>.grand-teton.pages.dev`, URL posted as a PR comment
+## CI, and why deploying is not automated here
+`.github/workflows/test.yml` runs `npm run verify` (tests + asset provenance + build) on every push
+and pull request. It needs no secrets, so it works from forks.
 
-Preview deploys are the review gate: open a PR, click the commented URL to see the change live,
-merge when happy. One-time setup:
+Publishing is deliberately **not** a GitHub Action. `wrangler` prints a Cloudflare account-selection
+table on startup, and account names default to `"<your-email>'s Account"` — which lands verbatim in
+Actions logs. Those logs are world-readable on a public repository, and GitHub only masks values it
+knows are secrets, so the account name is not redacted. Deploy from a checkout instead, where the
+output goes to your terminal:
 
-1. **Create the repo & push** (tiles included — see note):
-   ```bash
-   git add -A && git commit -m "Grand Teton world"
-   git branch -M main
-   git remote add origin git@github.com:<you>/grand-teton.git
-   git push -u origin main
-   ```
-2. **Add two GitHub secrets** (repo → Settings → Secrets and variables → Actions):
-   - `CLOUDFLARE_ACCOUNT_ID` = `<your-cloudflare-account-id>`
-   - `CLOUDFLARE_API_TOKEN`  = a token with **Cloudflare Pages: Edit**
-     (dashboard → My Profile → API Tokens → Create Token).
-3. Push again (or re-run the workflow) → it builds `dist/` and publishes to Pages.
+```bash
+./build-web.sh
+npx wrangler pages deploy dist --project-name <your-project> --branch main
+```
+
+If you do want CI deploys, set `CLOUDFLARE_ACCOUNT_ID` so wrangler never enumerates accounts, give
+the Cloudflare account a name that is not an email address, and read the first deploy log before
+trusting the rest.
 
 ## Tiles are on Cloudflare R2 (not in git)
 The bulk height + imagery pyramids (~483 MB, ~8k files) live in the **R2 bucket
