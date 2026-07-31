@@ -3,12 +3,29 @@
 Live: **https://grand-teton.pages.dev** (Cloudflare Pages, project `grand-teton`,
 account id `<your-cloudflare-account-id>`).
 
-## Manual deploy (works today)
+## Deploying
 ```bash
-./build-web.sh          # assemble dist/ (~496 MB, ~8k files)
+./build-web.sh                                                        # assemble dist/ (~50 MB, ~144 files)
 npx wrangler pages deploy dist --project-name grand-teton --branch main
 ```
 `wrangler login` auth persists locally, so no re-login needed.
+
+**Always pass `--branch main` explicitly.** Omitted, wrangler defaults to the *current git branch*,
+and Cloudflare Pages routes any branch that is not the project's production branch to a preview
+alias instead. The failure is silent — wrangler prints `✨ Deployment complete!` either way, and the
+only tell is the last line of output:
+
+```
+✨ Deployment alias URL: https://grand-teton.pages.dev          <- production
+✨ Deployment alias URL: https://<branch>.grand-teton.pages.dev <- preview, production untouched
+```
+
+Deploying without `--branch main` is a useful review step in its own right: it publishes the exact
+bundle to `https://<branch>.grand-teton.pages.dev` so you can check it from a real off-localhost
+origin (which also exercises the R2 tile path) before promoting it to production.
+
+Pin the major version if you script this — `npx wrangler@4 …` — so a future release cannot change
+flag behaviour underneath you.
 
 ## CI, and why deploying is not automated here
 `.github/workflows/test.yml` runs `npm run verify` (tests + asset provenance + build) on every push
@@ -17,13 +34,8 @@ and pull request. It needs no secrets, so it works from forks.
 Publishing is deliberately **not** a GitHub Action. `wrangler` prints a Cloudflare account-selection
 table on startup, and account names default to `"<your-email>'s Account"` — which lands verbatim in
 Actions logs. Those logs are world-readable on a public repository, and GitHub only masks values it
-knows are secrets, so the account name is not redacted. Deploy from a checkout instead, where the
-output goes to your terminal:
-
-```bash
-./build-web.sh
-npx wrangler pages deploy dist --project-name <your-project> --branch main
-```
+knows are secrets, so the account name is not redacted. Deploy from a checkout instead (see above),
+where the output goes to your terminal.
 
 If you do want CI deploys, set `CLOUDFLARE_ACCOUNT_ID` so wrangler never enumerates accounts, give
 the Cloudflare account a name that is not an email address, and read the first deploy log before

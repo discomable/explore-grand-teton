@@ -100,7 +100,9 @@ tiles to R2 (see `DEPLOY.md`) or deployed builds serve stale tiles.
 CI (`test.yml`) runs `npm run verify` on every push and PR: `npm run test:all && npm run
 validate:assets && vite build`. Publishing is manual and deliberately not a workflow — see
 `DEPLOY.md` (wrangler leaks the Cloudflare account name into public Actions logs). Deploy with
-`./build-web.sh && npx wrangler pages deploy dist`. `build-web.sh` produces a trimmed `dist/` (no
+`./build-web.sh && npx wrangler pages deploy dist --project-name grand-teton --branch main`
+(`--branch main` is required — without it Cloudflare serves a preview, silently). `build-web.sh`
+produces a trimmed `dist/` (no
 pipeline, raw atlas sources, shots, or dev tooling). Don't commit `dist/`.
 
 ## Commit & branch
