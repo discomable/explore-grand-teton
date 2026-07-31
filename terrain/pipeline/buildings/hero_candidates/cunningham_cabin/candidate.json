@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "id": "cunningham_cabin",
+  "display_name": "J. Pierce Cunningham Cabin",
+  "candidate_type": "single_building",
+  "status": "draft_ready_with_placement_gate",
+  "priority": 3,
+  "structure_ids": [
+    "cunningham_dogtrot"
+  ],
+  "source_manifest": "reference-sources.json",
+  "architecture_contract": "architecture.json",
+  "placement": {
+    "strategy": "georeferenced_osm_footprint_then_habs_cross_check",
+    "crs": {
+      "source": "EPSG:4326",
+      "processing": "EPSG:26912",
+      "runtime": "EPSG:32612"
+    },
+    "anchor": {
+      "latitude": 43.7786094,
+      "longitude": -110.5582988,
+      "accuracy_m": 3.0,
+      "source": "OpenStreetMap way 106472595 centroid, queried 2026-07-28"
+    },
+    "upstream_footprint": {
+      "provider": "OpenStreetMap",
+      "element_type": "way",
+      "element_id": 106472595,
+      "version": 3,
+      "wikidata": "Q5194313",
+      "centroid": {
+        "latitude": 43.7786094,
+        "longitude": -110.5582988
+      },
+      "observed_dimensions_m": {
+        "long_axis": 13.1,
+        "short_axis": 5.3
+      },
+      "observed_long_axis_bearing_deg_true": 178.2,
+      "tags_note": "The way is not named, but carries building=yes, wood material, wood roof and the Cunningham Cabin Wikidata identifier."
+    },
+    "repository_state": {
+      "named_footprint_present": false,
+      "upstream_way_present_in_local_buildings_extract": false,
+      "production_placement_blocked": true
+    },
+    "draft_policy": "Use the upstream way centroid and bearing for local preview only. Fit the measured HABS wall envelope inside the mapped roof/footprint envelope and terrain-snap the model origin.",
+    "production_gate": "Refresh or explicitly add OSM way 106472595 to the repository building extract, then confirm its centroid within 3 m, long-axis bearing within 5 degrees and envelope within 0.75 m of orthophoto or classified LiDAR. Never place from the tourism node or parking coordinates."
+  },
+  "lod": {
+    "switch_distances_m": {
+      "lod0_to_lod1": 90,
+      "lod1_to_lod2": 260
+    },
+    "budgets": {
+      "lod0": {
+        "max_triangles": 5000,
+        "max_material_primitives": 4
+      },
+      "lod1": {
+        "max_triangles": 1000,
+        "max_material_primitives": 3
+      },
+      "lod2": {
+        "max_triangles": 250,
+        "max_material_primitives": 2
+      },
+      "max_deployed_texture_bytes": 1048576
+    },
+    "recognition_contract": {
+      "lod0": "Two distinct log pens, genuinely open breezeway, common shallow sod-covered gable roof, saddle-V log ends and source-backed openings.",
+      "lod1": "Retain two pen masses, open breezeway and the common low gable/sod silhouette; simplify individual logs.",
+      "lod2": "Retain the open central void and low continuous roof silhouette; no opening or log relief."
+    }
+  },
+  "projection": {
+    "allowed": true,
+    "targets": [
+      "east_opaque_log_faces",
+      "west_opaque_log_faces"
+    ],
+    "constraints": [
+      "Render fixed orthographic targets from approved geometry before image-assisted surfacing.",
+      "Project only onto opaque exterior faces; the breezeway must remain a geometric opening with normal scene depth and lighting.",
+      "Use only sources positively identified as Cunningham Cabin/HABS WY-25.",
+      "Preserve registered silhouette, log courses, saddle-V corners, roof pitch and openings.",
+      "Exclude landscape, sky, people, signs, fences, baked shadows, black rectangles and featureless painted door or window voids.",
+      "Do not synthesize dimensions, roof topology, openings or missing elevations."
+    ],
+    "fallback": "Use a compact tileable log/chinking and sod/board atlas if a clean registered projection cannot pass the visual gate."
+  },
+  "work_product": {
+    "root": "terrain/pipeline/work/landmark-batches/{run_id}/cunningham_cabin",
+    "required_files": [
+      "source-acquisition.json",
+      "measurements.json",
+      "cunningham-cabin-lod0.glb",
+      "cunningham-cabin-lod1.glb",
+      "cunningham-cabin-lod2.glb",
+      "validation.json",
+      "review/index.html"
+    ],
+    "capture_views": [
+      "close_east_breezeway",
+      "approach_from_parking",
+      "distant_teton_context"
+    ]
+  },
+  "pipeline_stages": [
+    "acquire_and_hash_sources",
+    "register_habs_drawings",
+    "validate_placement",
+    "generate_clay_lods",
+    "render_projection_targets",
+    "surface_and_export",
+    "capture_and_validate"
+  ],
+  "quarantine_gates": [
+    {
+      "stage": "sources",
+      "status": "quarantined_sources",
+      "fail_when": "The HABS WY-25 record, all five measured sheets and at least two same-building photographic elevations are unavailable, unidentified or lack usable rights metadata."
+    },
+    {
+      "stage": "placement",
+      "status": "quarantined_geometry",
+      "fail_when": "The upstream footprint cannot be brought into the local extract or disagrees with orthophoto/LiDAR by more than the production placement tolerance."
+    },
+    {
+      "stage": "geometry",
+      "status": "quarantined_geometry",
+      "fail_when": "The two pens, 10 ft 2 in open breezeway, common low gable roof, measured envelope or saddle-V corners are absent or outside documented tolerances."
+    },
+    {
+      "stage": "visual",
+      "status": "quarantined_visual",
+      "fail_when": "The breezeway reads as a painted black rectangle, projection edges drift, unverified openings are added, the sod roof loses its low continuous silhouette, or the building floats above terrain."
+    },
+    {
+      "stage": "performance",
+      "status": "quarantined_performance",
+      "fail_when": "Any LOD, primitive, texture residency or one-active-LOD budget is exceeded."
+    }
+  ],
+  "production_blockers": [
+    "The current repository building extract does not contain upstream OSM way 106472595.",
+    "Final terrain height and footprint orientation still require orthophoto or LiDAR confirmation."
+  ]
+}

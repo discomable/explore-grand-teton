@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "candidate_id": "menors_homestead",
+  "measurement_policy": {
+    "precedence": [
+      "HABS WY-24 measured drawings",
+      "classified LiDAR",
+      "georeferenced named current footprint",
+      "multiple same-building photographs",
+      "explicit estimate"
+    ],
+    "rule": "Image generation may change registered surface appearance only; it may not determine geometry, placement, phase boundaries, roof topology, or openings.",
+    "units": "metres"
+  },
+  "structures": [
+    {
+      "id": "cabin",
+      "name": "Bill Menor Homestead Cabin",
+      "role": "hero_component",
+      "source_refs": [
+        "loc_menors_ferry_habs_wy_24",
+        "nps_menors_general_store",
+        "nps_menors_ferry_history",
+        "local_named_building_footprints"
+      ],
+      "source_backed_facts": [
+        {
+          "fact": "William D. Menor established the homestead beside the Snake River in the 1890s and built the cabin incrementally.",
+          "confidence": "high"
+        },
+        {
+          "fact": "NPS identifies a west wing built in 1894 and a central section added around 1895.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The west wing served as bedroom and sitting room, while the central section housed the kitchen and pantry.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The building used local timber and lime whitewash; NPS specifically identifies rough-sawn boards in the central section.",
+          "confidence": "high"
+        },
+        {
+          "fact": "HABS records restoration of the homestead cabin and attached store in 1949.",
+          "confidence": "high",
+          "note": "Use HABS drawings and current official references to separate historic form from later restoration work."
+        }
+      ],
+      "massing": {
+        "construction_phases": [
+          {
+            "id": "west_wing",
+            "date": "1894",
+            "status": "source_backed"
+          },
+          {
+            "id": "central_section",
+            "date": "circa 1895",
+            "status": "source_backed"
+          }
+        ],
+        "storeys": 1,
+        "wall_system": "extract phase-specific log and rough-sawn timber construction from HABS WY-24",
+        "primary_roof": "extract exact roof forms and junction from HABS WY-24",
+        "must_preserve_at_all_lods": [
+          "west-wing and central-section stepped plan",
+          "documented roof break between construction phases",
+          "continuous physical connection to the eastern country-store wing"
+        ]
+      },
+      "surface_family": {
+        "walls": "weathered local timber under restrained, uneven lime whitewash",
+        "phase_difference": "preserve source-backed log versus rough-sawn-board character without exaggerating it",
+        "roof": "derive material, pitch, and weathering from HABS and rights-cleared current references",
+        "foundation": "derive from HABS sections and current photographs; avoid a floating or uniformly exposed modern plinth"
+      },
+      "openings": {
+        "status": "extract_from_habs",
+        "rule": "Use HABS WY-24 plans, elevations, and same-building photographs. Image-assisted surfacing may not create, move, close, or enlarge an opening."
+      },
+      "dimensions": {
+        "status": "transcribed_from_habs_wy_24",
+        "measurement_ref": "documentary-measurements.json",
+        "source_sheet": 8,
+        "required_fields": [
+          "west_wing_length_m",
+          "west_wing_width_m",
+          "central_section_length_m",
+          "central_section_width_m",
+          "eave_heights_m",
+          "ridge_heights_m",
+          "roof_pitches_deg",
+          "phase_offsets_m",
+          "orientation_deg_true_north"
+        ]
+      },
+      "confidence": {
+        "identity": "high",
+        "phase_chronology": "high",
+        "whitewash_and_timber": "high",
+        "roof_topology_before_sheet_extraction": "low",
+        "dimensions_before_sheet_extraction": "low",
+        "placement": "medium_high"
+      }
+    },
+    {
+      "id": "country_store",
+      "name": "Bill Menor Country Store Wing",
+      "role": "hero_component",
+      "source_refs": [
+        "loc_menors_ferry_habs_wy_24",
+        "nps_menors_general_store",
+        "nps_menors_ferry_history",
+        "local_named_building_footprints"
+      ],
+      "source_backed_facts": [
+        {
+          "fact": "Bill Menor attached the store building to the east end of his homestead cabin.",
+          "confidence": "high"
+        },
+        {
+          "fact": "NPS identifies the larger east wing as built around 1905 and used as the general store.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The store served settlers and travelers and also supported Menor's post-office and ferry business.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The country-store wing is part of the Homestead footprint and is not the nearby Storehouse used for protected food and root crops.",
+          "confidence": "high"
+        }
+      ],
+      "massing": {
+        "construction_phases": [
+          {
+            "id": "east_store_wing",
+            "date": "circa 1905",
+            "status": "source_backed"
+          }
+        ],
+        "storeys": 1,
+        "wall_system": "extract timber construction from HABS WY-24",
+        "primary_roof": "extract exact roof form and cabin junction from HABS WY-24",
+        "must_preserve_at_all_lods": [
+          "larger eastern wing mass",
+          "attached east-end relationship",
+          "store-wing roof silhouette",
+          "documented primary shop opening rhythm"
+        ]
+      },
+      "surface_family": {
+        "walls": "weathered timber under restrained lime whitewash shared with the cabin",
+        "storefront": "derive door, glazing, shutters, trim, and any signage only from HABS/current same-building references",
+        "roof": "derive material, pitch, and weathering from HABS and rights-cleared current references",
+        "foundation": "derive from HABS sections and current photographs"
+      },
+      "openings": {
+        "status": "extract_from_habs",
+        "rule": "Use HABS WY-24 elevations for storefront opening count, proportions, and placement; do not interpret dark photographic areas as open black voids."
+      },
+      "dimensions": {
+        "status": "transcribed_from_habs_wy_24",
+        "measurement_ref": "documentary-measurements.json",
+        "source_sheets": [
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "required_fields": [
+          "length_m",
+          "width_m",
+          "eave_height_m",
+          "ridge_height_m",
+          "roof_pitch_deg",
+          "junction_offset_m",
+          "orientation_deg_true_north"
+        ]
+      },
+      "confidence": {
+        "identity": "high",
+        "attachment_and_phase": "high",
+        "whitewash_and_timber": "high",
+        "roof_topology_before_sheet_extraction": "low",
+        "dimensions_before_sheet_extraction": "low",
+        "placement": "medium_high"
+      }
+    }
+  ],
+  "site_registration_anchors": [
+    {
+      "id": "homestead_footprint",
+      "source_ref": "local_named_building_footprints",
+      "name": "Menor's Homestead",
+      "use": "Primary cabin-and-attached-store footprint."
+    },
+    {
+      "id": "storehouse_footprint",
+      "source_ref": "local_named_building_footprints",
+      "name": "Menor's Storehouse",
+      "use": "Secondary site-orientation and scale check only; not a rendered component."
+    }
+  ],
+  "shared_materials": [
+    {
+      "id": "menors_lime_whitewash",
+      "uses": [
+        "cabin",
+        "country_store"
+      ],
+      "rule": "Preserve visible timber and age variation; avoid opaque modern-white paint."
+    },
+    {
+      "id": "weathered_timber",
+      "uses": [
+        "cabin",
+        "country_store"
+      ]
+    },
+    {
+      "id": "weathered_roof",
+      "uses": [
+        "cabin",
+        "country_store"
+      ]
+    },
+    {
+      "id": "historic_trim_and_glass",
+      "uses": [
+        "cabin",
+        "country_store"
+      ]
+    }
+  ],
+  "unresolved_before_generation": [
+    "Register the HABS site plan against both named repository footprints and record residuals.",
+    "Confirm current roof, foundation, trim, and storefront materials from item-level rights-cleared references.",
+    "Choose and document a presentation date where restoration changes materially affect appearance."
+  ]
+}

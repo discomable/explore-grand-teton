@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "candidate_id": "jenny_lake_ranger_station",
+  "measurement_policy": {
+    "precedence": [
+      "HABS WY-108 measured drawings",
+      "classified LiDAR",
+      "named georeferenced current footprint",
+      "calibrated multiple same-building photographs",
+      "explicit estimate"
+    ],
+    "rule": "Image generation may change registered exterior surface appearance only; it may not determine geometry, placement, roof topology, additions, openings, or interior content.",
+    "units": "metres"
+  },
+  "structures": [
+    {
+      "id": "ranger_station",
+      "name": "Jenny Lake Ranger Station (Lee Mangus/Manges Cabin)",
+      "role": "hero",
+      "source_refs": [
+        "loc_habs_wy_108",
+        "nps_jenny_lake_ranger_station",
+        "nps_jenny_lake_historic_district",
+        "nps_historic_properties_guide",
+        "nps_jenny_lake_renewal_ea",
+        "runtime_named_building_footprints"
+      ],
+      "identity": {
+        "canonical_current_name": "Jenny Lake Ranger Station",
+        "documentary_aliases": [
+          "Lee Mangus Cabin",
+          "Lee Manges Cabin",
+          "Jenny Lake Museum and Visitor Center"
+        ],
+        "do_not_confuse_with": [
+          "Jenny Lake Visitor Center / Harrison Crandall Studio",
+          "J. Manges Cabin / James or Jimmy Manges Cabin near Cottonwood Creek"
+        ]
+      },
+      "source_backed_facts": [
+        {
+          "fact": "The current ranger station is the relocated Lee Mangus/Manges homestead cabin; HABS identifies it as survey WY-108 and the National Park Service identifies it as today's Jenny Lake Ranger Station.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The NPS dates the homestead cabin to 1925, while HABS describes it as built before July 1929. Preserve this date discrepancy in provenance.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The cabin was acquired and moved to South Jenny Lake in 1930 for use as the park's museum and visitor facility; it later became the ranger station.",
+          "confidence": "high"
+        },
+        {
+          "fact": "HABS records a room added at the east end in 1937, probably with Civilian Conservation Corps labor.",
+          "confidence": "high"
+        },
+        {
+          "fact": "HABS sheet 2 dimensions the wall envelope at 20 feet 6 inches by 36 feet 9 inches.",
+          "metric": {
+            "width_m": 6.2484,
+            "length_m": 11.2014
+          },
+          "confidence": "high"
+        },
+        {
+          "fact": "HABS sheet 3 dimensions the peak at 18 feet above floor line and the ceiling line at 7 feet 9 inches.",
+          "metric": {
+            "ridge_height_above_floor_m": 5.4864,
+            "ceiling_height_above_floor_m": 2.3622
+          },
+          "confidence": "high"
+        },
+        {
+          "fact": "The HABS material list specifies a stone foundation, saddle-jointed log walls, and a wood-shingle roof.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The west entrance elevation has a supported porch canopy, a vertical-plank door, a multi-light window, and a decorative diagonal-log king-post treatment in the gable.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The north long elevation documents three multi-light windows; the other elevations document their own asymmetric door and window arrangements.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The building remains a working ranger station beneath a wooded South Jenny Lake canopy, distinct from the nearby Crandall Studio visitor center.",
+          "confidence": "high"
+        }
+      ],
+      "massing": {
+        "storeys": 1,
+        "primary_body": "rectangular log cabin including a documented east-end room addition",
+        "primary_roof": "steep wood-shingle gable",
+        "secondary_roofs": "supported west entrance porch canopy and small documented exterior shelter projections",
+        "wall_system": "horizontal saddle-jointed logs",
+        "foundation": "low stone foundation",
+        "must_preserve_at_all_lods": [
+          "long rectangular cabin proportion",
+          "steep primary gable silhouette",
+          "west entrance porch projection",
+          "documented east-end addition relationship",
+          "asymmetric primary opening rhythm"
+        ],
+        "lod0_only_details": [
+          "extended saddle-notched corner log ends",
+          "diagonal-log king-post gable treatment",
+          "multi-light muntin relief where within budget",
+          "restrained irregular stone footing",
+          "door hardware and period sign only when rights-cleared current evidence supports them"
+        ]
+      },
+      "surface_family": {
+        "walls": "weathered horizontal logs with restrained chinking and no glossy modern varnish",
+        "roof": "weathered wood shingles with silhouette-safe edge breakup",
+        "foundation": "sparse, dark, partially buried stone matching the HABS foundation without a bright continuous plinth",
+        "doors": "weathered vertical timber planks",
+        "windows": "multi-light glazing with subtle reflection and interior occlusion; never featureless black rectangles",
+        "porch": "weathered timber posts, fascia, canopy, deck, and steps",
+        "signage": "Omit unless a rights-cleared, target-period same-building reference establishes exact appearance; never ask image generation to invent text"
+      },
+      "openings": {
+        "status": "documented_on_habs_sheets_exact_registration_pending",
+        "documented_types": [
+          "west vertical-plank entrance door beneath porch",
+          "west multi-light window",
+          "east door and multi-light window",
+          "three north multi-light windows",
+          "two south multi-light windows",
+          "small gable window on the east elevation"
+        ],
+        "rule": "Extract exact opening centers and sizes from HABS sheet 2 before modelling. Projection may not create, delete, move, or resize an opening."
+      },
+      "dimensions": {
+        "documented": {
+          "wall_envelope_length_m": 11.2014,
+          "wall_envelope_width_m": 6.2484,
+          "ridge_height_above_floor_m": 5.4864,
+          "ceiling_height_above_floor_m": 2.3622
+        },
+        "derived": {
+          "roof_pitch_deg_approx": 45.0,
+          "derivation": "The HABS section gives an 18-foot ridge, 7-foot-9-inch ceiling line, and 20-foot-6-inch width; verify the eave/ceiling relationship against the full-resolution sheet before generation."
+        },
+        "footprint_snapshot": {
+          "area_m2_approx": 90.54,
+          "note": "The current named polygon is larger than the HABS wall rectangle because it includes exterior projections and current footprint generalization."
+        },
+        "pending_fields": [
+          "floor_to_ground_offset_m",
+          "eave_height_above_floor_m",
+          "porch_depth_and_post_centers_m",
+          "east_addition_joint_location_m",
+          "opening_centers_and_sizes_m",
+          "orientation_deg_runtime_local"
+        ]
+      },
+      "confidence": {
+        "identity": "high",
+        "runtime_placement": "high",
+        "primary_dimensions": "high",
+        "ridge_height": "high",
+        "roof_pitch_before_full_sheet_extraction": "medium_high",
+        "materials": "high",
+        "opening_typology": "high",
+        "opening_positions_before_full_sheet_extraction": "medium",
+        "current_surface_colour": "low"
+      }
+    }
+  ],
+  "shared_materials": [
+    {
+      "id": "weathered_saddle_log",
+      "uses": [
+        "ranger_station"
+      ]
+    },
+    {
+      "id": "weathered_wood_shingle",
+      "uses": [
+        "ranger_station"
+      ]
+    },
+    {
+      "id": "dark_stone_and_hardware",
+      "uses": [
+        "ranger_station"
+      ]
+    }
+  ],
+  "unresolved_before_generation": [
+    "Acquire and hash only the HABS WY-108 sheets needed for plan, elevations, section, roof framing, and porch details.",
+    "Extract exact opening centers, porch dimensions, addition joint, eave height, and orientation from the full-resolution HABS sheets.",
+    "Reconcile the HABS 18-foot ridge with the current footprint extract's unverified 6.9-metre height field.",
+    "Confirm current roof, chinking, door, window, and foundation condition from rights-cleared same-building exterior evidence.",
+    "Acquire two useful current or documentary photographic elevations with item-level creator and rights metadata before projection.",
+    "Confirm the target exterior-condition date so later repairs, temporary operations, and signage are not mixed."
+  ]
+}

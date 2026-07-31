@@ -1,0 +1,9 @@
+# Offline terrain pipeline deps (Python side).
+# GDAL itself must be installed at the OS level (brew install gdal / apt install gdal-bin python3-gdal).
+rio-rgbify>=0.3.2
+rasterio>=1.3
+requests>=2.31
+numpy>=1.24
+# landcover bake (make_landcover.py)
+scipy>=1.10
+Pillow>=10.0

@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "candidate_id": "menors_homestead",
+  "download_root": "terrain/pipeline/data/hero-buildings/menors_homestead/habs-wy-24",
+  "same_building_exclusions": [
+    {
+      "name": "Menor's Storehouse",
+      "reason": "A separate food-storage/root-cellar building; it is not the country-store wing attached to the homestead cabin."
+    },
+    {
+      "name": "Maud Noble Cabin",
+      "reason": "A separate 1916 cabin moved to the Menor homestead in 1918 and documented as HABS WY-23."
+    },
+    {
+      "name": "Menor's Ferry and cableworks",
+      "reason": "The present ferry and cableworks are replicas and are outside this building slice."
+    },
+    {
+      "name": "Transportation Barn",
+      "reason": "The current barn stands only in the approximate location of Bill Menor's lost barn."
+    }
+  ],
+  "references": [
+    {
+      "id": "loc_menors_ferry_habs_wy_24",
+      "title": "Menor's Ferry, Snake River, Moose, Teton County, WY",
+      "author": "Historic American Buildings Survey; John N. DeHaas Jr., project manager, photographer, and historian; Al Huntsman, photographer; U. James Blackburn, Durward K. Sobek, Jack Oyama, Dick Shanahan, and Charles B. Goldy Jr., field team",
+      "source": "https://www.loc.gov/item/wy0036/",
+      "provider": "Library of Congress",
+      "call_number": "HABS WYO,20-MOOS,2-",
+      "survey_number": "HABS WY-24",
+      "type": "measured_architectural_and_site_record",
+      "coverage": {
+        "photos": 11,
+        "measured_drawings": 12,
+        "data_pages": 5
+      },
+      "license": "Rights advisory: no known restrictions on images made by the U.S. Government; images copied from other sources may be restricted. Verify each selected image's item-level credit before redistribution.",
+      "rights_url": "https://www.loc.gov/rr/print/res/114_habs.html",
+      "usage": [
+        "same-building identity",
+        "site plan and registration",
+        "primary dimensions",
+        "construction phases",
+        "roof topology",
+        "elevations and openings",
+        "projection references"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_menors_general_store",
+      "title": "Menors General Store",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/places/000/menors-general-store.htm",
+      "provider": "National Park Service",
+      "type": "official_structure_history_and_current_visual_reference",
+      "license": "U.S. National Park Service web publication. Text may be used as factual reference; treat page imagery as reference-only until its original asset credit and reuse terms are recorded.",
+      "usage": [
+        "three-phase cabin/store chronology",
+        "country-store identity",
+        "whitewash and timber materials",
+        "current public-facing appearance",
+        "same-building verification"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_menors_ferry_history",
+      "title": "Menors Ferry",
+      "author": "National Park Service",
+      "source": "https://home.nps.gov/grte/learn/historyculture/menor.htm",
+      "provider": "National Park Service",
+      "type": "official_homestead_history_and_structure_inventory",
+      "license": "U.S. National Park Service web publication. Text may be used as factual reference; inspect and record image credits separately before reuse.",
+      "usage": [
+        "homestead chronology",
+        "storehouse distinction",
+        "current site context",
+        "structure inventory",
+        "same-building verification"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_menors_ferry_district",
+      "title": "Menors Ferry District",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/places/000/menors-ferry-district.htm",
+      "provider": "National Park Service",
+      "type": "official_cultural_landscape_context",
+      "license": "U.S. National Park Service web publication. Text may be used as factual reference; inspect and record image credits separately before reuse.",
+      "usage": [
+        "district setting",
+        "historic component inventory",
+        "whitewashed cabin identity",
+        "paths, storage shed, smokehouse, fields, and riverbank context"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "local_named_building_footprints",
+      "title": "Grand Teton named building footprints",
+      "author": "OpenStreetMap contributors; Microsoft Building Footprints contributors",
+      "source": "terrain/public/buildings.json",
+      "provider": "Grand Teton local geospatial pipeline",
+      "type": "current_geospatial_footprint",
+      "license": "OpenStreetMap data is licensed under ODbL; Microsoft Building Footprints data is licensed under ODbL. Preserve dataset attribution and generated-file provenance.",
+      "rights_url": "https://www.openstreetmap.org/copyright",
+      "usage": [
+        "named Menor's Homestead primary anchor",
+        "named Menor's Storehouse secondary anchor",
+        "runtime placement",
+        "collision footprint"
+      ],
+      "confidence": "medium_high",
+      "acquisition_status": "repository_local",
+      "sha256": null
+    }
+  ],
+  "acquisition_requirements": {
+    "download_large_files_by_default": false,
+    "required_before_geometry": [
+      "Acquire only the HABS WY-24 measured sheets, data pages, and photographs needed for the cabin/store geometry and registration.",
+      "Record retrieval date, resolved URL, item identifier, byte count, and SHA-256 for every acquired artifact.",
+      "Confirm drawing scale, north arrow, construction-phase boundaries, and elevation labels are legible before extracting measurements.",
+      "Hash terrain/public/buildings.json and record the exact named Homestead and Storehouse features used by the run."
+    ],
+    "required_before_projection": [
+      "Resolve item-level authorship and rights for every selected HABS or NPS image.",
+      "Confirm each image shows Bill Menor's cabin and attached store rather than the separate storehouse, Maud Noble Cabin, ferry, or transportation barn.",
+      "Require at least two useful exterior elevations, including one that shows the cabin/store junction."
+    ]
+  }
+}

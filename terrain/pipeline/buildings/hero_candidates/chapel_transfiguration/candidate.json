@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "id": "chapel_transfiguration",
+  "name": "Chapel of the Transfiguration",
+  "status": "draft",
+  "priority": 5,
+  "batch_mode": "single",
+  "output_slug": "chapel-transfiguration",
+  "summary": "An exterior-only Western Craftsman landmark using the named chapel footprint as the authoritative runtime placement and the nearby named Brides' Room footprint as restrained immediate companion massing.",
+  "scope": {
+    "included": [
+      "chapel exterior",
+      "attached chapel projections visible from outside",
+      "immediate Brides' Room companion massing"
+    ],
+    "excluded": [
+      "walkable interior",
+      "portal-loaded interior scene",
+      "pews, altar, pulpit, and other interior furnishings",
+      "interior altar-window vista",
+      "Menor's Ferry buildings",
+      "bell canopy and storage shed until their footprints are independently resolved"
+    ]
+  },
+  "structures": [
+    {
+      "id": "chapel",
+      "name": "Chapel of the Transfiguration",
+      "role": "hero",
+      "architecture_ref": "architecture.json#chapel",
+      "required": true,
+      "output_stem": "chapel-transfiguration"
+    },
+    {
+      "id": "brides_room",
+      "name": "Chapel of the Transfiguration Brides' Room",
+      "role": "immediate_companion_massing",
+      "architecture_ref": "architecture.json#brides_room",
+      "required": true,
+      "output_stem": "chapel-transfiguration-brides-room"
+    }
+  ],
+  "placement": {
+    "status": "resolved_from_named_current_footprints",
+    "authoritative_crs": "runtime_local_coordinates",
+    "source_file": "terrain/public/buildings.json",
+    "source_attribution": "OpenStreetMap contributors (ODbL); Microsoft Building Footprints (ODbL)",
+    "strategy": "Select the two exact named records, retain their polygon vertices without buffering or rectangular replacement, and preserve their relative placement. Re-resolve by exact name and compare the source-file hash before every deterministic rebuild.",
+    "features": [
+      {
+        "structure": "chapel",
+        "selector": {
+          "name": "Chapel of the Transfiguration"
+        },
+        "source_height_m": 9.8,
+        "footprint_area_m2_approx": 118.26,
+        "footprint_snapshot": [
+          [772.1, 8348.5],
+          [770.6, 8346.8],
+          [769.6, 8347.7],
+          [761.5, 8336.6],
+          [768.3, 8330.9],
+          [772.0, 8335.2],
+          [770.0, 8336.8],
+          [775.5, 8343.5],
+          [774.4, 8344.5],
+          [775.4, 8345.7]
+        ]
+      },
+      {
+        "structure": "brides_room",
+        "selector": {
+          "name": "Chapel of the Transfiguration Brides' Room"
+        },
+        "source_height_m": 9.1,
+        "footprint_area_m2_approx": 37.28,
+        "footprint_snapshot": [
+          [779.3, 8326.5],
+          [775.4, 8329.9],
+          [771.6, 8326.6],
+          [771.0, 8324.8],
+          [774.9, 8321.4]
+        ]
+      }
+    ],
+    "resolution_steps": [
+      "Hash terrain/public/buildings.json and persist the hash in the run artifact.",
+      "Resolve exactly one record for each exact-name selector; reject zero or multiple matches.",
+      "Compare resolved vertices, source heights, and relative centroids with this package snapshot.",
+      "Use the current terrain sampler for ground elevation and re-basing; never bake an assumed absolute elevation.",
+      "Confirm the chapel axis and southeast-facing approach against the National Register description before capture approval."
+    ],
+    "acceptance": {
+      "exact_named_match_required": true,
+      "maximum_vertex_drift_m": 0.25,
+      "maximum_relative_center_drift_m": 0.25,
+      "maximum_orientation_drift_deg": 2.0,
+      "manual_review_required": true
+    },
+    "stable_runtime_ids": {
+      "chapel": "chapel_transfiguration.chapel",
+      "brides_room": "chapel_transfiguration.brides_room"
+    }
+  },
+  "budgets": {
+    "single": {
+      "lod0": {
+        "max_triangles": 5000,
+        "max_draw_calls": 4
+      },
+      "lod1": {
+        "max_triangles": 1000,
+        "max_draw_calls": 3
+      },
+      "lod2": {
+        "max_triangles": 250,
+        "max_draw_calls": 2
+      },
+      "max_deployed_texture_bytes": 1572864
+    },
+    "triangle_allocations": {
+      "chapel": {
+        "lod0": 4250,
+        "lod1": 850,
+        "lod2": 210
+      },
+      "brides_room": {
+        "lod0": 750,
+        "lod1": 150,
+        "lod2": 40
+      }
+    },
+    "material_policy": "Share compact log, wood-shake, dark trim, and board-and-batten material families. A registered projection is permitted only on exterior chapel surfaces and must not encode an interior view."
+  },
+  "lods": [
+    {
+      "id": "lod0",
+      "max_distance_m": 90,
+      "intent": "Recognizable log ends, spear-ended fascia silhouette, measured exterior openings, shake roof character, and restrained ground contact."
+    },
+    {
+      "id": "lod1",
+      "max_distance_m": 260,
+      "intent": "Retain the long low nave, primary and projecting gables, altar-window opening, and separate Brides' Room mass."
+    },
+    {
+      "id": "lod2",
+      "max_distance_m": 100000,
+      "intent": "Preserve the chapel's axial gable silhouette, principal wall/roof split, and companion footprint only."
+    }
+  ],
+  "projection": {
+    "enabled": true,
+    "target_method": "fixed_orthographic_render_from_approved_geometry",
+    "required_views": [
+      {
+        "id": "southeast_entry",
+        "structure": "chapel",
+        "source_refs": [
+          "nps_chapel_place",
+          "nps_nrhp_nomination_80004057"
+        ],
+        "purpose": "Entrance door, projecting gables, fascia treatment, and public approach."
+      },
+      {
+        "id": "nave_side",
+        "structure": "chapel",
+        "source_refs": [
+          "nps_nrhp_nomination_80004057",
+          "nps_historic_properties_guide"
+        ],
+        "purpose": "Horizontal log courses, lattice casement rhythm, log corners, and shake roof."
+      },
+      {
+        "id": "altar_end_exterior",
+        "structure": "chapel",
+        "source_refs": [
+          "nps_chapel_place",
+          "nps_menors_ferry_district"
+        ],
+        "purpose": "Exterior scale and framing of the signature fixed-sash altar-window opening; the interior mountain view is excluded."
+      }
+    ],
+    "minimum_reference_gate": {
+      "official_identity_source_required": true,
+      "minimum_useful_same_building_exterior_elevations": 2,
+      "rights_resolved_before_image_tool": true
+    },
+    "prompt_constraints": [
+      "Preserve the exact registered target silhouette, roof topology, openings, crop, camera, and transparent/background mask.",
+      "Use only references proven to depict the Chapel of the Transfiguration or its named Brides' Room; exclude the Chapel of the Sacred Heart and other rustic chapels.",
+      "Keep the chapel a long, low Western Craftsman lodgepole-log building with moderate wood-shake gables and smaller documented projecting gables.",
+      "Preserve sawn log ends beyond the corners, spear-ended raking fascias, the beveled vertical-plank entrance door, lattice casements, and the fixed-sash altar-window opening where geometry establishes them.",
+      "Do not infer geometry, dimensions, placement, roof pitches, openings, or additions from image generation.",
+      "Do not generate a view through the building, an interior, pews, altar furnishings, stained glass, religious figures, people, vehicles, signs, text, watermarks, landscape, mountains, sky, featureless black rectangles, or baked cast shadows.",
+      "Keep tileable materials free of perspective, vegetation, sky, and directional sunlight."
+    ],
+    "audit_required": [
+      "target_path",
+      "reference_paths",
+      "prompt",
+      "model_or_tool",
+      "output_path",
+      "sha256",
+      "review_status"
+    ]
+  },
+  "validation": {
+    "required_capture_views": [
+      "close_southeast_entry",
+      "approach_from_boardwalk",
+      "distant_teton_context"
+    ],
+    "required_lighting": [
+      "daylight",
+      "overcast"
+    ],
+    "checks": [
+      "single-candidate geometry, draw-call, and texture budgets",
+      "one active LOD for the combined landmark",
+      "terrain contact and re-basing",
+      "named footprint and relative-placement retention",
+      "projection registration at frontal and grazing angles",
+      "closed exterior envelope with no walkable interior or portal",
+      "collision footprints",
+      "vegetation and buck-and-pole fence continuity",
+      "no production asset or manifest mutation"
+    ]
+  },
+  "quarantine": {
+    "retry_limit": 1,
+    "gates": [
+      {
+        "code": "sources",
+        "status_on_failure": "quarantined_sources",
+        "conditions": [
+          "The chapel lacks an official NPS identity and architectural source.",
+          "Fewer than two useful, same-building exterior elevations have item-level creator and rights metadata before projection.",
+          "Any acquired artifact lacks final URL, creator, rights statement, retrieval date, byte count, and SHA-256.",
+          "A visual reference may show the Chapel of the Sacred Heart or another rustic chapel."
+        ]
+      },
+      {
+        "code": "placement",
+        "status_on_failure": "quarantined_geometry",
+        "conditions": [
+          "Either exact named footprint is absent or non-unique.",
+          "Any vertex or relative-center drift exceeds 0.25 metres without an approved source migration.",
+          "The chapel axis or southeast-facing relationship conflicts with the National Register description."
+        ]
+      },
+      {
+        "code": "geometry",
+        "status_on_failure": "quarantined_geometry",
+        "conditions": [
+          "The main chapel is not traceable to the documented approximately 22 by 50 foot massing and named footprint.",
+          "Documented gable projections, sacristy relationship, or signature fascia silhouette are lost in a required LOD.",
+          "Image generation determines dimensions, roof topology, placement, or openings.",
+          "Roofs intersect walls incorrectly, daylight gaps appear, or foundations float."
+        ]
+      },
+      {
+        "code": "visual",
+        "status_on_failure": "quarantined_visual",
+        "conditions": [
+          "Projection edges drift from the approved orthographic target.",
+          "Black placeholder openings, an invented interior view, landscape baked into the facade, cross-building contamination, or unsupported religious ornament is visible.",
+          "Vegetation or fence clearing extends beyond physical access and envelope clearance."
+        ]
+      },
+      {
+        "code": "performance",
+        "status_on_failure": "quarantined_performance",
+        "conditions": [
+          "Any LOD, material-primitive, or texture budget is exceeded.",
+          "More than one landmark LOD is active.",
+          "The required capture suite reports console errors, failed asset requests, or unacceptable frame-time regression."
+        ]
+      }
+    ]
+  },
+  "promotion": {
+    "allowed": false,
+    "reason": "This package is draft-only. Promotion requires separate user approval for this named candidate."
+  }
+}

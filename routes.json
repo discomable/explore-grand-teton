@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 2,
+  "routes": [
+    {
+      "id": "highway-junction-drive",
+      "mode": "drive",
+      "description": "Highway-speed approach through a paved valley junction and onto Teton Park Road.",
+      "durationSeconds": 10,
+      "certificationTargets": ["highway", "paved-junction", "park-road"],
+      "waypoints": [
+        {"view": "moose-highway-approach"},
+        {"view": "moose-highway-near"},
+        {"view": "moose-highway-junction"},
+        {"view": "moose-park-road-exit"}
+      ]
+    },
+    {
+      "id": "gravel-two-track-drive",
+      "mode": "drive",
+      "description": "Mormon Row transition from gravel to a narrow vehicle two-track.",
+      "durationSeconds": 10,
+      "certificationTargets": ["gravel", "two-track"],
+      "waypoints": [
+        {"view": "mormon-row-transition", "offset": [-2.5, 0, 114], "yawOffset": 0},
+        {"view": "mormon-row-transition", "offset": [-3.5, 0, 29], "yawOffset": 0},
+        {"view": "mormon-row-transition", "offset": [-5.0, 0, -56], "yawOffset": 0},
+        {"view": "mormon-row-transition", "offset": [-8.0, 0, -196], "yawOffset": 0}
+      ]
+    },
+    {
+      "id": "snake-bridge-drive",
+      "mode": "drive",
+      "description": "Bidirectional Snake River road-bridge and graded approach inspection.",
+      "durationSeconds": 10,
+      "certificationTargets": ["road-bridge", "bridge-approach"],
+      "waypoints": [
+        {"view": "snake-road-bridge", "offset": [120, 0, 70], "yawOffset": 0},
+        {"view": "snake-road-bridge", "offset": [0, 0, 0], "yawOffset": 0},
+        {"view": "snake-road-bridge", "offset": [-120, 0, -70], "yawOffset": 0},
+        {"view": "snake-road-bridge", "offset": [0, 0, 0], "yawOffset": 3.1415926536}
+      ]
+    },
+    {
+      "id": "jenny-trail-hike",
+      "mode": "hike",
+      "description": "Jenny Lake maintained tread, primitive spur, switchback, and road crossing.",
+      "durationSeconds": 10,
+      "certificationTargets": ["maintained-trail", "primitive-trail", "steep-switchback", "road-trail-intersection"],
+      "waypoints": [
+        {"view": "jenny-maintained-trail", "offset": [-18, 0, 7], "yawOffset": -0.12},
+        {"view": "jenny-maintained-trail", "offset": [14, 0, -5], "yawOffset": 0.08},
+        {"view": "jenny-primitive-trail", "offset": [-22, 0, 12], "yawOffset": 0.14},
+        {"view": "jenny-primitive-trail", "offset": [28, 0, -16], "yawOffset": -0.18}
+      ]
+    },
+    {
+      "id": "pedestrian-structures-hike",
+      "mode": "hike",
+      "description": "Dedicated trail bridge, timber boardwalk transitions, and steps.",
+      "durationSeconds": 9,
+      "certificationTargets": ["trail-bridge", "boardwalk", "steps"],
+      "waypoints": [
+        {"view": "cascade-boardwalk", "offset": [-12, 0, 8], "yawOffset": -0.12},
+        {"view": "cascade-boardwalk", "offset": [4, 0, -5], "yawOffset": 0.05},
+        {"view": "cascade-boardwalk", "offset": [11, 0, -12], "yawOffset": 0.12},
+        {"view": "cascade-boardwalk", "offset": [-6, 0, 4], "yawOffset": -0.04}
+      ]
+    },
+    {
+      "id": "hazard-recovery-drive",
+      "mode": "drive",
+      "description": "Controlled off-road departure, roadside barrier contact, water rejection, and recovery.",
+      "durationSeconds": 10,
+      "certificationTargets": ["off-road", "barrier-impact", "water-approach", "recovery"],
+      "waypoints": [
+        {"view": "snake-river-flow", "offset": [-190, 0, 190], "yawOffset": -0.28},
+        {"view": "snake-river-flow", "offset": [-45, 0, 65], "yawOffset": -0.12},
+        {"view": "snake-river-flow", "offset": [40, 0, 5], "yawOffset": 0.04},
+        {"view": "snake-river-flow", "offset": [-80, 0, 110], "yawOffset": 0.42}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "candidateId": "cunningham_cabin",
+  "modeledState": "post-1956 restored exterior documented by HABS in 1965",
+  "units": "meters",
+  "measurements": {
+    "overallWallLength": {
+      "value": 12.6238,
+      "sourceValue": "41 ft 5 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "2 of 5"
+    },
+    "southPenLength": {
+      "value": 4.7498,
+      "sourceValue": "15 ft 7 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "2 of 5"
+    },
+    "breezewayClearWidth": {
+      "value": 3.0988,
+      "sourceValue": "10 ft 2 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "2 of 5"
+    },
+    "northPenLength": {
+      "value": 4.7752,
+      "sourceValue": "15 ft 8 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "2 of 5"
+    },
+    "southPenDepth": {
+      "value": 4.8006,
+      "sourceValue": "15 ft 9 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "2 of 5"
+    },
+    "northPenDepth": {
+      "value": 4.7752,
+      "sourceValue": "15 ft 8 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "2 of 5"
+    },
+    "wallHeight": {
+      "value": 1.6764,
+      "sourceValue": "5 ft 6 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "3 of 5",
+      "definition": "grade to top wall/eave datum on south elevation"
+    },
+    "ridgeHeight": {
+      "value": 2.286,
+      "sourceValue": "approximately 7 ft 6 in",
+      "status": "scaled_from_measured_elevation",
+      "uncertainty": 0.08,
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "3 of 5"
+    },
+    "structuralRoofPitchDegrees": {
+      "value": 14.2,
+      "status": "derived_from_scaled_elevation",
+      "uncertainty": 1.5,
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "3 of 5",
+      "note": "The drawing does not label pitch; it is derived from the measured wall depth and ridge/eave geometry."
+    },
+    "westEaveProjection": {
+      "value": 0.762,
+      "sourceValue": "2 ft 6 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "3 of 5"
+    },
+    "eastEaveProjection": {
+      "value": 0.5334,
+      "sourceValue": "1 ft 9 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "3 of 5"
+    },
+    "gableRoofProjection": {
+      "value": 0.254,
+      "sourceValue": "10 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "3 of 5"
+    },
+    "southRoomDoorHeight": {
+      "value": 1.6256,
+      "sourceValue": "5 ft 4 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "5 of 5"
+    },
+    "sodSupportLogDiameterRange": {
+      "min": 0.0762,
+      "max": 0.1143,
+      "sourceValue": "3 in to 4 1/2 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "5 of 5"
+    },
+    "logEndProjectionRange": {
+      "min": 0.0254,
+      "max": 0.1016,
+      "sourceValue": "1 in to 4 in",
+      "status": "measured",
+      "sourceRefs": ["loc_habs_wy0038"],
+      "sheet": "5 of 5"
+    },
+    "placementAnchor": {
+      "latitude": 43.7786094,
+      "longitude": -110.5582988,
+      "longAxisBearingDegreesTrue": 178.2,
+      "status": "upstream_osm_footprint_pending_local_extract",
+      "sourceRefs": ["osm_way_106472595"]
+    }
+  },
+  "openingRule": {
+    "status": "registered_from_drawings",
+    "sourceRefs": ["loc_habs_wy0038"],
+    "sheets": ["2 of 5", "3 of 5", "4 of 5"],
+    "note": "Exterior window widths/offsets are taken from the floor-plan dimension strings. Openings remain geometry; no dark facade cards are permitted."
+  }
+}

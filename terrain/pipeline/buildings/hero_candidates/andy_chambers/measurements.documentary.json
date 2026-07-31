@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "candidate_id": "andy_chambers",
+  "status": "documentary_draft",
+  "coordinate_convention": {
+    "origin": "centre of the ranch house/cabin documented on HABS sheet 2",
+    "x": "east",
+    "y": "north",
+    "z": "up",
+    "units": "metres",
+    "runtime_authoritative": false
+  },
+  "structures": {
+    "cabin": {
+      "translation_m": [0.0, 0.0, 0.0],
+      "rotation_deg_true_north": 0.0,
+      "dimensions": {
+        "north_south_m": {
+          "value": 9.093,
+          "source_value": "29'-10\"",
+          "status": "measured_drawing",
+          "provenance": "HABS WY-83 sheet 3, overall first-floor-plan dimension"
+        },
+        "east_west_overall_m": {
+          "value": 9.83,
+          "source_value": "32'-3\"",
+          "status": "measured_drawing",
+          "provenance": "HABS WY-83 sheet 3, overall first-floor-plan dimension"
+        },
+        "central_gable_depth_m": {
+          "value": 4.953,
+          "source_value": "16'-3\"",
+          "status": "measured_drawing",
+          "provenance": "HABS WY-83 sheet 3, central-component dimension"
+        },
+        "west_front_porch_depth_m": {
+          "value": 2.489,
+          "source_value": "8'-2\"",
+          "status": "measured_drawing",
+          "provenance": "HABS WY-83 sheet 3, west porch dimension"
+        },
+        "east_rear_porch_depth_m": {
+          "value": 2.388,
+          "source_value": "7'-10\"",
+          "status": "measured_drawing",
+          "provenance": "HABS WY-83 sheet 3, east porch dimension"
+        },
+        "wall_eave_height_m": {
+          "value": 2.7,
+          "uncertainty_m": 0.25,
+          "status": "scaled_measured_drawing",
+          "provenance": "HABS WY-83 sheets 4 and 5, elevation scale bars"
+        },
+        "ridge_height_m": {
+          "value": 5.5,
+          "uncertainty_m": 0.35,
+          "status": "scaled_measured_drawing",
+          "provenance": "HABS WY-83 sheets 4 and 5, elevation scale bars"
+        },
+        "porch_eave_height_m": {
+          "value": 2.35,
+          "uncertainty_m": 0.2,
+          "status": "scaled_measured_drawing",
+          "provenance": "HABS WY-83 sheets 4 and 5, elevation scale bars"
+        }
+      }
+    },
+    "stable_barn": {
+      "translation_m": [13.1, 57.4, 0.0],
+      "translation_uncertainty_m": 1.5,
+      "rotation_deg_true_north": 0.0,
+      "dimensions": {
+        "north_south_m": {
+          "value": 10.2,
+          "uncertainty_m": 0.8,
+          "status": "scaled_site_plan",
+          "provenance": "HABS WY-83 sheet 2, barn roof outline calibrated against the drawn scale and measured ranch-house footprint"
+        },
+        "east_west_overall_m": {
+          "value": 11.6,
+          "uncertainty_m": 0.8,
+          "status": "scaled_site_plan",
+          "provenance": "HABS WY-83 sheet 2, barn roof outline calibrated against the drawn scale and measured ranch-house footprint"
+        },
+        "central_gambrel_width_m": {
+          "value": 8.0,
+          "uncertainty_m": 0.8,
+          "status": "documentary_decomposition",
+          "provenance": "National Register description of central gambrel plus single west shed, constrained to the HABS sheet 2 roof outline"
+        },
+        "west_shed_width_m": {
+          "value": 3.6,
+          "uncertainty_m": 0.8,
+          "status": "documentary_decomposition",
+          "provenance": "National Register description of full west-elevation shed, constrained to the HABS sheet 2 roof outline"
+        },
+        "eave_height_m": {
+          "value": 4.0,
+          "uncertainty_m": 1.0,
+          "status": "provisional_documentary_massing",
+          "provenance": "National Register two-level barn description and HABS overall photographs; replace with building-class LiDAR"
+        },
+        "gambrel_shoulder_height_m": {
+          "value": 5.7,
+          "uncertainty_m": 1.0,
+          "status": "provisional_documentary_massing",
+          "provenance": "National Register gambrel description and HABS overall photographs; replace with building-class LiDAR"
+        },
+        "ridge_height_m": {
+          "value": 7.2,
+          "uncertainty_m": 1.2,
+          "status": "provisional_documentary_massing",
+          "provenance": "National Register gambrel description and HABS overall photographs; replace with building-class LiDAR"
+        }
+      }
+    }
+  },
+  "omitted": {
+    "windmill": {
+      "reason": "HABS WY-83 sheet 2 does not show a windmill, and the National Register record identifies the documented 1946 generator windmill with the adjacent Roy Chambers complex.",
+      "gate": "Do not generate until a registered site plan or field record resolves identity and base transform."
+    }
+  },
+  "cluster_source": {
+    "site_plan": "HABS WY-83 sheet 2",
+    "site_plan_scale": "1 inch = 30 feet",
+    "north_orientation": "north points left on the scanned sheet",
+    "calibration": "Raster scale checked against the sheet-3 ranch-house dimensions before reading the barn outline and relative centres."
+  },
+  "replacement_requirements": [
+    "Replace provisional barn vertical dimensions with building-class LiDAR before visual approval.",
+    "Georeference the cluster to EPSG:32612 before runtime placement.",
+    "Do not promote this local coordinate frame or its rounded site-plan transforms to production."
+  ]
+}

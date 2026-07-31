@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "runRoot": "terrain/pipeline/work/landmark-batches",
+  "retryLimit": 1,
+  "previewQuery": "landmarkDraftRun",
+  "budgets": {
+    "single": {
+      "triangles": {"LOD0": 5000, "LOD1": 1000, "LOD2": 250},
+      "materialPrimitives": {"LOD0": 4, "LOD1": 3, "LOD2": 2},
+      "textureBytes": 1572864
+    },
+    "cluster": {
+      "triangles": {"LOD0": 12000, "LOD1": 3000, "LOD2": 750},
+      "materialPrimitives": {"LOD0": 8, "LOD1": 5, "LOD2": 3},
+      "textureBytes": 1572864
+    }
+  },
+  "lodDistances": [90, 260, 100000],
+  "requiredViews": ["close-day", "approach-day", "distant-day", "close-overcast", "approach-overcast", "distant-overcast"],
+  "candidates": [
+    {
+      "id": "john_moulton",
+      "name": "John Moulton Homestead",
+      "wave": 1,
+      "kind": "cluster",
+      "package": "terrain/pipeline/buildings/hero_candidates/john_moulton",
+      "structures": ["gambrel barn", "pink stucco house", "minor outbuildings"],
+      "retryLimitOverride": 2
+    },
+    {
+      "id": "andy_chambers",
+      "name": "Andy Chambers Homestead",
+      "wave": 1,
+      "kind": "cluster",
+      "package": "terrain/pipeline/buildings/hero_candidates/andy_chambers",
+      "structures": ["cabin", "stable", "windmill"]
+    },
+    {
+      "id": "cunningham_cabin",
+      "name": "Cunningham Cabin",
+      "wave": 1,
+      "kind": "single",
+      "package": "terrain/pipeline/buildings/hero_candidates/cunningham_cabin",
+      "structures": ["double-pen dogtrot cabin"]
+    },
+    {
+      "id": "menors_homestead",
+      "name": "Menor's Homestead",
+      "wave": 2,
+      "kind": "cluster",
+      "package": "terrain/pipeline/buildings/hero_candidates/menors_homestead",
+      "structures": ["cabin", "country store"],
+      "excluded": ["ferry"]
+    },
+    {
+      "id": "chapel_transfiguration",
+      "name": "Chapel of the Transfiguration",
+      "wave": 2,
+      "kind": "single",
+      "package": "terrain/pipeline/buildings/hero_candidates/chapel_transfiguration",
+      "structures": ["chapel exterior", "immediate companion massing"],
+      "excluded": ["walkable interior"]
+    },
+    {
+      "id": "jenny_lake_ranger_station",
+      "name": "Jenny Lake Ranger Station",
+      "wave": 2,
+      "kind": "single",
+      "package": "terrain/pipeline/buildings/hero_candidates/jenny_lake_ranger_station",
+      "structures": ["Lee Manges cabin"],
+      "excluded": ["Jenny Lake Visitor Center"]
+    }
+  ]
+}

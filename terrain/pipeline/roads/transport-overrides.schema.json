@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "propertyNames": { "pattern": "^(osm-way-[0-9]+|\\$schema|_comment)$" },
+  "additionalProperties": {
+    "type": ["object", "string"],
+    "properties": {
+      "classification": {
+        "enum": ["highway", "park_paved", "gravel", "track", "trail", "primitive_trail", "steps", "boardwalk"]
+      },
+      "width": { "type": "number", "minimum": 0.4, "maximum": 30 },
+      "alignment": {
+        "type": "array",
+        "minItems": 2,
+        "items": {
+          "type": "array",
+          "prefixItems": [{ "type": "number" }, { "type": "number" }],
+          "items": false
+        }
+      },
+      "bridgeType": { "enum": ["road_bridge", "minor_vehicle_bridge", "footbridge", "culvert"] },
+      "exclude": { "type": "boolean" }
+    },
+    "additionalProperties": false
+  }
+}

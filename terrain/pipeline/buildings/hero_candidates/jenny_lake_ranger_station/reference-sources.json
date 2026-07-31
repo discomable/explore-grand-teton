@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "candidate_id": "jenny_lake_ranger_station",
+  "download_root": "terrain/pipeline/data/hero-buildings/jenny-lake-ranger-station/sources",
+  "same_building_exclusions": [
+    {
+      "name": "Jenny Lake Visitor Center / Harrison Crandall Studio",
+      "reason": "A separate relocated cabin with a cupola; its geometry, openings, and photographs must not guide the ranger station."
+    },
+    {
+      "name": "J. Manges Cabin / James or Jimmy Manges Cabin",
+      "reason": "A separate one-and-one-half-story homestead cabin near Cottonwood Creek and Taggart Lake. Shared surname and park setting make it a high-risk contaminant."
+    },
+    {
+      "name": "Jackson Lake Ranger Station",
+      "reason": "A different NPS rustic ranger-station complex with named footprints elsewhere in the repository."
+    }
+  ],
+  "references": [
+    {
+      "id": "loc_habs_wy_108",
+      "title": "Lee Mangus Cabin, Moose, Teton County, WY",
+      "alternate_title": "Grand Teton National Park, Jenny Lake Ranger Station",
+      "author": "Historic American Buildings Survey",
+      "source": "https://www.loc.gov/pictures/item/wy0037/",
+      "provider": "Library of Congress",
+      "call_number": "HABS WYO,20-MOOS.V,6-",
+      "survey_number": "HABS WY-108",
+      "type": "official_measured_architectural_record",
+      "coverage": {
+        "measured_drawings": 4,
+        "data_pages": 1,
+        "documented_dimensions": [
+          "wall envelope 20 feet 6 inches by 36 feet 9 inches",
+          "ridge 18 feet above floor line",
+          "ceiling line 7 feet 9 inches above floor line"
+        ],
+        "documented_elevations": [
+          "north",
+          "south",
+          "east",
+          "west"
+        ],
+        "documented_materials": [
+          "stone foundation",
+          "saddle-jointed log walls",
+          "wood-shingle roof"
+        ]
+      },
+      "license": "No known restrictions on images made by the U.S. Government; images copied from other sources may be restricted. Verify the credit for every selected image before redistribution.",
+      "rights_url": "https://www.loc.gov/rr/print/res/114_habs.html",
+      "usage": [
+        "same-building identity",
+        "plan dimensions",
+        "elevations and openings",
+        "ridge and ceiling heights",
+        "roof and porch topology",
+        "materials",
+        "1937 east-end addition"
+      ],
+      "confidence": "high",
+      "acquisition_status": "compact_official_derivatives_acquired",
+      "acquisition_manifest": "terrain/pipeline/data/hero-buildings/jenny_lake_ranger_station/source-manifest.json",
+      "acquired_artifact_count": 5,
+      "acquired_bytes": 393795,
+      "sha256": null
+    },
+    {
+      "id": "nps_jenny_lake_ranger_station",
+      "title": "Jenny Lake Ranger Station",
+      "author": "National Park Service; page hero image credited NPS/J. Bonney",
+      "source": "https://www.nps.gov/grte/planyourvisit/jlrangerstation.htm",
+      "provider": "National Park Service",
+      "type": "official_current_identity_and_visual_reference",
+      "license": "U.S. National Park Service web publication. Page text is used as factual reference; treat imagery as reference-only until the original asset's item-level credit and reuse terms are verified.",
+      "usage": [
+        "current identity",
+        "Lee Manges cabin relationship",
+        "current exterior condition",
+        "current public approach",
+        "same-building verification"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_jenny_lake_historic_district",
+      "title": "Jenny Lake Historic District",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/grte/learn/historyculture/jlhd.htm",
+      "provider": "National Park Service",
+      "type": "official_historic_identity_and_context",
+      "license": "U.S. National Park Service web publication. Text is used as factual reference; inspect item-level image credits before downloading, editing, or redistributing imagery.",
+      "usage": [
+        "distinguish ranger station from visitor center",
+        "relocation history",
+        "historic district context",
+        "current use"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_historic_properties_guide",
+      "title": "Built Beneath the Mountains: Historic Properties in Grand Teton National Park",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/grte/planyourvisit/upload/Historic-Properties-guide-access.pdf",
+      "provider": "National Park Service",
+      "type": "official_historic_context_and_visual_reference",
+      "license": "U.S. National Park Service publication. Use factual text as government reference; verify individual photograph credits before image reuse or projection input.",
+      "usage": [
+        "Lee Manges identity",
+        "1930 relocation",
+        "South Jenny Lake setting",
+        "gable treatment",
+        "historic exterior review"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_reviewed",
+      "sha256": null
+    },
+    {
+      "id": "nps_jenny_lake_renewal_ea",
+      "title": "Jenny Lake Renewal Plan Environmental Assessment",
+      "author": "National Park Service, Grand Teton National Park",
+      "source": "https://parkplanning.nps.gov/showFile.cfm?projectID=33848&sfid=175635",
+      "provider": "National Park Service Planning, Environment and Public Comment",
+      "type": "official_national_register_and_setting_context",
+      "license": "Official U.S. National Park Service planning publication. Use factual and architectural information as public-record reference; verify credits and reuse terms for any embedded photograph.",
+      "usage": [
+        "National Register context",
+        "NPS rustic architecture significance",
+        "relocation and rebuilding history",
+        "historic district boundaries",
+        "distinguish Crandall Studio"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_reviewed",
+      "sha256": null
+    },
+    {
+      "id": "runtime_named_building_footprints",
+      "title": "Current Grand Teton named building-footprint extract",
+      "author": "OpenStreetMap contributors; Microsoft Building Footprints contributors",
+      "source": "terrain/public/buildings.json",
+      "provider": "Grand Teton repository derived dataset",
+      "type": "current_geospatial_footprint",
+      "license": "Open Database License (ODbL) attribution recorded in the source dataset: © OpenStreetMap contributors; Microsoft Building Footprints (ODbL).",
+      "rights_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "usage": [
+        "exact Jenny Lake Ranger Station footprint",
+        "runtime placement",
+        "current orientation",
+        "collision footprint",
+        "visitor-center and Manges Cabin exclusion checks"
+      ],
+      "confidence": "high",
+      "acquisition_status": "available_in_repository",
+      "sha256": "3620214757f3c3bbf7f71570248111fab455c01fb62eee458d31e3be57b70935"
+    }
+  ],
+  "source_assessment": {
+    "identity_readiness": "Ready. HABS and current NPS sources explicitly identify the Lee Mangus/Manges cabin as the present Jenny Lake Ranger Station.",
+    "geometry_readiness": "Ready after full-resolution HABS extraction. Four measured sheets document plan, all elevations, sections, roof framing, dimensions, openings, materials, and porch details.",
+    "placement_readiness": "Ready. terrain/public/buildings.json contains one exact named Jenny Lake Ranger Station footprint; the similarly named Manges Cabin and Jenny Lake Visitor Center are explicit exclusions.",
+    "projection_readiness": "Blocked until at least two useful same-building photographic exterior elevations have item-level creator and rights metadata. HABS drawings may establish geometry but do not satisfy the photographic surface-reference gate."
+  },
+  "acquisition_requirements": {
+    "download_large_files_by_default": false,
+    "required_before_geometry": [
+      "Download only the HABS WY-108 measured sheets and data page required for plan, elevations, section, roof framing, and porch extraction.",
+      "Prefer the smallest derivative that keeps dimensions legible; do not bulk-download the collection.",
+      "Record retrieval date, final URL, byte count, sheet number, and SHA-256 for every acquired artifact.",
+      "Confirm drawing scale, north arrow, wall envelope, ridge height, porch geometry, and opening dimensions are legible before extraction.",
+      "Hash terrain/public/buildings.json and persist the exact Jenny Lake Ranger Station record."
+    ],
+    "required_before_projection": [
+      "Resolve item-level authorship and rights for every selected photographic image.",
+      "Confirm each image depicts the relocated Lee Mangus/Manges cabin serving as Jenny Lake Ranger Station.",
+      "Reject photographs of the Crandall Studio visitor center, James/Jimmy Manges Cabin, and Jackson Lake Ranger Station.",
+      "Require at least two useful photographic exterior elevations before invoking an image tool.",
+      "Use HABS elevations to register geometry and openings; do not treat drawing hatching or text as facade texture."
+    ]
+  }
+}

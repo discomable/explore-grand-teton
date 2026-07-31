@@ -1,0 +1,4427 @@
+{
+ "res": 10.0,
+ "width": 2832,
+ "height": 4118,
+ "originE": 508020.8068557632,
+ "originN": 4863096.167973563,
+ "world": {
+  "centerEasting": 522180.8068557632,
+  "centerNorthing": 4842506.167973563,
+  "datum": 1897.3
+ },
+ "elevMin": 1897.341552734375,
+ "scale": 0.1,
+ "biasZero": 128,
+ "biasScale": 0.01,
+ "url": "water-surface.png",
+ "comps": [
+  {
+   "id": 1,
+   "type": "river",
+   "areaPx": 707041,
+   "minPx": [
+    1168,
+    0
+   ],
+   "maxPx": [
+    2831,
+    1286
+   ],
+   "anchorY": 2055.81,
+   "elev": 2055.81
+  },
+  {
+   "id": 288,
+   "type": "lake",
+   "areaPx": 48782,
+   "minPx": [
+    1254,
+    1582
+   ],
+   "maxPx": [
+    1475,
+    1907
+   ],
+   "elev": 2068.3,
+   "anchorY": 2068.3
+  },
+  {
+   "id": 166,
+   "type": "river",
+   "areaPx": 47008,
+   "minPx": [
+    787,
+    1202
+   ],
+   "maxPx": [
+    2831,
+    4117
+   ],
+   "elev": 1978.3
+  },
+  {
+   "id": 150,
+   "type": "lake",
+   "areaPx": 41531,
+   "minPx": [
+    1175,
+    1042
+   ],
+   "maxPx": [
+    1465,
+    1365
+   ],
+   "elev": 2096.8,
+   "anchorY": 2096.8
+  },
+  {
+   "id": 451,
+   "type": "lake",
+   "areaPx": 18471,
+   "minPx": [
+    757,
+    2973
+   ],
+   "maxPx": [
+    916,
+    3188
+   ],
+   "elev": 2021.0,
+   "anchorY": 2021.0
+  },
+  {
+   "id": 63,
+   "type": "lake",
+   "areaPx": 7219,
+   "minPx": [
+    2767,
+    332
+   ],
+   "maxPx": [
+    2831,
+    482
+   ],
+   "elev": 2095.7,
+   "anchorY": 2095.7
+  },
+  {
+   "id": 376,
+   "type": "lake",
+   "areaPx": 4636,
+   "minPx": [
+    1128,
+    2358
+   ],
+   "maxPx": [
+    1225,
+    2463
+   ],
+   "elev": 2101.5,
+   "anchorY": 2101.5
+  },
+  {
+   "id": 499,
+   "type": "river",
+   "areaPx": 3262,
+   "minPx": [
+    1540,
+    3325
+   ],
+   "maxPx": [
+    2067,
+    3793
+   ],
+   "elev": 1991.87
+  },
+  {
+   "id": 564,
+   "type": "river",
+   "areaPx": 3088,
+   "minPx": [
+    963,
+    3753
+   ],
+   "maxPx": [
+    1536,
+    4117
+   ],
+   "elev": 1936.78
+  },
+  {
+   "id": 202,
+   "type": "lake",
+   "areaPx": 2893,
+   "minPx": [
+    1323,
+    1373
+   ],
+   "maxPx": [
+    1404,
+    1534
+   ],
+   "elev": 2093.8,
+   "anchorY": 2093.8
+  },
+  {
+   "id": 363,
+   "type": "lake",
+   "areaPx": 2713,
+   "minPx": [
+    1126,
+    2270
+   ],
+   "maxPx": [
+    1227,
+    2316
+   ],
+   "elev": 2139.5,
+   "anchorY": 2139.5
+  },
+  {
+   "id": 43,
+   "type": "lake",
+   "areaPx": 2630,
+   "minPx": [
+    2107,
+    279
+   ],
+   "maxPx": [
+    2223,
+    411
+   ],
+   "elev": 2073.57,
+   "anchorY": 2073.57
+  },
+  {
+   "id": 136,
+   "type": "lake",
+   "areaPx": 2487,
+   "minPx": [
+    491,
+    976
+   ],
+   "maxPx": [
+    541,
+    1046
+   ],
+   "elev": 2926.9,
+   "anchorY": 2926.9
+  },
+  {
+   "id": 370,
+   "type": "lake",
+   "areaPx": 2216,
+   "minPx": [
+    534,
+    2339
+   ],
+   "maxPx": [
+    636,
+    2373
+   ],
+   "elev": 3052.0,
+   "anchorY": 3052.0
+  },
+  {
+   "id": 464,
+   "type": "river",
+   "areaPx": 1833,
+   "minPx": [
+    2346,
+    3109
+   ],
+   "maxPx": [
+    2785,
+    3290
+   ],
+   "elev": 2047.76
+  },
+  {
+   "id": 114,
+   "type": "river",
+   "areaPx": 1539,
+   "minPx": [
+    1438,
+    820
+   ],
+   "maxPx": [
+    1510,
+    896
+   ],
+   "elev": 2061.66
+  },
+  {
+   "id": 212,
+   "type": "lake",
+   "areaPx": 1505,
+   "minPx": [
+    419,
+    1401
+   ],
+   "maxPx": [
+    467,
+    1447
+   ],
+   "elev": 2754.4,
+   "anchorY": 2754.4
+  },
+  {
+   "id": 78,
+   "type": "lake",
+   "areaPx": 1274,
+   "minPx": [
+    2666,
+    446
+   ],
+   "maxPx": [
+    2696,
+    517
+   ],
+   "elev": 2078.34,
+   "anchorY": 2078.34
+  },
+  {
+   "id": 350,
+   "type": "lake",
+   "areaPx": 940,
+   "minPx": [
+    600,
+    2137
+   ],
+   "maxPx": [
+    641,
+    2178
+   ],
+   "elev": 3246.3,
+   "anchorY": 3246.3
+  },
+  {
+   "id": 66,
+   "type": "lake",
+   "areaPx": 871,
+   "minPx": [
+    2096,
+    360
+   ],
+   "maxPx": [
+    2144,
+    414
+   ],
+   "elev": 2062.2,
+   "anchorY": 2062.2
+  },
+  {
+   "id": 28,
+   "type": "lake",
+   "areaPx": 843,
+   "minPx": [
+    758,
+    213
+   ],
+   "maxPx": [
+    800,
+    245
+   ],
+   "elev": 2942.2,
+   "anchorY": 2942.2
+  },
+  {
+   "id": 25,
+   "type": "lake",
+   "areaPx": 769,
+   "minPx": [
+    2257,
+    198
+   ],
+   "maxPx": [
+    2286,
+    245
+   ],
+   "elev": 2082.84,
+   "anchorY": 2082.84
+  },
+  {
+   "id": 27,
+   "type": "lake",
+   "areaPx": 748,
+   "minPx": [
+    2183,
+    210
+   ],
+   "maxPx": [
+    2217,
+    242
+   ],
+   "elev": 2079.27,
+   "anchorY": 2079.27
+  },
+  {
+   "id": 472,
+   "type": "lake",
+   "areaPx": 738,
+   "minPx": [
+    82,
+    3195
+   ],
+   "maxPx": [
+    115,
+    3239
+   ],
+   "elev": 2986.4,
+   "anchorY": 2986.4
+  },
+  {
+   "id": 141,
+   "type": "river",
+   "areaPx": 648,
+   "minPx": [
+    2693,
+    988
+   ],
+   "maxPx": [
+    2727,
+    1029
+   ],
+   "elev": 2079.18
+  },
+  {
+   "id": 440,
+   "type": "lake",
+   "areaPx": 647,
+   "minPx": [
+    422,
+    2939
+   ],
+   "maxPx": [
+    463,
+    2962
+   ],
+   "elev": 3026.5,
+   "anchorY": 3026.5
+  },
+  {
+   "id": 325,
+   "type": "lake",
+   "areaPx": 633,
+   "minPx": [
+    2453,
+    1831
+   ],
+   "maxPx": [
+    2512,
+    1854
+   ],
+   "elev": 2047.76,
+   "anchorY": 2047.76
+  },
+  {
+   "id": 21,
+   "type": "lake",
+   "areaPx": 630,
+   "minPx": [
+    478,
+    170
+   ],
+   "maxPx": [
+    516,
+    192
+   ],
+   "elev": 2967.3,
+   "anchorY": 2967.3
+  },
+  {
+   "id": 3,
+   "type": "lake",
+   "areaPx": 612,
+   "minPx": [
+    581,
+    18
+   ],
+   "maxPx": [
+    614,
+    54
+   ],
+   "elev": 2758.1,
+   "anchorY": 2758.1
+  },
+  {
+   "id": 375,
+   "type": "lake",
+   "areaPx": 543,
+   "minPx": [
+    737,
+    2358
+   ],
+   "maxPx": [
+    780,
+    2373
+   ],
+   "elev": 2762.2,
+   "anchorY": 2762.2
+  },
+  {
+   "id": 188,
+   "type": "lake",
+   "areaPx": 516,
+   "minPx": [
+    711,
+    1291
+   ],
+   "maxPx": [
+    734,
+    1321
+   ],
+   "elev": 2808.6,
+   "anchorY": 2808.6
+  },
+  {
+   "id": 262,
+   "type": "lake",
+   "areaPx": 475,
+   "minPx": [
+    207,
+    1536
+   ],
+   "maxPx": [
+    234,
+    1565
+   ],
+   "elev": 2870.9,
+   "anchorY": 2870.9
+  },
+  {
+   "id": 140,
+   "type": "lake",
+   "areaPx": 456,
+   "minPx": [
+    1354,
+    988
+   ],
+   "maxPx": [
+    1384,
+    1020
+   ],
+   "elev": 2089.8,
+   "anchorY": 2089.8
+  },
+  {
+   "id": 2,
+   "type": "lake",
+   "areaPx": 454,
+   "minPx": [
+    1093,
+    16
+   ],
+   "maxPx": [
+    1120,
+    40
+   ],
+   "elev": 2930.6,
+   "anchorY": 2930.6
+  },
+  {
+   "id": 293,
+   "type": "lake",
+   "areaPx": 447,
+   "minPx": [
+    1023,
+    1601
+   ],
+   "maxPx": [
+    1074,
+    1622
+   ],
+   "elev": 2914.4,
+   "anchorY": 2914.4
+  },
+  {
+   "id": 6,
+   "type": "lake",
+   "areaPx": 445,
+   "minPx": [
+    2178,
+    44
+   ],
+   "maxPx": [
+    2197,
+    84
+   ],
+   "elev": 2097.7,
+   "anchorY": 2097.7
+  },
+  {
+   "id": 9,
+   "type": "lake",
+   "areaPx": 421,
+   "minPx": [
+    861,
+    80
+   ],
+   "maxPx": [
+    885,
+    103
+   ],
+   "elev": 3060.7,
+   "anchorY": 3060.7
+  },
+  {
+   "id": 82,
+   "type": "lake",
+   "areaPx": 397,
+   "minPx": [
+    437,
+    500
+   ],
+   "maxPx": [
+    454,
+    528
+   ],
+   "elev": 2927.5,
+   "anchorY": 2927.5
+  },
+  {
+   "id": 128,
+   "type": "lake",
+   "areaPx": 388,
+   "minPx": [
+    0,
+    958
+   ],
+   "maxPx": [
+    19,
+    987
+   ],
+   "elev": 2697.6,
+   "anchorY": 2697.6
+  },
+  {
+   "id": 111,
+   "type": "lake",
+   "areaPx": 387,
+   "minPx": [
+    197,
+    729
+   ],
+   "maxPx": [
+    221,
+    751
+   ],
+   "elev": 2960.3,
+   "anchorY": 2960.3
+  },
+  {
+   "id": 167,
+   "type": "lake",
+   "areaPx": 383,
+   "minPx": [
+    419,
+    1213
+   ],
+   "maxPx": [
+    454,
+    1232
+   ],
+   "elev": 2715.3,
+   "anchorY": 2715.3
+  },
+  {
+   "id": 242,
+   "type": "lake",
+   "areaPx": 383,
+   "minPx": [
+    434,
+    1515
+   ],
+   "maxPx": [
+    465,
+    1533
+   ],
+   "elev": 2911.4,
+   "anchorY": 2911.4
+  },
+  {
+   "id": 76,
+   "type": "lake",
+   "areaPx": 367,
+   "minPx": [
+    939,
+    444
+   ],
+   "maxPx": [
+    964,
+    463
+   ],
+   "elev": 2513.5,
+   "anchorY": 2513.5
+  },
+  {
+   "id": 392,
+   "type": "river",
+   "areaPx": 347,
+   "minPx": [
+    2651,
+    2485
+   ],
+   "maxPx": [
+    2675,
+    2509
+   ],
+   "elev": 2260.72
+  },
+  {
+   "id": 13,
+   "type": "lake",
+   "areaPx": 344,
+   "minPx": [
+    480,
+    86
+   ],
+   "maxPx": [
+    508,
+    125
+   ],
+   "elev": 2909.4,
+   "anchorY": 2909.4
+  },
+  {
+   "id": 498,
+   "type": "river",
+   "areaPx": 334,
+   "minPx": [
+    2134,
+    3316
+   ],
+   "maxPx": [
+    2260,
+    3369
+   ],
+   "elev": 2021.0
+  },
+  {
+   "id": 152,
+   "type": "river",
+   "areaPx": 325,
+   "minPx": [
+    2249,
+    1060
+   ],
+   "maxPx": [
+    2277,
+    1087
+   ],
+   "elev": 2100.32
+  },
+  {
+   "id": 116,
+   "type": "lake",
+   "areaPx": 320,
+   "minPx": [
+    554,
+    882
+   ],
+   "maxPx": [
+    571,
+    911
+   ],
+   "elev": 2818.4,
+   "anchorY": 2818.4
+  },
+  {
+   "id": 580,
+   "type": "lake",
+   "areaPx": 309,
+   "minPx": [
+    1444,
+    3901
+   ],
+   "maxPx": [
+    1462,
+    3928
+   ],
+   "elev": 1953.52,
+   "anchorY": 1953.52
+  },
+  {
+   "id": 170,
+   "type": "lake",
+   "areaPx": 308,
+   "minPx": [
+    129,
+    1221
+   ],
+   "maxPx": [
+    147,
+    1245
+   ],
+   "elev": 2837.0,
+   "anchorY": 2837.0
+  },
+  {
+   "id": 587,
+   "type": "river",
+   "areaPx": 303,
+   "minPx": [
+    849,
+    4018
+   ],
+   "maxPx": [
+    912,
+    4117
+   ],
+   "elev": 1906.55
+  },
+  {
+   "id": 214,
+   "type": "lake",
+   "areaPx": 292,
+   "minPx": [
+    809,
+    1413
+   ],
+   "maxPx": [
+    830,
+    1432
+   ],
+   "elev": 2869.8,
+   "anchorY": 2869.8
+  },
+  {
+   "id": 342,
+   "type": "lake",
+   "areaPx": 281,
+   "minPx": [
+    1016,
+    2081
+   ],
+   "maxPx": [
+    1040,
+    2099
+   ],
+   "elev": 2748.75,
+   "anchorY": 2748.75
+  },
+  {
+   "id": 544,
+   "type": "lake",
+   "areaPx": 278,
+   "minPx": [
+    1681,
+    3639
+   ],
+   "maxPx": [
+    1696,
+    3664
+   ],
+   "elev": 1980.03,
+   "anchorY": 1980.03
+  },
+  {
+   "id": 506,
+   "type": "river",
+   "areaPx": 274,
+   "minPx": [
+    2069,
+    3343
+   ],
+   "maxPx": [
+    2133,
+    3375
+   ],
+   "elev": 2016.45
+  },
+  {
+   "id": 182,
+   "type": "lake",
+   "areaPx": 260,
+   "minPx": [
+    68,
+    1241
+   ],
+   "maxPx": [
+    93,
+    1258
+   ],
+   "elev": 2777.01,
+   "anchorY": 2777.01
+  },
+  {
+   "id": 142,
+   "type": "lake",
+   "areaPx": 254,
+   "minPx": [
+    109,
+    992
+   ],
+   "maxPx": [
+    126,
+    1018
+   ],
+   "elev": 2844.7,
+   "anchorY": 2844.7
+  },
+  {
+   "id": 366,
+   "type": "lake",
+   "areaPx": 251,
+   "minPx": [
+    1210,
+    2288
+   ],
+   "maxPx": [
+    1224,
+    2310
+   ],
+   "elev": 2139.5,
+   "anchorY": 2139.5
+  },
+  {
+   "id": 23,
+   "type": "lake",
+   "areaPx": 248,
+   "minPx": [
+    710,
+    184
+   ],
+   "maxPx": [
+    726,
+    206
+   ],
+   "elev": 2914.7,
+   "anchorY": 2914.7
+  },
+  {
+   "id": 159,
+   "type": "lake",
+   "areaPx": 242,
+   "minPx": [
+    918,
+    1141
+   ],
+   "maxPx": [
+    945,
+    1154
+   ],
+   "elev": 2376.5,
+   "anchorY": 2376.5
+  },
+  {
+   "id": 42,
+   "type": "lake",
+   "areaPx": 241,
+   "minPx": [
+    416,
+    276
+   ],
+   "maxPx": [
+    435,
+    292
+   ],
+   "elev": 2925.6,
+   "anchorY": 2925.6
+  },
+  {
+   "id": 123,
+   "type": "river",
+   "areaPx": 236,
+   "minPx": [
+    2491,
+    941
+   ],
+   "maxPx": [
+    2514,
+    958
+   ],
+   "elev": 2115.77
+  },
+  {
+   "id": 301,
+   "type": "lake",
+   "areaPx": 231,
+   "minPx": [
+    462,
+    1639
+   ],
+   "maxPx": [
+    481,
+    1656
+   ],
+   "elev": 3060.0,
+   "anchorY": 3060.0
+  },
+  {
+   "id": 33,
+   "type": "lake",
+   "areaPx": 230,
+   "minPx": [
+    828,
+    231
+   ],
+   "maxPx": [
+    845,
+    246
+   ],
+   "elev": 2801.0,
+   "anchorY": 2801.0
+  },
+  {
+   "id": 83,
+   "type": "lake",
+   "areaPx": 220,
+   "minPx": [
+    1360,
+    501
+   ],
+   "maxPx": [
+    1371,
+    524
+   ],
+   "elev": 2080.82,
+   "anchorY": 2080.82
+  },
+  {
+   "id": 409,
+   "type": "river",
+   "areaPx": 204,
+   "minPx": [
+    700,
+    2598
+   ],
+   "maxPx": [
+    720,
+    2610
+   ],
+   "elev": 3138.13
+  },
+  {
+   "id": 321,
+   "type": "lake",
+   "areaPx": 203,
+   "minPx": [
+    445,
+    1765
+   ],
+   "maxPx": [
+    464,
+    1778
+   ],
+   "elev": 2926.8,
+   "anchorY": 2926.8
+  },
+  {
+   "id": 139,
+   "type": "lake",
+   "areaPx": 201,
+   "minPx": [
+    61,
+    981
+   ],
+   "maxPx": [
+    76,
+    1001
+   ],
+   "elev": 2768.95,
+   "anchorY": 2768.95
+  },
+  {
+   "id": 59,
+   "type": "lake",
+   "areaPx": 193,
+   "minPx": [
+    2504,
+    325
+   ],
+   "maxPx": [
+    2526,
+    355
+   ],
+   "elev": 2085.53,
+   "anchorY": 2085.53
+  },
+  {
+   "id": 348,
+   "type": "lake",
+   "areaPx": 187,
+   "minPx": [
+    951,
+    2114
+   ],
+   "maxPx": [
+    968,
+    2128
+   ],
+   "elev": 2955.5,
+   "anchorY": 2955.5
+  },
+  {
+   "id": 134,
+   "type": "lake",
+   "areaPx": 181,
+   "minPx": [
+    1385,
+    974
+   ],
+   "maxPx": [
+    1410,
+    986
+   ],
+   "elev": 2089.66,
+   "anchorY": 2089.66
+  },
+  {
+   "id": 8,
+   "type": "lake",
+   "areaPx": 177,
+   "minPx": [
+    2691,
+    49
+   ],
+   "maxPx": [
+    2707,
+    74
+   ],
+   "elev": 2125.95,
+   "anchorY": 2125.95
+  },
+  {
+   "id": 281,
+   "type": "lake",
+   "areaPx": 175,
+   "minPx": [
+    167,
+    1563
+   ],
+   "maxPx": [
+    183,
+    1577
+   ],
+   "elev": 2894.38,
+   "anchorY": 2894.38
+  },
+  {
+   "id": 92,
+   "type": "lake",
+   "areaPx": 174,
+   "minPx": [
+    659,
+    567
+   ],
+   "maxPx": [
+    680,
+    580
+   ],
+   "elev": 3022.41,
+   "anchorY": 3022.41
+  },
+  {
+   "id": 374,
+   "type": "river",
+   "areaPx": 167,
+   "minPx": [
+    1709,
+    2356
+   ],
+   "maxPx": [
+    1743,
+    2441
+   ],
+   "elev": 1990.11
+  },
+  {
+   "id": 161,
+   "type": "lake",
+   "areaPx": 164,
+   "minPx": [
+    136,
+    1161
+   ],
+   "maxPx": [
+    150,
+    1177
+   ],
+   "elev": 2889.3,
+   "anchorY": 2889.3
+  },
+  {
+   "id": 454,
+   "type": "lake",
+   "areaPx": 164,
+   "minPx": [
+    237,
+    2997
+   ],
+   "maxPx": [
+    252,
+    3010
+   ],
+   "elev": 2921.89,
+   "anchorY": 2921.89
+  },
+  {
+   "id": 324,
+   "type": "lake",
+   "areaPx": 160,
+   "minPx": [
+    449,
+    1806
+   ],
+   "maxPx": [
+    466,
+    1822
+   ],
+   "elev": 2920.83,
+   "anchorY": 2920.83
+  },
+  {
+   "id": 466,
+   "type": "lake",
+   "areaPx": 160,
+   "minPx": [
+    232,
+    3119
+   ],
+   "maxPx": [
+    247,
+    3131
+   ],
+   "elev": 3104.15,
+   "anchorY": 3104.15
+  },
+  {
+   "id": 522,
+   "type": "lake",
+   "areaPx": 158,
+   "minPx": [
+    1752,
+    3521
+   ],
+   "maxPx": [
+    1772,
+    3551
+   ],
+   "elev": 1990.32,
+   "anchorY": 1990.32
+  },
+  {
+   "id": 574,
+   "type": "lake",
+   "areaPx": 158,
+   "minPx": [
+    907,
+    3834
+   ],
+   "maxPx": [
+    948,
+    3899
+   ],
+   "elev": 1916.73,
+   "anchorY": 1916.73
+  },
+  {
+   "id": 305,
+   "type": "lake",
+   "areaPx": 155,
+   "minPx": [
+    390,
+    1661
+   ],
+   "maxPx": [
+    400,
+    1681
+   ],
+   "elev": 2982.12,
+   "anchorY": 2982.12
+  },
+  {
+   "id": 540,
+   "type": "lake",
+   "areaPx": 153,
+   "minPx": [
+    1705,
+    3620
+   ],
+   "maxPx": [
+    1734,
+    3640
+   ],
+   "elev": 1983.31,
+   "anchorY": 1983.31
+  },
+  {
+   "id": 86,
+   "type": "lake",
+   "areaPx": 146,
+   "minPx": [
+    1404,
+    513
+   ],
+   "maxPx": [
+    1418,
+    531
+   ],
+   "elev": 2072.08,
+   "anchorY": 2072.08
+  },
+  {
+   "id": 74,
+   "type": "lake",
+   "areaPx": 144,
+   "minPx": [
+    336,
+    431
+   ],
+   "maxPx": [
+    356,
+    441
+   ],
+   "elev": 2838.13,
+   "anchorY": 2838.13
+  },
+  {
+   "id": 237,
+   "type": "lake",
+   "areaPx": 144,
+   "minPx": [
+    2229,
+    1508
+   ],
+   "maxPx": [
+    2249,
+    1520
+   ],
+   "elev": 2039.0,
+   "anchorY": 2039.0
+  },
+  {
+   "id": 528,
+   "type": "lake",
+   "areaPx": 140,
+   "minPx": [
+    969,
+    3576
+   ],
+   "maxPx": [
+    998,
+    3647
+   ],
+   "elev": 1928.48,
+   "anchorY": 1928.48
+  },
+  {
+   "id": 113,
+   "type": "lake",
+   "areaPx": 137,
+   "minPx": [
+    228,
+    820
+   ],
+   "maxPx": [
+    243,
+    831
+   ],
+   "elev": 2987.51,
+   "anchorY": 2987.51
+  },
+  {
+   "id": 45,
+   "type": "lake",
+   "areaPx": 134,
+   "minPx": [
+    749,
+    283
+   ],
+   "maxPx": [
+    764,
+    295
+   ],
+   "elev": 2982.5,
+   "anchorY": 2982.5
+  },
+  {
+   "id": 12,
+   "type": "lake",
+   "areaPx": 133,
+   "minPx": [
+    2140,
+    85
+   ],
+   "maxPx": [
+    2152,
+    99
+   ],
+   "elev": 2082.63,
+   "anchorY": 2082.63
+  },
+  {
+   "id": 29,
+   "type": "lake",
+   "areaPx": 131,
+   "minPx": [
+    500,
+    219
+   ],
+   "maxPx": [
+    511,
+    233
+   ],
+   "elev": 3061.5,
+   "anchorY": 3061.5
+  },
+  {
+   "id": 133,
+   "type": "lake",
+   "areaPx": 130,
+   "minPx": [
+    565,
+    973
+   ],
+   "maxPx": [
+    578,
+    991
+   ],
+   "elev": 3002.8,
+   "anchorY": 3002.8
+  },
+  {
+   "id": 221,
+   "type": "lake",
+   "areaPx": 130,
+   "minPx": [
+    845,
+    1466
+   ],
+   "maxPx": [
+    861,
+    1475
+   ],
+   "elev": 2799.07,
+   "anchorY": 2799.07
+  },
+  {
+   "id": 125,
+   "type": "lake",
+   "areaPx": 129,
+   "minPx": [
+    96,
+    949
+   ],
+   "maxPx": [
+    111,
+    961
+   ],
+   "elev": 2804.91,
+   "anchorY": 2804.91
+  },
+  {
+   "id": 130,
+   "type": "lake",
+   "areaPx": 129,
+   "minPx": [
+    1343,
+    966
+   ],
+   "maxPx": [
+    1355,
+    982
+   ],
+   "elev": 2104.5,
+   "anchorY": 2104.5
+  },
+  {
+   "id": 364,
+   "type": "lake",
+   "areaPx": 125,
+   "minPx": [
+    543,
+    2279
+   ],
+   "maxPx": [
+    554,
+    2292
+   ],
+   "elev": 3153.01,
+   "anchorY": 3153.01
+  },
+  {
+   "id": 481,
+   "type": "river",
+   "areaPx": 124,
+   "minPx": [
+    2301,
+    3289
+   ],
+   "maxPx": [
+    2342,
+    3311
+   ],
+   "elev": 2028.94
+  },
+  {
+   "id": 180,
+   "type": "lake",
+   "areaPx": 122,
+   "minPx": [
+    290,
+    1240
+   ],
+   "maxPx": [
+    305,
+    1251
+   ],
+   "elev": 2918.71,
+   "anchorY": 2918.71
+  },
+  {
+   "id": 198,
+   "type": "lake",
+   "areaPx": 122,
+   "minPx": [
+    550,
+    1342
+   ],
+   "maxPx": [
+    565,
+    1353
+   ],
+   "elev": 2899.92,
+   "anchorY": 2899.92
+  },
+  {
+   "id": 567,
+   "type": "lake",
+   "areaPx": 119,
+   "minPx": [
+    103,
+    3778
+   ],
+   "maxPx": [
+    113,
+    3793
+   ],
+   "elev": 2941.51,
+   "anchorY": 2941.51
+  },
+  {
+   "id": 559,
+   "type": "river",
+   "areaPx": 115,
+   "minPx": [
+    1542,
+    3689
+   ],
+   "maxPx": [
+    1571,
+    3729
+   ],
+   "elev": 1970.24
+  },
+  {
+   "id": 443,
+   "type": "lake",
+   "areaPx": 114,
+   "minPx": [
+    1311,
+    2944
+   ],
+   "maxPx": [
+    1339,
+    2975
+   ],
+   "elev": 1960.94,
+   "anchorY": 1960.94
+  },
+  {
+   "id": 369,
+   "type": "lake",
+   "areaPx": 109,
+   "minPx": [
+    350,
+    2332
+   ],
+   "maxPx": [
+    361,
+    2343
+   ],
+   "elev": 2934.43,
+   "anchorY": 2934.43
+  },
+  {
+   "id": 290,
+   "type": "lake",
+   "areaPx": 107,
+   "minPx": [
+    1089,
+    1595
+   ],
+   "maxPx": [
+    1104,
+    1604
+   ],
+   "elev": 2887.86,
+   "anchorY": 2887.86
+  },
+  {
+   "id": 471,
+   "type": "river",
+   "areaPx": 107,
+   "minPx": [
+    276,
+    3192
+   ],
+   "maxPx": [
+    287,
+    3204
+   ],
+   "elev": 3055.54
+  },
+  {
+   "id": 75,
+   "type": "lake",
+   "areaPx": 106,
+   "minPx": [
+    2642,
+    438
+   ],
+   "maxPx": [
+    2649,
+    459
+   ],
+   "elev": 2079.08,
+   "anchorY": 2079.08
+  },
+  {
+   "id": 53,
+   "type": "lake",
+   "areaPx": 105,
+   "minPx": [
+    2240,
+    311
+   ],
+   "maxPx": [
+    2264,
+    324
+   ],
+   "elev": 2075.7,
+   "anchorY": 2075.7
+  },
+  {
+   "id": 193,
+   "type": "lake",
+   "areaPx": 105,
+   "minPx": [
+    688,
+    1317
+   ],
+   "maxPx": [
+    696,
+    1332
+   ],
+   "elev": 2894.22,
+   "anchorY": 2894.22
+  },
+  {
+   "id": 73,
+   "type": "lake",
+   "areaPx": 104,
+   "minPx": [
+    2356,
+    425
+   ],
+   "maxPx": [
+    2371,
+    445
+   ],
+   "elev": 2073.53,
+   "anchorY": 2073.53
+  },
+  {
+   "id": 222,
+   "type": "lake",
+   "areaPx": 104,
+   "minPx": [
+    753,
+    1467
+   ],
+   "maxPx": [
+    765,
+    1480
+   ],
+   "elev": 2969.11,
+   "anchorY": 2969.11
+  },
+  {
+   "id": 248,
+   "type": "lake",
+   "areaPx": 102,
+   "minPx": [
+    264,
+    1520
+   ],
+   "maxPx": [
+    274,
+    1536
+   ],
+   "elev": 2909.14,
+   "anchorY": 2909.14
+  },
+  {
+   "id": 184,
+   "type": "lake",
+   "areaPx": 100,
+   "minPx": [
+    2624,
+    1250
+   ],
+   "maxPx": [
+    2653,
+    1265
+   ],
+   "elev": 2038.34,
+   "anchorY": 2038.34
+  },
+  {
+   "id": 323,
+   "type": "lake",
+   "areaPx": 97,
+   "minPx": [
+    2395,
+    1790
+   ],
+   "maxPx": [
+    2445,
+    1800
+   ],
+   "elev": 2023.62,
+   "anchorY": 2023.62
+  },
+  {
+   "id": 349,
+   "type": "lake",
+   "areaPx": 96,
+   "minPx": [
+    985,
+    2130
+   ],
+   "maxPx": [
+    996,
+    2140
+   ],
+   "elev": 2906.91,
+   "anchorY": 2906.91
+  },
+  {
+   "id": 356,
+   "type": "lake",
+   "areaPx": 94,
+   "minPx": [
+    420,
+    2151
+   ],
+   "maxPx": [
+    431,
+    2162
+   ],
+   "elev": 3065.0,
+   "anchorY": 3065.0
+  },
+  {
+   "id": 410,
+   "type": "lake",
+   "areaPx": 94,
+   "minPx": [
+    1571,
+    2609
+   ],
+   "maxPx": [
+    1584,
+    2628
+   ],
+   "elev": 1981.86,
+   "anchorY": 1981.86
+  },
+  {
+   "id": 312,
+   "type": "lake",
+   "areaPx": 92,
+   "minPx": [
+    2527,
+    1704
+   ],
+   "maxPx": [
+    2539,
+    1719
+   ],
+   "elev": 2027.22,
+   "anchorY": 2027.22
+  },
+  {
+   "id": 158,
+   "type": "river",
+   "areaPx": 89,
+   "minPx": [
+    951,
+    1138
+   ],
+   "maxPx": [
+    969,
+    1146
+   ],
+   "elev": 2375.44
+  },
+  {
+   "id": 240,
+   "type": "lake",
+   "areaPx": 89,
+   "minPx": [
+    25,
+    1513
+   ],
+   "maxPx": [
+    38,
+    1522
+   ],
+   "elev": 2759.83,
+   "anchorY": 2759.83
+  },
+  {
+   "id": 160,
+   "type": "lake",
+   "areaPx": 88,
+   "minPx": [
+    2701,
+    1148
+   ],
+   "maxPx": [
+    2712,
+    1160
+   ],
+   "elev": 2040.78,
+   "anchorY": 2040.78
+  },
+  {
+   "id": 41,
+   "type": "lake",
+   "areaPx": 87,
+   "minPx": [
+    2149,
+    275
+   ],
+   "maxPx": [
+    2159,
+    301
+   ],
+   "elev": 2074.31,
+   "anchorY": 2074.31
+  },
+  {
+   "id": 146,
+   "type": "lake",
+   "areaPx": 87,
+   "minPx": [
+    691,
+    1006
+   ],
+   "maxPx": [
+    699,
+    1022
+   ],
+   "elev": 2722.46,
+   "anchorY": 2722.46
+  },
+  {
+   "id": 306,
+   "type": "lake",
+   "areaPx": 87,
+   "minPx": [
+    258,
+    1665
+   ],
+   "maxPx": [
+    276,
+    1672
+   ],
+   "elev": 2823.34,
+   "anchorY": 2823.34
+  },
+  {
+   "id": 52,
+   "type": "lake",
+   "areaPx": 86,
+   "minPx": [
+    806,
+    309
+   ],
+   "maxPx": [
+    823,
+    317
+   ],
+   "elev": 2935.43,
+   "anchorY": 2935.43
+  },
+  {
+   "id": 568,
+   "type": "lake",
+   "areaPx": 86,
+   "minPx": [
+    940,
+    3793
+   ],
+   "maxPx": [
+    947,
+    3836
+   ],
+   "elev": 1918.67,
+   "anchorY": 1918.67
+  },
+  {
+   "id": 431,
+   "type": "lake",
+   "areaPx": 84,
+   "minPx": [
+    1635,
+    2795
+   ],
+   "maxPx": [
+    1653,
+    2808
+   ],
+   "elev": 1972.69,
+   "anchorY": 1972.69
+  },
+  {
+   "id": 20,
+   "type": "lake",
+   "areaPx": 83,
+   "minPx": [
+    1065,
+    157
+   ],
+   "maxPx": [
+    1077,
+    167
+   ],
+   "elev": 3098.2,
+   "anchorY": 3098.2
+  },
+  {
+   "id": 295,
+   "type": "lake",
+   "areaPx": 83,
+   "minPx": [
+    2529,
+    1611
+   ],
+   "maxPx": [
+    2538,
+    1626
+   ],
+   "elev": 2030.03,
+   "anchorY": 2030.03
+  },
+  {
+   "id": 327,
+   "type": "lake",
+   "areaPx": 83,
+   "minPx": [
+    2389,
+    1867
+   ],
+   "maxPx": [
+    2399,
+    1876
+   ],
+   "elev": 2063.48,
+   "anchorY": 2063.48
+  },
+  {
+   "id": 62,
+   "type": "river",
+   "areaPx": 81,
+   "minPx": [
+    798,
+    332
+   ],
+   "maxPx": [
+    807,
+    343
+   ],
+   "elev": 2938.25
+  },
+  {
+   "id": 227,
+   "type": "lake",
+   "areaPx": 81,
+   "minPx": [
+    1956,
+    1482
+   ],
+   "maxPx": [
+    1969,
+    1495
+   ],
+   "elev": 2116.2,
+   "anchorY": 2116.2
+  },
+  {
+   "id": 478,
+   "type": "lake",
+   "areaPx": 80,
+   "minPx": [
+    1002,
+    3240
+   ],
+   "maxPx": [
+    1012,
+    3261
+   ],
+   "elev": 1953.81,
+   "anchorY": 1953.81
+  },
+  {
+   "id": 47,
+   "type": "lake",
+   "areaPx": 79,
+   "minPx": [
+    2134,
+    285
+   ],
+   "maxPx": [
+    2142,
+    298
+   ],
+   "elev": 2073.04,
+   "anchorY": 2073.04
+  },
+  {
+   "id": 206,
+   "type": "lake",
+   "areaPx": 79,
+   "minPx": [
+    239,
+    1387
+   ],
+   "maxPx": [
+    251,
+    1395
+   ],
+   "elev": 2839.2,
+   "anchorY": 2839.2
+  },
+  {
+   "id": 450,
+   "type": "lake",
+   "areaPx": 78,
+   "minPx": [
+    1330,
+    2970
+   ],
+   "maxPx": [
+    1346,
+    2992
+   ],
+   "elev": 1960.4,
+   "anchorY": 1960.4
+  },
+  {
+   "id": 105,
+   "type": "lake",
+   "areaPx": 77,
+   "minPx": [
+    102,
+    676
+   ],
+   "maxPx": [
+    109,
+    690
+   ],
+   "elev": 2860.05,
+   "anchorY": 2860.05
+  },
+  {
+   "id": 36,
+   "type": "lake",
+   "areaPx": 76,
+   "minPx": [
+    772,
+    259
+   ],
+   "maxPx": [
+    780,
+    271
+   ],
+   "elev": 2958.73,
+   "anchorY": 2958.73
+  },
+  {
+   "id": 154,
+   "type": "lake",
+   "areaPx": 75,
+   "minPx": [
+    597,
+    1066
+   ],
+   "maxPx": [
+    607,
+    1076
+   ],
+   "elev": 3072.62,
+   "anchorY": 3072.62
+  },
+  {
+   "id": 24,
+   "type": "lake",
+   "areaPx": 73,
+   "minPx": [
+    811,
+    194
+   ],
+   "maxPx": [
+    821,
+    203
+   ],
+   "elev": 2923.0,
+   "anchorY": 2923.0
+  },
+  {
+   "id": 399,
+   "type": "lake",
+   "areaPx": 72,
+   "minPx": [
+    400,
+    2508
+   ],
+   "maxPx": [
+    410,
+    2517
+   ],
+   "elev": 2911.1,
+   "anchorY": 2911.1
+  },
+  {
+   "id": 408,
+   "type": "lake",
+   "areaPx": 72,
+   "minPx": [
+    1576,
+    2591
+   ],
+   "maxPx": [
+    1582,
+    2606
+   ],
+   "elev": 1982.96,
+   "anchorY": 1982.96
+  },
+  {
+   "id": 401,
+   "type": "lake",
+   "areaPx": 71,
+   "minPx": [
+    371,
+    2512
+   ],
+   "maxPx": [
+    378,
+    2525
+   ],
+   "elev": 2899.26,
+   "anchorY": 2899.26
+  },
+  {
+   "id": 48,
+   "type": "lake",
+   "areaPx": 70,
+   "minPx": [
+    2314,
+    289
+   ],
+   "maxPx": [
+    2322,
+    319
+   ],
+   "elev": 2081.08,
+   "anchorY": 2081.08
+  },
+  {
+   "id": 505,
+   "type": "lake",
+   "areaPx": 69,
+   "minPx": [
+    1028,
+    3340
+   ],
+   "maxPx": [
+    1037,
+    3360
+   ],
+   "elev": 1939.84,
+   "anchorY": 1939.84
+  },
+  {
+   "id": 270,
+   "type": "lake",
+   "areaPx": 68,
+   "minPx": [
+    2415,
+    1548
+   ],
+   "maxPx": [
+    2420,
+    1566
+   ],
+   "elev": 2029.93,
+   "anchorY": 2029.93
+  },
+  {
+   "id": 333,
+   "type": "lake",
+   "areaPx": 68,
+   "minPx": [
+    1287,
+    1944
+   ],
+   "maxPx": [
+    1297,
+    1954
+   ],
+   "elev": 2063.72,
+   "anchorY": 2063.72
+  },
+  {
+   "id": 292,
+   "type": "lake",
+   "areaPx": 67,
+   "minPx": [
+    2387,
+    1600
+   ],
+   "maxPx": [
+    2417,
+    1616
+   ],
+   "elev": 2027.65,
+   "anchorY": 2027.65
+  },
+  {
+   "id": 264,
+   "type": "lake",
+   "areaPx": 65,
+   "minPx": [
+    1270,
+    1538
+   ],
+   "maxPx": [
+    1277,
+    1548
+   ],
+   "elev": 2293.0,
+   "anchorY": 2293.0
+  },
+  {
+   "id": 14,
+   "type": "lake",
+   "areaPx": 63,
+   "minPx": [
+    2415,
+    125
+   ],
+   "maxPx": [
+    2423,
+    134
+   ],
+   "elev": 2103.9,
+   "anchorY": 2103.9
+  },
+  {
+   "id": 70,
+   "type": "lake",
+   "areaPx": 63,
+   "minPx": [
+    2447,
+    401
+   ],
+   "maxPx": [
+    2471,
+    407
+   ],
+   "elev": 2081.26,
+   "anchorY": 2081.26
+  },
+  {
+   "id": 233,
+   "type": "river",
+   "areaPx": 63,
+   "minPx": [
+    798,
+    1498
+   ],
+   "maxPx": [
+    810,
+    1510
+   ],
+   "elev": 2872.86
+  },
+  {
+   "id": 520,
+   "type": "lake",
+   "areaPx": 62,
+   "minPx": [
+    1777,
+    3508
+   ],
+   "maxPx": [
+    1801,
+    3521
+   ],
+   "elev": 1991.81,
+   "anchorY": 1991.81
+  },
+  {
+   "id": 427,
+   "type": "lake",
+   "areaPx": 60,
+   "minPx": [
+    1558,
+    2774
+   ],
+   "maxPx": [
+    1564,
+    2795
+   ],
+   "elev": 1971.55,
+   "anchorY": 1971.55
+  },
+  {
+   "id": 329,
+   "type": "lake",
+   "areaPx": 59,
+   "minPx": [
+    1268,
+    1903
+   ],
+   "maxPx": [
+    1276,
+    1913
+   ],
+   "elev": 2067.83,
+   "anchorY": 2067.83
+  },
+  {
+   "id": 423,
+   "type": "lake",
+   "areaPx": 59,
+   "minPx": [
+    2669,
+    2678
+   ],
+   "maxPx": [
+    2680,
+    2684
+   ],
+   "elev": 2302.22,
+   "anchorY": 2302.22
+  },
+  {
+   "id": 276,
+   "type": "lake",
+   "areaPx": 58,
+   "minPx": [
+    2428,
+    1556
+   ],
+   "maxPx": [
+    2435,
+    1586
+   ],
+   "elev": 2029.36,
+   "anchorY": 2029.36
+  },
+  {
+   "id": 300,
+   "type": "lake",
+   "areaPx": 58,
+   "minPx": [
+    441,
+    1629
+   ],
+   "maxPx": [
+    450,
+    1638
+   ],
+   "elev": 3145.4,
+   "anchorY": 3145.4
+  },
+  {
+   "id": 318,
+   "type": "lake",
+   "areaPx": 58,
+   "minPx": [
+    2364,
+    1750
+   ],
+   "maxPx": [
+    2385,
+    1768
+   ],
+   "elev": 2023.64,
+   "anchorY": 2023.64
+  },
+  {
+   "id": 537,
+   "type": "lake",
+   "areaPx": 57,
+   "minPx": [
+    936,
+    3614
+   ],
+   "maxPx": [
+    948,
+    3623
+   ],
+   "elev": 1926.6,
+   "anchorY": 1926.6
+  },
+  {
+   "id": 479,
+   "type": "river",
+   "areaPx": 56,
+   "minPx": [
+    2809,
+    3282
+   ],
+   "maxPx": [
+    2815,
+    3293
+   ],
+   "elev": 2239.74
+  },
+  {
+   "id": 583,
+   "type": "lake",
+   "areaPx": 56,
+   "minPx": [
+    908,
+    3957
+   ],
+   "maxPx": [
+    919,
+    3977
+   ],
+   "elev": 1912.01,
+   "anchorY": 1912.01
+  },
+  {
+   "id": 67,
+   "type": "lake",
+   "areaPx": 55,
+   "minPx": [
+    2361,
+    362
+   ],
+   "maxPx": [
+    2366,
+    377
+   ],
+   "elev": 2079.43,
+   "anchorY": 2079.43
+  },
+  {
+   "id": 90,
+   "type": "lake",
+   "areaPx": 54,
+   "minPx": [
+    701,
+    535
+   ],
+   "maxPx": [
+    705,
+    548
+   ],
+   "elev": 2942.87,
+   "anchorY": 2942.87
+  },
+  {
+   "id": 339,
+   "type": "lake",
+   "areaPx": 54,
+   "minPx": [
+    1880,
+    2022
+   ],
+   "maxPx": [
+    1890,
+    2043
+   ],
+   "elev": 2004.47,
+   "anchorY": 2004.47
+  },
+  {
+   "id": 362,
+   "type": "lake",
+   "areaPx": 54,
+   "minPx": [
+    1837,
+    2268
+   ],
+   "maxPx": [
+    1856,
+    2286
+   ],
+   "elev": 1994.95,
+   "anchorY": 1994.95
+  },
+  {
+   "id": 446,
+   "type": "lake",
+   "areaPx": 53,
+   "minPx": [
+    1043,
+    2954
+   ],
+   "maxPx": [
+    1053,
+    2961
+   ],
+   "elev": 2029.91,
+   "anchorY": 2029.91
+  },
+  {
+   "id": 510,
+   "type": "lake",
+   "areaPx": 52,
+   "minPx": [
+    1045,
+    3393
+   ],
+   "maxPx": [
+    1063,
+    3425
+   ],
+   "elev": 1937.2,
+   "anchorY": 1937.2
+  },
+  {
+   "id": 336,
+   "type": "lake",
+   "areaPx": 51,
+   "minPx": [
+    1889,
+    1990
+   ],
+   "maxPx": [
+    1896,
+    2008
+   ],
+   "elev": 2006.29,
+   "anchorY": 2006.29
+  },
+  {
+   "id": 465,
+   "type": "lake",
+   "areaPx": 51,
+   "minPx": [
+    227,
+    3112
+   ],
+   "maxPx": [
+    233,
+    3122
+   ],
+   "elev": 3113.66,
+   "anchorY": 3113.66
+  },
+  {
+   "id": 117,
+   "type": "lake",
+   "areaPx": 50,
+   "minPx": [
+    104,
+    890
+   ],
+   "maxPx": [
+    110,
+    898
+   ],
+   "elev": 2858.53,
+   "anchorY": 2858.53
+  },
+  {
+   "id": 391,
+   "type": "lake",
+   "areaPx": 50,
+   "minPx": [
+    1698,
+    2471
+   ],
+   "maxPx": [
+    1713,
+    2486
+   ],
+   "elev": 1985.7,
+   "anchorY": 1985.7
+  },
+  {
+   "id": 16,
+   "type": "lake",
+   "areaPx": 49,
+   "minPx": [
+    744,
+    137
+   ],
+   "maxPx": [
+    754,
+    146
+   ],
+   "elev": 2896.1,
+   "anchorY": 2896.1
+  },
+  {
+   "id": 550,
+   "type": "lake",
+   "areaPx": 49,
+   "minPx": [
+    914,
+    3660
+   ],
+   "maxPx": [
+    921,
+    3684
+   ],
+   "elev": 1923.53,
+   "anchorY": 1923.53
+  },
+  {
+   "id": 65,
+   "type": "lake",
+   "areaPx": 48,
+   "minPx": [
+    2558,
+    358
+   ],
+   "maxPx": [
+    2568,
+    364
+   ],
+   "elev": 2086.14,
+   "anchorY": 2086.14
+  },
+  {
+   "id": 407,
+   "type": "lake",
+   "areaPx": 48,
+   "minPx": [
+    1587,
+    2580
+   ],
+   "maxPx": [
+    1594,
+    2596
+   ],
+   "elev": 1983.19,
+   "anchorY": 1983.19
+  },
+  {
+   "id": 514,
+   "type": "lake",
+   "areaPx": 48,
+   "minPx": [
+    977,
+    3430
+   ],
+   "maxPx": [
+    984,
+    3447
+   ],
+   "elev": 1935.8,
+   "anchorY": 1935.8
+  },
+  {
+   "id": 57,
+   "type": "lake",
+   "areaPx": 47,
+   "minPx": [
+    2617,
+    320
+   ],
+   "maxPx": [
+    2633,
+    326
+   ],
+   "elev": 2092.36,
+   "anchorY": 2092.36
+  },
+  {
+   "id": 360,
+   "type": "lake",
+   "areaPx": 47,
+   "minPx": [
+    1844,
+    2241
+   ],
+   "maxPx": [
+    1857,
+    2256
+   ],
+   "elev": 1995.52,
+   "anchorY": 1995.52
+  },
+  {
+   "id": 422,
+   "type": "lake",
+   "areaPx": 47,
+   "minPx": [
+    2641,
+    2668
+   ],
+   "maxPx": [
+    2648,
+    2675
+   ],
+   "elev": 2279.91,
+   "anchorY": 2279.91
+  },
+  {
+   "id": 453,
+   "type": "lake",
+   "areaPx": 47,
+   "minPx": [
+    1307,
+    2990
+   ],
+   "maxPx": [
+    1326,
+    2998
+   ],
+   "elev": 1960.26,
+   "anchorY": 1960.26
+  },
+  {
+   "id": 575,
+   "type": "lake",
+   "areaPx": 47,
+   "minPx": [
+    1223,
+    3854
+   ],
+   "maxPx": [
+    1233,
+    3860
+   ],
+   "elev": 1940.91,
+   "anchorY": 1940.91
+  },
+  {
+   "id": 103,
+   "type": "lake",
+   "areaPx": 46,
+   "minPx": [
+    1841,
+    662
+   ],
+   "maxPx": [
+    1848,
+    670
+   ],
+   "elev": 2063.08,
+   "anchorY": 2063.08
+  },
+  {
+   "id": 189,
+   "type": "lake",
+   "areaPx": 46,
+   "minPx": [
+    519,
+    1295
+   ],
+   "maxPx": [
+    526,
+    1303
+   ],
+   "elev": 2784.87,
+   "anchorY": 2784.87
+  },
+  {
+   "id": 326,
+   "type": "river",
+   "areaPx": 46,
+   "minPx": [
+    2461,
+    1863
+   ],
+   "maxPx": [
+    2467,
+    1870
+   ],
+   "elev": 2050.0
+  },
+  {
+   "id": 268,
+   "type": "lake",
+   "areaPx": 45,
+   "minPx": [
+    141,
+    1548
+   ],
+   "maxPx": [
+    147,
+    1556
+   ],
+   "elev": 2866.11,
+   "anchorY": 2866.11
+  },
+  {
+   "id": 299,
+   "type": "lake",
+   "areaPx": 45,
+   "minPx": [
+    2386,
+    1626
+   ],
+   "maxPx": [
+    2389,
+    1643
+   ],
+   "elev": 2026.59,
+   "anchorY": 2026.59
+  },
+  {
+   "id": 330,
+   "type": "lake",
+   "areaPx": 45,
+   "minPx": [
+    1280,
+    1910
+   ],
+   "maxPx": [
+    1286,
+    1918
+   ],
+   "elev": 2066.05,
+   "anchorY": 2066.05
+  },
+  {
+   "id": 56,
+   "type": "lake",
+   "areaPx": 44,
+   "minPx": [
+    2228,
+    318
+   ],
+   "maxPx": [
+    2239,
+    334
+   ],
+   "elev": 2074.81,
+   "anchorY": 2074.81
+  },
+  {
+   "id": 186,
+   "type": "lake",
+   "areaPx": 44,
+   "minPx": [
+    1345,
+    1259
+   ],
+   "maxPx": [
+    1351,
+    1268
+   ],
+   "elev": 2101.93,
+   "anchorY": 2101.93
+  },
+  {
+   "id": 55,
+   "type": "lake",
+   "areaPx": 43,
+   "minPx": [
+    2609,
+    317
+   ],
+   "maxPx": [
+    2616,
+    325
+   ],
+   "elev": 2092.11,
+   "anchorY": 2092.11
+  },
+  {
+   "id": 258,
+   "type": "lake",
+   "areaPx": 42,
+   "minPx": [
+    2420,
+    1531
+   ],
+   "maxPx": [
+    2432,
+    1536
+   ],
+   "elev": 2030.89,
+   "anchorY": 2030.89
+  },
+  {
+   "id": 331,
+   "type": "lake",
+   "areaPx": 42,
+   "minPx": [
+    1912,
+    1923
+   ],
+   "maxPx": [
+    1921,
+    1940
+   ],
+   "elev": 2013.47,
+   "anchorY": 2013.47
+  },
+  {
+   "id": 521,
+   "type": "lake",
+   "areaPx": 42,
+   "minPx": [
+    1014,
+    3511
+   ],
+   "maxPx": [
+    1020,
+    3526
+   ],
+   "elev": 1933.26,
+   "anchorY": 1933.26
+  },
+  {
+   "id": 22,
+   "type": "lake",
+   "areaPx": 41,
+   "minPx": [
+    530,
+    184
+   ],
+   "maxPx": [
+    536,
+    194
+   ],
+   "elev": 2984.02,
+   "anchorY": 2984.02
+  },
+  {
+   "id": 153,
+   "type": "lake",
+   "areaPx": 41,
+   "minPx": [
+    1340,
+    1062
+   ],
+   "maxPx": [
+    1348,
+    1072
+   ],
+   "elev": 2100.55,
+   "anchorY": 2100.55
+  },
+  {
+   "id": 452,
+   "type": "lake",
+   "areaPx": 41,
+   "minPx": [
+    1252,
+    2982
+   ],
+   "maxPx": [
+    1259,
+    2992
+   ],
+   "elev": 1972.86,
+   "anchorY": 1972.86
+  },
+  {
+   "id": 19,
+   "type": "lake",
+   "areaPx": 40,
+   "minPx": [
+    2168,
+    155
+   ],
+   "maxPx": [
+    2174,
+    162
+   ],
+   "elev": 2079.45,
+   "anchorY": 2079.45
+  },
+  {
+   "id": 165,
+   "type": "lake",
+   "areaPx": 40,
+   "minPx": [
+    444,
+    1198
+   ],
+   "maxPx": [
+    451,
+    1205
+   ],
+   "elev": 2718.67,
+   "anchorY": 2718.67
+  },
+  {
+   "id": 334,
+   "type": "lake",
+   "areaPx": 40,
+   "minPx": [
+    1912,
+    1957
+   ],
+   "maxPx": [
+    1924,
+    1964
+   ],
+   "elev": 2006.92,
+   "anchorY": 2006.92
+  },
+  {
+   "id": 418,
+   "type": "lake",
+   "areaPx": 40,
+   "minPx": [
+    1545,
+    2663
+   ],
+   "maxPx": [
+    1548,
+    2675
+   ],
+   "elev": 1980.39,
+   "anchorY": 1980.39
+  },
+  {
+   "id": 4,
+   "type": "lake",
+   "areaPx": 39,
+   "minPx": [
+    1077,
+    29
+   ],
+   "maxPx": [
+    1088,
+    35
+   ],
+   "elev": 2935.83,
+   "anchorY": 2935.83
+  },
+  {
+   "id": 102,
+   "type": "lake",
+   "areaPx": 39,
+   "minPx": [
+    1831,
+    659
+   ],
+   "maxPx": [
+    1836,
+    668
+   ],
+   "elev": 2063.17,
+   "anchorY": 2063.17
+  },
+  {
+   "id": 223,
+   "type": "lake",
+   "areaPx": 38,
+   "minPx": [
+    2231,
+    1472
+   ],
+   "maxPx": [
+    2237,
+    1480
+   ],
+   "elev": 2040.16,
+   "anchorY": 2040.16
+  },
+  {
+   "id": 145,
+   "type": "lake",
+   "areaPx": 37,
+   "minPx": [
+    221,
+    1003
+   ],
+   "maxPx": [
+    225,
+    1013
+   ],
+   "elev": 2992.5,
+   "anchorY": 2992.5
+  },
+  {
+   "id": 315,
+   "type": "lake",
+   "areaPx": 37,
+   "minPx": [
+    2522,
+    1722
+   ],
+   "maxPx": [
+    2529,
+    1730
+   ],
+   "elev": 2026.72,
+   "anchorY": 2026.72
+  },
+  {
+   "id": 458,
+   "type": "lake",
+   "areaPx": 37,
+   "minPx": [
+    219,
+    3007
+   ],
+   "maxPx": [
+    226,
+    3015
+   ],
+   "elev": 2952.84,
+   "anchorY": 2952.84
+  },
+  {
+   "id": 44,
+   "type": "lake",
+   "areaPx": 36,
+   "minPx": [
+    2089,
+    281
+   ],
+   "maxPx": [
+    2097,
+    285
+   ],
+   "elev": 2077.84,
+   "anchorY": 2077.84
+  },
+  {
+   "id": 89,
+   "type": "lake",
+   "areaPx": 36,
+   "minPx": [
+    18,
+    521
+   ],
+   "maxPx": [
+    25,
+    526
+   ],
+   "elev": 2715.43,
+   "anchorY": 2715.43
+  },
+  {
+   "id": 194,
+   "type": "lake",
+   "areaPx": 36,
+   "minPx": [
+    294,
+    1337
+   ],
+   "maxPx": [
+    303,
+    1347
+   ],
+   "elev": 3095.25,
+   "anchorY": 3095.25
+  },
+  {
+   "id": 365,
+   "type": "lake",
+   "areaPx": 36,
+   "minPx": [
+    1113,
+    2283
+   ],
+   "maxPx": [
+    1120,
+    2292
+   ],
+   "elev": 2150.0,
+   "anchorY": 2150.0
+  },
+  {
+   "id": 513,
+   "type": "lake",
+   "areaPx": 36,
+   "minPx": [
+    1032,
+    3428
+   ],
+   "maxPx": [
+    1043,
+    3448
+   ],
+   "elev": 1935.85,
+   "anchorY": 1935.85
+  },
+  {
+   "id": 565,
+   "type": "lake",
+   "areaPx": 36,
+   "minPx": [
+    942,
+    3764
+   ],
+   "maxPx": [
+    945,
+    3782
+   ],
+   "elev": 1920.58,
+   "anchorY": 1920.58
+  },
+  {
+   "id": 263,
+   "type": "lake",
+   "areaPx": 35,
+   "minPx": [
+    2416,
+    1537
+   ],
+   "maxPx": [
+    2425,
+    1546
+   ],
+   "elev": 2030.5,
+   "anchorY": 2030.5
+  },
+  {
+   "id": 169,
+   "type": "lake",
+   "areaPx": 34,
+   "minPx": [
+    29,
+    1220
+   ],
+   "maxPx": [
+    37,
+    1225
+   ],
+   "elev": 2660.26,
+   "anchorY": 2660.26
+  },
+  {
+   "id": 234,
+   "type": "lake",
+   "areaPx": 34,
+   "minPx": [
+    1987,
+    1499
+   ],
+   "maxPx": [
+    1997,
+    1504
+   ],
+   "elev": 2109.1,
+   "anchorY": 2109.1
+  },
+  {
+   "id": 421,
+   "type": "lake",
+   "areaPx": 34,
+   "minPx": [
+    1564,
+    2665
+   ],
+   "maxPx": [
+    1568,
+    2682
+   ],
+   "elev": 1979.1,
+   "anchorY": 1979.1
+  },
+  {
+   "id": 155,
+   "type": "lake",
+   "areaPx": 33,
+   "minPx": [
+    1738,
+    1066
+   ],
+   "maxPx": [
+    1743,
+    1075
+   ],
+   "elev": 2124.95,
+   "anchorY": 2124.95
+  },
+  {
+   "id": 235,
+   "type": "river",
+   "areaPx": 33,
+   "minPx": [
+    2278,
+    1502
+   ],
+   "maxPx": [
+    2284,
+    1509
+   ],
+   "elev": 2044.57
+  },
+  {
+   "id": 273,
+   "type": "lake",
+   "areaPx": 33,
+   "minPx": [
+    2505,
+    1554
+   ],
+   "maxPx": [
+    2526,
+    1563
+   ],
+   "elev": 2030.28,
+   "anchorY": 2030.28
+  },
+  {
+   "id": 298,
+   "type": "lake",
+   "areaPx": 33,
+   "minPx": [
+    2807,
+    1625
+   ],
+   "maxPx": [
+    2811,
+    1635
+   ],
+   "elev": 2068.79,
+   "anchorY": 2068.79
+  },
+  {
+   "id": 7,
+   "type": "lake",
+   "areaPx": 32,
+   "minPx": [
+    899,
+    48
+   ],
+   "maxPx": [
+    904,
+    54
+   ],
+   "elev": 2986.17,
+   "anchorY": 2986.17
+  },
+  {
+   "id": 230,
+   "type": "lake",
+   "areaPx": 32,
+   "minPx": [
+    2489,
+    1493
+   ],
+   "maxPx": [
+    2494,
+    1510
+   ],
+   "elev": 2031.37,
+   "anchorY": 2031.37
+  },
+  {
+   "id": 303,
+   "type": "lake",
+   "areaPx": 32,
+   "minPx": [
+    2571,
+    1650
+   ],
+   "maxPx": [
+    2581,
+    1663
+   ],
+   "elev": 2030.31,
+   "anchorY": 2030.31
+  },
+  {
+   "id": 388,
+   "type": "lake",
+   "areaPx": 32,
+   "minPx": [
+    1700,
+    2440
+   ],
+   "maxPx": [
+    1703,
+    2461
+   ],
+   "elev": 1987.55,
+   "anchorY": 1987.55
+  },
+  {
+   "id": 413,
+   "type": "lake",
+   "areaPx": 32,
+   "minPx": [
+    1580,
+    2640
+   ],
+   "maxPx": [
+    1588,
+    2647
+   ],
+   "elev": 1980.12,
+   "anchorY": 1980.12
+  },
+  {
+   "id": 68,
+   "type": "lake",
+   "areaPx": 31,
+   "minPx": [
+    2751,
+    364
+   ],
+   "maxPx": [
+    2757,
+    369
+   ],
+   "elev": 2110.53,
+   "anchorY": 2110.53
+  },
+  {
+   "id": 156,
+   "type": "lake",
+   "areaPx": 31,
+   "minPx": [
+    592,
+    1093
+   ],
+   "maxPx": [
+    598,
+    1099
+   ],
+   "elev": 3106.68,
+   "anchorY": 3106.68
+  },
+  {
+   "id": 430,
+   "type": "lake",
+   "areaPx": 31,
+   "minPx": [
+    1549,
+    2785
+   ],
+   "maxPx": [
+    1557,
+    2798
+   ],
+   "elev": 1971.54,
+   "anchorY": 1971.54
+  },
+  {
+   "id": 485,
+   "type": "lake",
+   "areaPx": 31,
+   "minPx": [
+    2285,
+    3301
+   ],
+   "maxPx": [
+    2298,
+    3305
+   ],
+   "elev": 2026.26,
+   "anchorY": 2026.26
+  },
+  {
+   "id": 573,
+   "type": "lake",
+   "areaPx": 31,
+   "minPx": [
+    985,
+    3815
+   ],
+   "maxPx": [
+    994,
+    3825
+   ],
+   "elev": 1920.84,
+   "anchorY": 1920.84
+  },
+  {
+   "id": 61,
+   "type": "lake",
+   "areaPx": 30,
+   "minPx": [
+    2662,
+    328
+   ],
+   "maxPx": [
+    2665,
+    336
+   ],
+   "elev": 2090.68,
+   "anchorY": 2090.68
+  },
+  {
+   "id": 112,
+   "type": "lake",
+   "areaPx": 30,
+   "minPx": [
+    903,
+    743
+   ],
+   "maxPx": [
+    910,
+    747
+   ],
+   "elev": 2370.28,
+   "anchorY": 2370.28
+  },
+  {
+   "id": 137,
+   "type": "lake",
+   "areaPx": 30,
+   "minPx": [
+    32,
+    978
+   ],
+   "maxPx": [
+    37,
+    985
+   ],
+   "elev": 2715.29,
+   "anchorY": 2715.29
+  },
+  {
+   "id": 210,
+   "type": "lake",
+   "areaPx": 30,
+   "minPx": [
+    1535,
+    1394
+   ],
+   "maxPx": [
+    1539,
+    1402
+   ],
+   "elev": 2107.79,
+   "anchorY": 2107.79
+  },
+  {
+   "id": 132,
+   "type": "lake",
+   "areaPx": 29,
+   "minPx": [
+    2419,
+    966
+   ],
+   "maxPx": [
+    2423,
+    973
+   ],
+   "elev": 2127.49,
+   "anchorY": 2127.49
+  },
+  {
+   "id": 174,
+   "type": "lake",
+   "areaPx": 29,
+   "minPx": [
+    2137,
+    1223
+   ],
+   "maxPx": [
+    2142,
+    1228
+   ],
+   "elev": 2123.24,
+   "anchorY": 2123.24
+  },
+  {
+   "id": 343,
+   "type": "lake",
+   "areaPx": 29,
+   "minPx": [
+    1354,
+    2081
+   ],
+   "maxPx": [
+    1358,
+    2087
+   ],
+   "elev": 2053.03,
+   "anchorY": 2053.03
+  },
+  {
+   "id": 484,
+   "type": "lake",
+   "areaPx": 29,
+   "minPx": [
+    2374,
+    3291
+   ],
+   "maxPx": [
+    2390,
+    3294
+   ],
+   "elev": 2032.61,
+   "anchorY": 2032.61
+  },
+  {
+   "id": 15,
+   "type": "lake",
+   "areaPx": 28,
+   "minPx": [
+    533,
+    132
+   ],
+   "maxPx": [
+    541,
+    139
+   ],
+   "elev": 2991.68,
+   "anchorY": 2991.68
+  },
+  {
+   "id": 49,
+   "type": "lake",
+   "areaPx": 28,
+   "minPx": [
+    2142,
+    294
+   ],
+   "maxPx": [
+    2146,
+    300
+   ],
+   "elev": 2073.15,
+   "anchorY": 2073.15
+  },
+  {
+   "id": 118,
+   "type": "lake",
+   "areaPx": 28,
+   "minPx": [
+    2362,
+    895
+   ],
+   "maxPx": [
+    2366,
+    901
+   ],
+   "elev": 2108.31,
+   "anchorY": 2108.31
+  },
+  {
+   "id": 441,
+   "type": "lake",
+   "areaPx": 28,
+   "minPx": [
+    1370,
+    2939
+   ],
+   "maxPx": [
+    1381,
+    2941
+   ],
+   "elev": 1962.16,
+   "anchorY": 1962.16
+  },
+  {
+   "id": 536,
+   "type": "lake",
+   "areaPx": 28,
+   "minPx": [
+    1059,
+    3611
+   ],
+   "maxPx": [
+    1064,
+    3628
+   ],
+   "elev": 1930.22,
+   "anchorY": 1930.22
+  },
+  {
+   "id": 601,
+   "type": "lake",
+   "areaPx": 28,
+   "minPx": [
+    1458,
+    4088
+   ],
+   "maxPx": [
+    1464,
+    4095
+   ],
+   "elev": 1913.86,
+   "anchorY": 1913.86
+  },
+  {
+   "id": 157,
+   "type": "river",
+   "areaPx": 27,
+   "minPx": [
+    2110,
+    1116
+   ],
+   "maxPx": [
+    2116,
+    1121
+   ],
+   "elev": 2084.59
+  },
+  {
+   "id": 219,
+   "type": "lake",
+   "areaPx": 27,
+   "minPx": [
+    1963,
+    1457
+   ],
+   "maxPx": [
+    1967,
+    1465
+   ],
+   "elev": 2116.64,
+   "anchorY": 2116.64
+  },
+  {
+   "id": 229,
+   "type": "river",
+   "areaPx": 27,
+   "minPx": [
+    1979,
+    1488
+   ],
+   "maxPx": [
+    1986,
+    1495
+   ],
+   "elev": 2113.84
+  },
+  {
+   "id": 256,
+   "type": "lake",
+   "areaPx": 27,
+   "minPx": [
+    140,
+    1529
+   ],
+   "maxPx": [
+    146,
+    1535
+   ],
+   "elev": 2870.94,
+   "anchorY": 2870.94
+  },
+  {
+   "id": 467,
+   "type": "lake",
+   "areaPx": 27,
+   "minPx": [
+    2289,
+    3119
+   ],
+   "maxPx": [
+    2296,
+    3124
+   ],
+   "elev": 2036.24,
+   "anchorY": 2036.24
+  },
+  {
+   "id": 602,
+   "type": "lake",
+   "areaPx": 27,
+   "minPx": [
+    2128,
+    4099
+   ],
+   "maxPx": [
+    2131,
+    4107
+   ],
+   "elev": 2038.82,
+   "anchorY": 2038.82
+  },
+  {
+   "id": 40,
+   "type": "lake",
+   "areaPx": 26,
+   "minPx": [
+    719,
+    272
+   ],
+   "maxPx": [
+    724,
+    278
+   ],
+   "elev": 3037.32,
+   "anchorY": 3037.32
+  },
+  {
+   "id": 64,
+   "type": "lake",
+   "areaPx": 26,
+   "minPx": [
+    2300,
+    333
+   ],
+   "maxPx": [
+    2308,
+    337
+   ],
+   "elev": 2077.96,
+   "anchorY": 2077.96
+  },
+  {
+   "id": 335,
+   "type": "lake",
+   "areaPx": 26,
+   "minPx": [
+    1897,
+    1970
+   ],
+   "maxPx": [
+    1904,
+    1981
+   ],
+   "elev": 2006.08,
+   "anchorY": 2006.08
+  },
+  {
+   "id": 551,
+   "type": "lake",
+   "areaPx": 26,
+   "minPx": [
+    912,
+    3669
+   ],
+   "maxPx": [
+    915,
+    3680
+   ],
+   "elev": 1924.17,
+   "anchorY": 1924.17
+  },
+  {
+   "id": 80,
+   "type": "lake",
+   "areaPx": 25,
+   "minPx": [
+    2278,
+    488
+   ],
+   "maxPx": [
+    2284,
+    498
+   ],
+   "elev": 2069.18,
+   "anchorY": 2069.18
+  },
+  {
+   "id": 91,
+   "type": "river",
+   "areaPx": 25,
+   "minPx": [
+    725,
+    540
+   ],
+   "maxPx": [
+    729,
+    546
+   ],
+   "elev": 3050.59
+  },
+  {
+   "id": 265,
+   "type": "lake",
+   "areaPx": 25,
+   "minPx": [
+    2436,
+    1543
+   ],
+   "maxPx": [
+    2442,
+    1553
+   ],
+   "elev": 2030.01,
+   "anchorY": 2030.01
+  },
+  {
+   "id": 368,
+   "type": "river",
+   "areaPx": 25,
+   "minPx": [
+    525,
+    2305
+   ],
+   "maxPx": [
+    529,
+    2311
+   ],
+   "elev": 3129.69
+  },
+  {
+   "id": 585,
+   "type": "lake",
+   "areaPx": 25,
+   "minPx": [
+    1115,
+    3972
+   ],
+   "maxPx": [
+    1120,
+    3980
+   ],
+   "elev": 1928.67,
+   "anchorY": 1928.67
+  },
+  {
+   "id": 340,
+   "type": "lake",
+   "areaPx": 24,
+   "minPx": [
+    427,
+    2028
+   ],
+   "maxPx": [
+    432,
+    2035
+   ],
+   "elev": 3000.47,
+   "anchorY": 3000.47
+  },
+  {
+   "id": 393,
+   "type": "lake",
+   "areaPx": 24,
+   "minPx": [
+    406,
+    2488
+   ],
+   "maxPx": [
+    412,
+    2492
+   ],
+   "elev": 2903.35,
+   "anchorY": 2903.35
+  },
+  {
+   "id": 416,
+   "type": "lake",
+   "areaPx": 24,
+   "minPx": [
+    1571,
+    2647
+   ],
+   "maxPx": [
+    1578,
+    2662
+   ],
+   "elev": 1979.19,
+   "anchorY": 1979.19
+  },
+  {
+   "id": 457,
+   "type": "lake",
+   "areaPx": 24,
+   "minPx": [
+    1297,
+    3006
+   ],
+   "maxPx": [
+    1305,
+    3010
+   ],
+   "elev": 1959.95,
+   "anchorY": 1959.95
+  },
+  {
+   "id": 475,
+   "type": "river",
+   "areaPx": 24,
+   "minPx": [
+    2814,
+    3212
+   ],
+   "maxPx": [
+    2831,
+    3214
+   ],
+   "elev": 2097.26
+  },
+  {
+   "id": 597,
+   "type": "lake",
+   "areaPx": 24,
+   "minPx": [
+    1084,
+    4062
+   ],
+   "maxPx": [
+    1095,
+    4065
+   ],
+   "elev": 1921.36,
+   "anchorY": 1921.36
+  },
+  {
+   "id": 38,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    742,
+    266
+   ],
+   "maxPx": [
+    747,
+    271
+   ],
+   "elev": 3011.12,
+   "anchorY": 3011.12
+  },
+  {
+   "id": 60,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    2310,
+    328
+   ],
+   "maxPx": [
+    2318,
+    333
+   ],
+   "elev": 2078.34,
+   "anchorY": 2078.34
+  },
+  {
+   "id": 77,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    2632,
+    445
+   ],
+   "maxPx": [
+    2635,
+    454
+   ],
+   "elev": 2082.05,
+   "anchorY": 2082.05
+  },
+  {
+   "id": 138,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    703,
+    980
+   ],
+   "maxPx": [
+    706,
+    986
+   ],
+   "elev": 2712.75,
+   "anchorY": 2712.75
+  },
+  {
+   "id": 172,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    2662,
+    1222
+   ],
+   "maxPx": [
+    2669,
+    1235
+   ],
+   "elev": 2039.67,
+   "anchorY": 2039.67
+  },
+  {
+   "id": 269,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    1389,
+    1548
+   ],
+   "maxPx": [
+    1393,
+    1553
+   ],
+   "elev": 2095.05,
+   "anchorY": 2095.05
+  },
+  {
+   "id": 338,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    403,
+    2013
+   ],
+   "maxPx": [
+    410,
+    2018
+   ],
+   "elev": 3006.09,
+   "anchorY": 3006.09
+  },
+  {
+   "id": 447,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    1347,
+    2957
+   ],
+   "maxPx": [
+    1354,
+    2965
+   ],
+   "elev": 1960.89,
+   "anchorY": 1960.89
+  },
+  {
+   "id": 486,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    1248,
+    3306
+   ],
+   "maxPx": [
+    1254,
+    3317
+   ],
+   "elev": 1949.8,
+   "anchorY": 1949.8
+  },
+  {
+   "id": 518,
+   "type": "river",
+   "areaPx": 23,
+   "minPx": [
+    237,
+    3503
+   ],
+   "maxPx": [
+    241,
+    3510
+   ],
+   "elev": 2760.36
+  },
+  {
+   "id": 554,
+   "type": "lake",
+   "areaPx": 23,
+   "minPx": [
+    964,
+    3685
+   ],
+   "maxPx": [
+    976,
+    3693
+   ],
+   "elev": 1924.12,
+   "anchorY": 1924.12
+  },
+  {
+   "id": 46,
+   "type": "lake",
+   "areaPx": 22,
+   "minPx": [
+    2129,
+    284
+   ],
+   "maxPx": [
+    2134,
+    289
+   ],
+   "elev": 2073.38,
+   "anchorY": 2073.38
+  },
+  {
+   "id": 144,
+   "type": "lake",
+   "areaPx": 22,
+   "minPx": [
+    559,
+    994
+   ],
+   "maxPx": [
+    563,
+    1000
+   ],
+   "elev": 3004.04,
+   "anchorY": 3004.04
+  },
+  {
+   "id": 217,
+   "type": "lake",
+   "areaPx": 22,
+   "minPx": [
+    2537,
+    1433
+   ],
+   "maxPx": [
+    2539,
+    1445
+   ],
+   "elev": 2033.49,
+   "anchorY": 2033.49
+  },
+  {
+   "id": 291,
+   "type": "lake",
+   "areaPx": 22,
+   "minPx": [
+    2575,
+    1596
+   ],
+   "maxPx": [
+    2578,
+    1604
+   ],
+   "elev": 2030.72,
+   "anchorY": 2030.72
+  },
+  {
+   "id": 294,
+   "type": "lake",
+   "areaPx": 22,
+   "minPx": [
+    1135,
+    1610
+   ],
+   "maxPx": [
+    1141,
+    1615
+   ],
+   "elev": 2783.08,
+   "anchorY": 2783.08
+  },
+  {
+   "id": 470,
+   "type": "lake",
+   "areaPx": 22,
+   "minPx": [
+    862,
+    3181
+   ],
+   "maxPx": [
+    868,
+    3184
+   ],
+   "elev": 2021.61,
+   "anchorY": 2021.61
+  },
+  {
+   "id": 588,
+   "type": "lake",
+   "areaPx": 22,
+   "minPx": [
+    1173,
+    4018
+   ],
+   "maxPx": [
+    1178,
+    4023
+   ],
+   "elev": 1929.03,
+   "anchorY": 1929.03
+  },
+  {
+   "id": 30,
+   "type": "lake",
+   "areaPx": 21,
+   "minPx": [
+    587,
+    223
+   ],
+   "maxPx": [
+    592,
+    228
+   ],
+   "elev": 3081.25,
+   "anchorY": 3081.25
+  },
+  {
+   "id": 192,
+   "type": "river",
+   "areaPx": 21,
+   "minPx": [
+    2316,
+    1315
+   ],
+   "maxPx": [
+    2321,
+    1320
+   ],
+   "elev": 2081.65
+  },
+  {
+   "id": 384,
+   "type": "lake",
+   "areaPx": 21,
+   "minPx": [
+    1292,
+    2417
+   ],
+   "maxPx": [
+    1296,
+    2422
+   ],
+   "elev": 2103.81,
+   "anchorY": 2103.81
+  },
+  {
+   "id": 501,
+   "type": "lake",
+   "areaPx": 21,
+   "minPx": [
+    1196,
+    3334
+   ],
+   "maxPx": [
+    1200,
+    3339
+   ],
+   "elev": 1946.71,
+   "anchorY": 1946.71
+  },
+  {
+   "id": 511,
+   "type": "lake",
+   "areaPx": 21,
+   "minPx": [
+    1005,
+    3413
+   ],
+   "maxPx": [
+    1008,
+    3423
+   ],
+   "elev": 1936.68,
+   "anchorY": 1936.68
+  },
+  {
+   "id": 530,
+   "type": "lake",
+   "areaPx": 21,
+   "minPx": [
+    1062,
+    3595
+   ],
+   "maxPx": [
+    1066,
+    3605
+   ],
+   "elev": 1930.68,
+   "anchorY": 1930.68
+  },
+  {
+   "id": 120,
+   "type": "river",
+   "areaPx": 20,
+   "minPx": [
+    721,
+    912
+   ],
+   "maxPx": [
+    726,
+    916
+   ],
+   "elev": 2666.49
+  },
+  {
+   "id": 131,
+   "type": "lake",
+   "areaPx": 20,
+   "minPx": [
+    1617,
+    966
+   ],
+   "maxPx": [
+    1619,
+    972
+   ],
+   "elev": 2089.51,
+   "anchorY": 2089.51
+  },
+  {
+   "id": 199,
+   "type": "lake",
+   "areaPx": 20,
+   "minPx": [
+    559,
+    1354
+   ],
+   "maxPx": [
+    566,
+    1358
+   ],
+   "elev": 2900.23,
+   "anchorY": 2900.23
+  },
+  {
+   "id": 243,
+   "type": "lake",
+   "areaPx": 20,
+   "minPx": [
+    2334,
+    1516
+   ],
+   "maxPx": [
+    2340,
+    1519
+   ],
+   "elev": 2040.78,
+   "anchorY": 2040.78
+  },
+  {
+   "id": 304,
+   "type": "lake",
+   "areaPx": 20,
+   "minPx": [
+    2391,
+    1651
+   ],
+   "maxPx": [
+    2398,
+    1659
+   ],
+   "elev": 2026.15,
+   "anchorY": 2026.15
+  },
+  {
+   "id": 476,
+   "type": "river",
+   "areaPx": 20,
+   "minPx": [
+    2786,
+    3214
+   ],
+   "maxPx": [
+    2800,
+    3217
+   ],
+   "elev": 2090.89
+  },
+  {
+   "id": 591,
+   "type": "lake",
+   "areaPx": 20,
+   "minPx": [
+    921,
+    4035
+   ],
+   "maxPx": [
+    931,
+    4039
+   ],
+   "elev": 1909.2,
+   "anchorY": 1909.2
+  }
+ ]
+}

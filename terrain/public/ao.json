@@ -1,0 +1,8 @@
+{
+ "url": "ao.png",
+ "width": 1416,
+ "height": 2059,
+ "res": 20.0,
+ "azimuths": 16,
+ "encoding": "skyVisibility 0..1 over 0..255"
+}

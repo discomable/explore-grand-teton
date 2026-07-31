@@ -1,0 +1,24 @@
+{
+  "name": "grand-teton-floating-range",
+  "private": true,
+  "version": "0.184.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "dev:setup": "node scripts/dev-setup.mjs",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --test",
+    "test:py": "python3 -m unittest discover -s test -p 'test_*.py'",
+    "test:all": "npm test && npm run test:py",
+    "validate:assets": "node scripts/validate-assets.mjs",
+    "verify": "npm run test:all && npm run validate:assets && npm run build"
+  },
+  "dependencies": {
+    "three": "0.184.0"
+  },
+  "devDependencies": {
+    "vite": "7.3.6"
+  }
+}

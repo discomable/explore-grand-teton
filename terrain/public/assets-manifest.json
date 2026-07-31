@@ -1,0 +1,220 @@
+{
+  "schema": "grand-teton-assets/v1",
+  "assets": [
+    {
+      "id": "pickup-quaternius",
+      "title": "Pickup Truck",
+      "author": "Quaternius",
+      "source": "https://poly.pizza/m/qn4grQgHm8",
+      "license": "CC0-1.0",
+      "attribution": "Pickup Truck by Quaternius, CC0 1.0.",
+      "files": [
+        "terrain/public/models/pickup-src.glb",
+        "terrain/public/models/pickup.glb"
+      ],
+      "recipe": "terrain/public/models/build-pickup.py"
+    },
+    {
+      "id": "interior-range-rover",
+      "title": "Range Rover",
+      "author": "IvOfficial",
+      "source": "https://poly.pizza/m/8zk4o6nALW",
+      "license": "CC-BY-4.0",
+      "attribution": "Range Rover by IvOfficial, via Poly Pizza, licensed CC BY 4.0; modified for Grand Teton.",
+      "files": [
+        "terrain/public/models/interior-car.glb"
+      ],
+      "recipe": "Runtime normalization is documented in terrain/public/models/ASSETS.md."
+    },
+    {
+      "id": "transport-photographic-materials",
+      "title": "Grand Teton transport material tiles",
+      "author": "OpenAI image generation for the Grand Teton project",
+      "source": "terrain/public/materials/transport/ASSETS.md",
+      "license": "CC0-1.0",
+      "attribution": "Generated for this project with AI image generation; dedicated to the public domain under CC0-1.0.",
+      "files": [
+        "terrain/public/materials/transport/dry-two-track-albedo.webp",
+        "terrain/public/materials/transport/packed-trail-albedo.webp"
+      ],
+      "recipe": "terrain/public/materials/transport/ASSETS.md"
+    },
+    {
+      "id": "ta-moulton-barn-reconstruction",
+      "title": "T. A. Moulton Barn measured reconstruction",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/buildings/moulton_barn/building.json",
+      "license": "CC0-1.0",
+      "attribution": "Project reconstruction using a USGS 3DEP measured envelope, NPS/HABS massing references, and an OpenStreetMap placement footprint; dedicated to the public domain under CC0-1.0.",
+      "files": [
+        "terrain/public/models/ta-moulton-barn-lod0.glb",
+        "terrain/public/models/ta-moulton-barn-lod1.glb",
+        "terrain/public/models/ta-moulton-barn-lod2.glb",
+        "terrain/public/models/ta-moulton-barn-validation.json",
+        "terrain/public/landmarks.json",
+        "terrain/public/materials/moulton-barn/moulton-barn-atlas.webp",
+        "terrain/public/materials/moulton-barn/front-projection-v1.webp",
+        "terrain/public/materials/moulton-barn/front-projection-v2.webp"
+      ],
+      "recipe": "terrain/pipeline/buildings/moulton_barn/README.md"
+    },
+    {
+      "id": "john-moulton-barn-reconstruction",
+      "title": "John Moulton Barn reconstruction",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/work/hero/john-moulton-barn/placed/place.json (image-to-3D mesh terrain/pipeline/data/hero/meshes/john-moulton-barn.glb, footprint-fit, no LiDAR stage per terrain/pipeline/buildings/hero/place_mesh.py); footprint named 'John Moulton Barn' in terrain/public/buildings.json, built by terrain/pipeline/buildings/build_buildings.py from OSM way 306529655 in terrain/pipeline/data/osm/buildings.osm.json (© OpenStreetMap contributors, ODbL-1.0); historic reference only (not redistributed) from Library of Congress HABS records wy0575 (WY-152-C, barn), wy0573 (WY-152-A, house) and wy0339 (WY-152, homestead site), per terrain/pipeline/buildings/hero_candidates/john_moulton/acquired-sources.json",
+      "license": "CC0-1.0",
+      "attribution": "Project reconstruction: an image-to-3D mesh (no LiDAR) footprint-fitted to an OpenStreetMap-derived placement footprint, with AI-generated wall/roof imagery baked in via terrain/pipeline/buildings/hero/apply_textures.py; dedicated to the public domain under CC0-1.0. Library of Congress HABS records WY-152-C (barn; measured drawings by Barrett Powley, photographs by Arnold Thallheimer; https://www.loc.gov/pictures/item/wy0575/), WY-152-A (house; measured drawings by Jeff Farnum, photographs by Arnold Thallheimer; https://www.loc.gov/pictures/item/wy0573/) and WY-152 (homestead site; https://www.loc.gov/pictures/item/wy0339/) were consulted as documentary reference only — not redistributed here and not a measured input to this mesh's geometry. Per the Library of Congress rights statement: 'No known restrictions on images made by the U.S. Government; images copied from other sources may be restricted.' OpenStreetMap/ODbL attribution for the underlying footprint is carried by the in-app #credit HUD.",
+      "files": [
+        "terrain/public/models/john-moulton-barn-lod0.glb",
+        "terrain/public/models/john-moulton-barn-lod1.glb",
+        "terrain/public/models/john-moulton-barn-lod2.glb",
+        "terrain/public/models/john-moulton-barn-base.jpg",
+        "terrain/public/models/john-moulton-barn-roof.jpg",
+        "terrain/public/models/john-moulton-barn-wall.jpg"
+      ],
+      "recipe": "terrain/pipeline/buildings/hero/import_mesh.py + place_mesh.py --fit footprint + apply_textures.py, run against terrain/pipeline/work/hero/john-moulton-barn/ (parameters recorded in placed/place.json: ridgeM 8.062, textureBytes 1078255); footprint sourced by terrain/pipeline/buildings/build_buildings.py from terrain/pipeline/data/osm/buildings.osm.json way 306529655"
+    },
+    {
+      "id": "chapel-transfiguration-lidar-reconstruction",
+      "title": "Chapel of the Transfiguration, LiDAR-measured reconstruction (dormant LODs)",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/work/hero/chapel-of-the-transfiguration/chapel-of-the-transfiguration-geometry.json",
+      "license": "CC0-1.0",
+      "attribution": "Project reconstruction using 2022 USGS 3DEP LiDAR-measured roof planes and ridge (roof.json), the NPS National Register of Historic Places nomination #80004057 for chapel/sacristy dimensions and construction facts, and an OpenStreetMap/Microsoft Building Footprints placement footprint, with AI-generated wall and roof surface imagery projected onto the measured geometry through registered cameras; dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/buildings/hero/README.md (hero_lidar.py -> heroblock.py -> render_elevations.py -> apply_textures.py, per terrain/pipeline/work/hero/chapel-of-the-transfiguration/roof.json and chapel-of-the-transfiguration-geometry.json)",
+      "files": [
+        "terrain/public/models/chapel-of-the-transfiguration-lod0.glb",
+        "terrain/public/models/chapel-of-the-transfiguration-lod1.glb",
+        "terrain/public/models/chapel-of-the-transfiguration-lod2.glb",
+        "terrain/public/models/chapel-of-the-transfiguration-roof.jpg",
+        "terrain/public/models/chapel-of-the-transfiguration-wall-atlas.jpg"
+      ]
+    },
+    {
+      "id": "chapel-transfiguration-mesh-reconstruction",
+      "title": "Chapel of the Transfiguration, image-to-3D mesh reconstruction (active LODs)",
+      "author": "Meshy image-to-3D generation for the Grand Teton project",
+      "source": "terrain/pipeline/work/hero/chapel-of-the-transfiguration/imported-v2/import.json",
+      "license": "CC0-1.0",
+      "attribution": "Image-to-3D mesh generated with Meshy (terrain/pipeline/data/hero/meshes/chapel-meshy-export.glb), footprint- and ridge-fitted to the 2022 USGS 3DEP LiDAR-derived envelope (roof.json) and an OpenStreetMap/Microsoft Building Footprints placement footprint; project processing (spatial prop removal, LOD decimation, roof-colour correction) per import_mesh.py; dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/buildings/hero/import_mesh.py, run against terrain/pipeline/data/hero/meshes/chapel-meshy-export.glb (see terrain/pipeline/work/hero/chapel-of-the-transfiguration/imported-v2/import.json)",
+      "files": [
+        "terrain/public/models/chapel-mesh-lod0.glb",
+        "terrain/public/models/chapel-mesh-lod1.glb",
+        "terrain/public/models/chapel-mesh-lod2.glb",
+        "terrain/public/models/chapel-of-the-transfiguration-mesh-roof.jpg",
+        "terrain/public/models/chapel-of-the-transfiguration-mesh-wall.jpg"
+      ]
+    },
+    {
+      "id": "veg-atlas",
+      "title": "Vegetation photo-billboard atlas",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/VEG-ATLAS-SOURCES.md",
+      "license": "CC0-1.0",
+      "attribution": "Runtime-baked atlas composited from five CC0 tree photo cutouts: the OpenGameArt conifer/spruce-fir sheet by rubberduck (opengameart.org/content/high-res-tree-textures, tree_collection_2K.png), and four cgbookcase.com textures by Dorian Zgraggen (Tree01, Tree04, Tree05, Tree07). All five source cutouts are CC0 1.0 and carry no attribution obligation; the upstream authors are credited here per the project's own record-keeping convention. The bake itself is dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/src/ScatterManager.js ('?bakeatlas=1' runtime bake path) composites the source cutouts (terrain/public/atlas-candidates/, not shipped in git) into the 8-column 256x512-cell atlas per the source-to-cell mapping and alpha-scan x-ranges documented in terrain/pipeline/VEG-ATLAS-SOURCES.md.",
+      "files": [
+        "terrain/public/veg-atlas.png"
+      ]
+    },
+    {
+      "id": "terrain-ambient-occlusion-bake",
+      "title": "Terrain ambient-occlusion / sky-visibility map",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/SOURCES.md (§7, USGS 3DEP 1 m DEM)",
+      "license": "CC0-1.0",
+      "attribution": "Baked from the USGS 3DEP 1 m DEM (US federal public domain); mechanical derivative dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/bake_ao.py",
+      "files": [
+        "terrain/public/ao.png"
+      ]
+    },
+    {
+      "id": "terrain-horizon-shadow-bake",
+      "title": "Terrain horizon-angle shadow maps",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/SOURCES.md (§7, USGS 3DEP 1 m DEM)",
+      "license": "CC0-1.0",
+      "attribution": "Baked from the USGS 3DEP 1 m DEM (US federal public domain); mechanical derivative dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/bake_horizon.py",
+      "files": [
+        "terrain/public/horizon_a.png",
+        "terrain/public/horizon_b.png"
+      ]
+    },
+    {
+      "id": "landcover-water-mask-bake",
+      "title": "Landcover / water mask",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/make_landcover.py (NLCD 2021 land cover via MRLC WCS; NHD waterbody polygons via USGS National Map)",
+      "license": "CC0-1.0",
+      "attribution": "Baked from NLCD 2021 land cover (MRLC/USGS) and NHD waterbody polygons (USGS), both US federal public domain per LICENSE-ASSETS.md; mechanical derivative dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/make_landcover.py",
+      "files": [
+        "terrain/public/landcover.png"
+      ]
+    },
+    {
+      "id": "forest-mask-bake",
+      "title": "Forest canopy mask",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/SOURCES.md (§9, USDA NAIP imagery, access path only)",
+      "license": "CC0-1.0",
+      "attribution": "Baked from USDA NAIP aerial imagery (US federal public domain); mechanical derivative dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/bake_forestmask.py",
+      "files": [
+        "terrain/public/forestmask.png"
+      ]
+    },
+    {
+      "id": "groundtint-map-bake",
+      "title": "Ground colour tint map",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/SOURCES.md (§9, USDA NAIP imagery, access path only)",
+      "license": "CC0-1.0",
+      "attribution": "Baked from USDA NAIP aerial imagery (US federal public domain); mechanical derivative dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/bake_groundtint.py",
+      "files": [
+        "terrain/public/groundtint.png"
+      ]
+    },
+    {
+      "id": "vegetation-height-map-bake",
+      "title": "Vegetation height / cover map",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/SOURCES.md (§6, LANDFIRE LF2025 EVH/EVC clip)",
+      "license": "CC0-1.0",
+      "attribution": "Baked from LANDFIRE LF2025 existing-vegetation-height/-cover data (USGS/USDA, US federal public domain); mechanical derivative dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/vegheight/bake_vegheight.py",
+      "files": [
+        "terrain/public/vegheight.png"
+      ]
+    },
+    {
+      "id": "water-surface-elevation-bake",
+      "title": "Water-surface elevation map",
+      "author": "Grand Teton project",
+      "source": "terrain/pipeline/water/bake_water.py (USGS 3DEP-derived height-tile pyramid; NHD-derived water mask)",
+      "license": "CC0-1.0",
+      "attribution": "Baked from the USGS 3DEP-derived height-tile pyramid and the NHD-derived water mask (both US federal public domain); mechanical derivative dedicated to the public domain under CC0-1.0.",
+      "recipe": "terrain/pipeline/water/bake_water.py",
+      "files": [
+        "terrain/public/water-surface.png"
+      ]
+    },
+    {
+      "id": "roads-sdf-bake",
+      "title": "Road distance-field raster (roads.png)",
+      "author": "Grand Teton project, from OpenStreetMap contributor data",
+      "source": "Baked from terrain/public/roads.json, whose own metadata records the source as \"OpenStreetMap via Overpass (2026-07-10)\"; see terrain/pipeline/SOURCES.md and terrain/pipeline/buildings/README.md",
+      "license": "ODbL-1.0",
+      "attribution": "(c) OpenStreetMap contributors, ODbL 1.0. A mechanical distance-field derivative of OSM way geometry, so it carries the same ODbL attribution obligation as roads.json itself. Satisfied by the visible #credit HUD line in grand-teton-3d.html and the attribution string embedded in roads.json; do not remove either.",
+      "recipe": "terrain/pipeline/roads/bake_sdf.py, from roads.json produced by terrain/pipeline/roads/build_roads.py; encoding documented in terrain/public/roads-meta.json",
+      "files": [
+        "terrain/public/roads.png"
+      ]
+    }
+  ]
+}

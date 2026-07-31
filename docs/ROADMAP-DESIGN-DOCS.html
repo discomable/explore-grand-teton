@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grand Teton — Remaining Roadmap Design Docs</title>
+</head>
+<body>
+<style>
+  :root{
+    /* USGS quad-sheet palette — a cool survey paper, contour-brown accent, glacier blue, forest green */
+    --paper:#edefe8; --paper-2:#e5e8df; --card:#f4f6ef;
+    --ink:#1a231d; --ink-2:#42504440; --muted:#5c6a5e;
+    --line:#c9cebf; --line-soft:#d7dbcd;
+    --contour:#a85a24;        /* USGS contour brown — the accent */
+    --contour-2:#8f4a1c;
+    --water:#2c6f8e;          /* glacier / lake */
+    --forest:#3a6438;         /* status: shipped */
+    --amber:#9a7517;          /* status: blocked */
+    --shadow:0 1px 0 rgba(26,35,29,.04), 0 8px 26px -14px rgba(26,35,29,.32);
+    --font-display:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --font-body:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --maxw:1080px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#12180f; --paper-2:#0e130c; --card:#191f14;
+      --ink:#e4e9dc; --muted:#9aa793; --line:#2c3527; --line-soft:#232b1f;
+      --contour:#d98a4e; --contour-2:#e0965d; --water:#66aecb; --forest:#7bb06f; --amber:#d6b24e;
+      --shadow:0 1px 0 rgba(0,0,0,.3), 0 12px 30px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#edefe8; --paper-2:#e5e8df; --card:#f4f6ef; --ink:#1a231d; --muted:#5c6a5e;
+    --line:#c9cebf; --line-soft:#d7dbcd; --contour:#a85a24; --contour-2:#8f4a1c; --water:#2c6f8e;
+    --forest:#3a6438; --amber:#9a7517; --shadow:0 1px 0 rgba(26,35,29,.04), 0 8px 26px -14px rgba(26,35,29,.32);
+  }
+  :root[data-theme="dark"]{
+    --paper:#12180f; --paper-2:#0e130c; --card:#191f14; --ink:#e4e9dc; --muted:#9aa793;
+    --line:#2c3527; --line-soft:#232b1f; --contour:#d98a4e; --contour-2:#e0965d; --water:#66aecb;
+    --forest:#7bb06f; --amber:#d6b24e; --shadow:0 1px 0 rgba(0,0,0,.3), 0 12px 30px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);
+    line-height:1.6;-webkit-font-smoothing:antialiased;font-size:16px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  a{color:var(--water)}
+
+  /* ---- masthead ---- */
+  header{position:relative;border-bottom:1px solid var(--line);overflow:hidden;background:var(--paper-2)}
+  #contour{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
+  .mast{position:relative;padding:52px 0 30px}
+  .eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--contour);margin:0 0 14px;font-weight:600}
+  h1{font-family:var(--font-display);font-weight:600;font-size:clamp(30px,5.2vw,50px);line-height:1.04;
+    margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance;max-width:20ch}
+  .lede{max-width:64ch;color:var(--muted);font-size:17px;margin:0 0 22px}
+  .lede b{color:var(--ink);font-weight:600}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;font-family:var(--font-mono);font-size:11px}
+  .legend .k{color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-right:2px}
+
+  /* ---- status chips ---- */
+  .chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;
+    font-weight:600;letter-spacing:.03em;padding:3px 9px;border-radius:2px;border:1px solid;white-space:nowrap}
+  .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .chip.proposed{color:var(--contour);border-color:color-mix(in srgb,var(--contour) 40%,transparent);
+    background:color-mix(in srgb,var(--contour) 9%,transparent)}
+  .chip.blocked{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 40%,transparent);
+    background:color-mix(in srgb,var(--amber) 9%,transparent)}
+  .chip.partial{color:var(--water);border-color:color-mix(in srgb,var(--water) 40%,transparent);
+    background:color-mix(in srgb,var(--water) 9%,transparent)}
+  .chip.shipped{color:var(--forest);border-color:color-mix(in srgb,var(--forest) 40%,transparent);
+    background:color-mix(in srgb,var(--forest) 9%,transparent)}
+
+  /* ---- guiding principle ---- */
+  .principle{margin:34px 0 8px;border:1px solid var(--line);border-left:3px solid var(--contour);
+    background:var(--card);border-radius:3px;padding:20px 22px;box-shadow:var(--shadow)}
+  .principle .eyebrow{margin-bottom:8px}
+  .principle p{margin:0 0 8px;max-width:70ch}
+  .principle p:last-child{margin:0}
+  .principle strong{color:var(--ink)}
+
+  /* ---- summary matrix ---- */
+  section.block{padding:40px 0}
+  .h-eye{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 16px;display:flex;align-items:center;gap:12px}
+  .h-eye::after{content:"";flex:1;height:1px;background:var(--line)}
+  .tbl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--card);box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  thead th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;background:var(--paper-2);position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:color-mix(in srgb,var(--contour) 4%,transparent)}
+  td.feat{font-weight:600;white-space:nowrap}
+  td.feat a{text-decoration:none;color:var(--ink);border-bottom:1px dotted var(--muted)}
+  td.feat a:hover{color:var(--contour);border-bottom-color:var(--contour)}
+  .ms{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+  .eff{font-family:var(--font-mono);font-weight:600;letter-spacing:.05em}
+  .eff.s{color:var(--forest)} .eff.m{color:var(--water)} .eff.l{color:var(--contour)}
+  .val{font-variant-numeric:tabular-nums}
+  .dots{letter-spacing:2px}
+
+  /* ---- feature docs ---- */
+  .doc{scroll-margin-top:20px;border:1px solid var(--line);border-radius:4px;background:var(--card);
+    box-shadow:var(--shadow);margin-bottom:22px;overflow:hidden}
+  .doc-head{padding:22px 26px 16px;border-bottom:1px solid var(--line-soft);
+    background:linear-gradient(180deg,color-mix(in srgb,var(--contour) 4%,transparent),transparent)}
+  .doc-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .doc-id{font-family:var(--font-mono);font-size:12px;color:var(--contour);font-weight:600;letter-spacing:.05em}
+  .doc h3{font-family:var(--font-display);font-size:23px;font-weight:600;margin:0;letter-spacing:-.01em;flex:1;min-width:200px}
+  .doc-goal{margin:2px 0 0;color:var(--muted);max-width:74ch}
+  .doc-body{padding:8px 26px 24px}
+  .field{padding:16px 0;border-bottom:1px solid var(--line-soft)}
+  .field:last-child{border-bottom:none;padding-bottom:2px}
+  .field-l{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 8px;font-weight:600}
+  .field p{margin:0 0 8px;max-width:76ch}
+  .field p:last-child{margin:0}
+  .field ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;max-width:80ch}
+  .field li{position:relative;padding-left:20px}
+  .field li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;
+    border:1.5px solid var(--contour);border-radius:50%}
+  .field.avoid li::before{border:none;width:auto;height:auto;top:0;left:0;content:"✕";color:var(--contour-2);
+    font-family:var(--font-mono);font-weight:700;font-size:12px}
+  code,.path{font-family:var(--font-mono);font-size:12.5px;background:var(--paper-2);
+    border:1px solid var(--line-soft);border-radius:3px;padding:1px 5px;white-space:nowrap}
+  .files{display:flex;flex-wrap:wrap;gap:6px}
+  .meta-row{display:flex;flex-wrap:wrap;gap:26px}
+  .meta-row .mi{display:flex;flex-direction:column;gap:3px}
+  .meta-row .mi .field-l{margin:0}
+  .meta-row .mi b{font-family:var(--font-mono);font-size:14px}
+  em{font-style:italic;color:var(--ink)}
+
+  footer{border-top:1px solid var(--line);padding:28px 0 44px;color:var(--muted);font-size:13.5px}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;align-items:baseline}
+  .mono-note{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em}
+  @media (prefers-reduced-motion:no-preference){.doc{transition:box-shadow .2s}}
+  :focus-visible{outline:2px solid var(--contour);outline-offset:2px}
+</style>
+
+<header>
+  <canvas id="contour" aria-hidden="true"></canvas>
+  <div class="wrap mast">
+    <p class="eyebrow">Grand Teton · WebGL Render · Design Docs · Rev 2026-07-17</p>
+    <h1>Remaining roadmap: proposed builds</h1>
+    <p class="lede">Design specs for every feature still open on the Teton render. Written after a
+      hard build session — so each one leads with <b>the failure mode it must avoid</b>, not just the
+      happy path. The core world is shipped and live; these are the deliberate next moves.</p>
+    <div class="legend">
+      <span class="k">Status</span>
+      <span class="chip proposed">Proposed</span>
+      <span class="chip blocked">Blocked</span>
+      <span class="chip partial">Partly shipped</span>
+      <span class="chip shipped">Shipped</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="principle">
+    <p class="eyebrow">The governing constraint</p>
+    <p><strong>Nothing that isn't world-anchored.</strong> Every effect must be fixed to world or object
+      space. Screen-space passes (a vignette, low-res bloom, SSAO, SSR) <em>crawl</em> as the camera
+      moves and read as artifacts sliding across the terrain — three separate features were pulled this
+      session for exactly this. If an effect can't be made stable in world space, it doesn't ship.</p>
+    <p><strong>Interactive features are verified in-sim, not in a screenshot.</strong> A held map you
+      raise, a bridge you drive across, a waterfall on streamed canyon relief — headless captures can't
+      confirm these. The loop that works: implement → drive/look in the sim → iterate → then commit.</p>
+  </div>
+
+  <section class="block">
+    <p class="h-eye">Summary</p>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr>
+          <th>Feature</th><th>Milestone</th><th>Status</th><th>Effort</th><th>Value</th><th>The one-line thesis</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="feat"><a href="#bridges">Bridges v2</a></td>
+            <td class="ms">M6 · roads</td>
+            <td><span class="chip shipped">Shipped</span></td>
+            <td class="eff l">L</td>
+            <td class="val"><span class="dots" style="color:var(--contour)">●●●</span></td>
+            <td>One authoritative drivable surface the road, deck, and physics all share.</td>
+          </tr>
+          <tr>
+            <td class="feat"><a href="#waterfalls">Waterfalls v2</a></td>
+            <td class="ms">M4 · location</td>
+            <td><span class="chip proposed">Proposed</span></td>
+            <td class="eff m">M</td>
+            <td class="val"><span class="dots" style="color:var(--contour)">●●</span><span style="color:var(--line)">●</span></td>
+            <td>Bare-rock-only placement + a clean white-water shader. Few and good.</td>
+          </tr>
+          <tr>
+            <td class="feat"><a href="#pbr">PBR / IBL</a></td>
+            <td class="ms">M7.4 · cinematic</td>
+            <td><span class="chip proposed">Proposed</span></td>
+            <td class="eff l">M–L</td>
+            <td class="val"><span class="dots" style="color:var(--contour)">●●●</span></td>
+            <td>One throttled sky env-map lights the car, snow sheen, and wet rock.</td>
+          </tr>
+          <tr>
+            <td class="feat"><a href="#water">Water upgrade</a></td>
+            <td class="ms">M7.5 · cinematic</td>
+            <td><span class="chip proposed">Proposed</span></td>
+            <td class="eff m">M</td>
+            <td class="val"><span class="dots" style="color:var(--contour)">●●</span><span style="color:var(--line)">●</span></td>
+            <td>Free per-vertex depth colour + a crisper mirror. Fixes a dead preset toggle.</td>
+          </tr>
+          <tr>
+            <td class="feat"><a href="#signs">Road signs</a></td>
+            <td class="ms">M4 · location</td>
+            <td><span class="chip proposed">Proposed</span></td>
+            <td class="eff m">M</td>
+            <td class="val"><span class="dots" style="color:var(--contour)">●●</span><span style="color:var(--line)">●</span></td>
+            <td>Derive brown NPS guide signs from names + the road graph.</td>
+          </tr>
+          <tr>
+            <td class="feat"><a href="#shields">Route shields</a></td>
+            <td class="ms">pipeline</td>
+            <td><span class="chip blocked">Blocked</span></td>
+            <td class="eff s">S</td>
+            <td class="val"><span class="dots" style="color:var(--contour)">●</span><span style="color:var(--line)">●●</span></td>
+            <td>US-89/191 shields — needs the OSM <code>ref</code> re-baked into the tiles.</td>
+          </tr>
+          <tr>
+            <td class="feat"><a href="#ao">Contact AO / DoF</a></td>
+            <td class="ms">M7.1 · cinematic</td>
+            <td><span class="chip partial">Partly shipped</span></td>
+            <td class="eff s">S</td>
+            <td class="val"><span class="dots" style="color:var(--contour)">●</span><span style="color:var(--line)">●●</span></td>
+            <td>Baked AO already in; the screen-space remainder is deliberately declined.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mono-note" style="margin-top:12px;color:var(--muted)">Effort: S ≈ hours · M ≈ a focused day · L ≈ multi-day architectural. Value: contour dots = relative payoff.</p>
+  </section>
+
+  <!-- ============ BRIDGES ============ -->
+  <article class="doc" id="bridges">
+    <div class="doc-head">
+      <div class="doc-top">
+        <span class="doc-id">01 · M6</span>
+        <h3>Bridges — unified drivable surface</h3>
+        <span class="chip shipped">Shipped</span>
+      </div>
+      <p class="doc-goal">Roads and trails cross water on real bridge decks that the car and the walking
+        player ride across — with the road, the deck, and the physics all agreeing on one height.</p>
+    </div>
+    <div class="doc-body">
+      <div class="field">
+        <p class="field-l">Why v1 failed</p>
+        <p>The road ribbon (a graded visual surface), the bridge deck (separate geometry), and the car
+          physics (raw terrain height) were <em>three surfaces that never agreed</em>. The deck rendered
+          at the wrong level and oversized, the road floated separately above it, and the car dropped
+          through to the lakebed — then flipped 90° at the deck edge where two wheels hung over the drop.</p>
+      </div>
+      <div class="field">
+        <p class="field-l">Approach — one surface, read everywhere</p>
+        <p>The whole feature collapses to a single idea: the road system publishes one authoritative
+          query, <code>drivableSurfaceAt(x,z) → y | null</code>. RoadRibbon already computes a smoothed
+          longitudinal grade profile per way; expose it as a spatial-hashed, interpolatable surface.
+          BridgeBuilder detects the crossings and builds decks <em>pinned to that same profile</em> — so
+          the deck top <em>is</em> the road running surface, never a separate datum. Then both the visual
+          meshes and the physics (<code>sampleGround</code> for the four wheels + the walking player) read
+          this one query. If there is only one surface, the three can't disagree.</p>
+      </div>
+      <div class="field">
+        <p class="field-l">Key decisions</p>
+        <ul>
+          <li>Deck top ≡ graded road surface. No independent deck elevation — the v1 mislevel is structurally impossible.</li>
+          <li>Detection: a dry-bounded over-water run ≤ 240&nbsp;m, plus an opposite-banks test to reject a road that merely clips a pond edge.</li>
+          <li>Deck width = carriageway + parapet only (v1's slab was far too wide).</li>
+          <li>Body tilt clamped to ±24° — <strong>already shipped</strong> — so any sharp edge leans the car hard but never flips it.</li>
+        </ul>
+      </div>
+      <div class="field avoid">
+        <p class="field-l">Failure modes to avoid</p>
+        <ul>
+          <li>A separate deck datum → the road and deck read at different levels.</li>
+          <li>Physics sampling raw terrain instead of the road surface → the car falls through.</li>
+          <li>Unclamped roll at the deck edge → the 90° flip (fixed).</li>
+          <li>An oversized slab at water level instead of a road-width deck.</li>
+        </ul>
+      </div>
+      <div class="field">
+        <p class="field-l">Files</p>
+        <div class="files"><span class="path">terrain/src/BridgeBuilder.js (new)</span>
+          <span class="path">RoadRibbon.js — publish surface query</span>
+          <span class="path">app/40-terrain.js — sampleGround folds it in</span>
+          <span class="path">app/82-drive.js — deck-as-road driving</span></div>
+      </div>
+      <div class="field">
+        <div class="meta-row">
+          <div class="mi"><span class="field-l">Effort</span><b class="eff l">L — architectural</b></div>
+          <div class="mi"><span class="field-l">Verified in sim</span><b>Shipped: Moose/Snake River crossings and Jenny Lake and Jackson Lake approaches, walked and driven in both directions; deck meets road at both banks and at deck centre.</b></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ WATERFALLS ============ -->
+  <article class="doc" id="waterfalls">
+    <div class="doc-head">
+      <div class="doc-top">
+        <span class="doc-id">02 · M4</span>
+        <h3>Waterfalls — bare rock, clean water</h3>
+        <span class="chip proposed">Proposed</span>
+      </div>
+      <p class="doc-goal">Animated cascades at the park's real named falls — Hidden Falls the hero —
+        reading as clean falling water on genuine cliff faces.</p>
+    </div>
+    <div class="doc-body">
+      <div class="field">
+        <p class="field-l">Why v1 failed</p>
+        <p>A 23° steepness gate let falls land on <em>forested hillsides</em>, so the water ribbons draped
+          straight through the trees; and the procedural shader mixed hue and foam noise into a garish
+          iridescent smear. It looked like broken glass, not a waterfall.</p>
+      </div>
+      <div class="field">
+        <p class="field-l">Approach — gate hard, prefer few</p>
+        <p>Place a cascade only where the traced fall line is <em>both</em> genuinely steep (slope &gt; ~0.8,
+          i.e. &gt; 38°) <em>and</em> bare rock — tested against <code>ForestMask.probAt</code>. GNIS points
+          that don't sit on a clean face are <em>skipped, not forced</em>: two convincing falls beat ten
+          bad ones. The shader is desaturated white/blue, low-frequency vertical streaks scrolling in
+          world/UV space (never screen space), with tasteful alpha so it doesn't bleed over background
+          trees, plus a soft base mist puff.</p>
+      </div>
+      <div class="field avoid">
+        <p class="field-l">Failure modes to avoid</p>
+        <ul>
+          <li>A loose slope gate → water on forest or flat ground.</li>
+          <li>Hue / high-frequency foam terms → the iridescent look.</li>
+          <li>Screen-space scroll → the sheet crawls as you orbit.</li>
+        </ul>
+      </div>
+      <div class="field">
+        <p class="field-l">Files</p>
+        <div class="files"><span class="path">terrain/src/WaterfallBuilder.js (new, loads forestmask)</span>
+          <span class="path">app/92-boot.js — wiring</span></div>
+      </div>
+      <div class="field">
+        <div class="meta-row">
+          <div class="mi"><span class="field-l">Effort</span><b class="eff m">M</b></div>
+          <div class="mi"><span class="field-l">Verify in-sim</span><b>Fly Jenny Lake → Cascade Canyon to Hidden Falls; clean water on the cliff, none on flat or forest.</b></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ PBR / IBL ============ -->
+  <article class="doc" id="pbr">
+    <div class="doc-head">
+      <div class="doc-top">
+        <span class="doc-id">03 · M7.4</span>
+        <h3>PBR &amp; image-based lighting</h3>
+        <span class="chip proposed">Proposed</span>
+      </div>
+      <p class="doc-goal">Physically-based material response where it actually reads: the car body and
+        glass, snow sheen, and wet granite — without touching the draped-NAIP terrain or the water.</p>
+    </div>
+    <div class="doc-body">
+      <div class="field">
+        <p class="field-l">Approach — one sky env-map, routed two ways</p>
+        <p>Capture a single sky-only cubemap at world origin, re-baked <em>only</em> when the time of day
+          changes materially — so it's world-anchored and, at static time, bakes exactly once. Route it
+          two ways: a PMREM feeds <code>scene.environment</code>, which in r128 auto-lights only
+          Standard/Physical materials — i.e. the car — for free selectivity, restoring its metalness and
+          glass reflections. The raw cube feeds the custom terrain shader a Fresnel sky reflection on
+          steep bare "wet" granite. Snow gets an analytic sun-specular sheen that needs no env-map at all.
+          The terrain keeps its NAIP drape; the water keeps its planar mirror.</p>
+      </div>
+      <div class="field">
+        <p class="field-l">Key decisions</p>
+        <ul>
+          <li>Throttled bake, not per-frame — static time = one bake, no pop; capture linear radiance so the car tone-maps exactly once.</li>
+          <li>Selectivity is free: only Standard materials consume <code>scene.environment</code>; Lambert terrain/veg/buildings ignore it.</li>
+          <li>Ship in phases: car IBL first (highest, lowest risk) → snow specular → wet-rock reflection.</li>
+        </ul>
+      </div>
+      <div class="field avoid">
+        <p class="field-l">Failure modes to avoid</p>
+        <ul>
+          <li>Baking the env every frame → cost and a visible pop; and distant snow specular that shimmers — roughen it with distance.</li>
+          <li>Double tone-mapping the car (verified safe: it maps once via the fog-fragment hook).</li>
+        </ul>
+      </div>
+      <div class="field">
+        <p class="field-l">Files</p>
+        <div class="files"><span class="path">app/30-sun-sky.js — ENV_UNIFORMS + capture</span>
+          <span class="path">app/92-boot.js — throttled bake</span>
+          <span class="path">app/82-drive.js — car metalness</span>
+          <span class="path">terrain-shaders.js + TerrainStreamer.js — env plumbing</span></div>
+      </div>
+      <div class="field">
+        <div class="meta-row">
+          <div class="mi"><span class="field-l">Effort</span><b class="eff l">M–L · phased</b></div>
+          <div class="mi"><span class="field-l">Verify in-sim</span><b>Car sky-sheen + glass reflection; snow sheen; wet granite; env goes dark at night; water unchanged.</b></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ WATER ============ -->
+  <article class="doc" id="water">
+    <div class="doc-head">
+      <div class="doc-top">
+        <span class="doc-id">04 · M7.5</span>
+        <h3>Water — depth colour &amp; crisper reflections</h3>
+        <span class="chip proposed">Proposed</span>
+      </div>
+      <p class="doc-goal">Shallow shore reads green, deep water reads blue; the reflected range is sharper;
+        and a dormant quality-toggle bug gets fixed along the way.</p>
+    </div>
+    <div class="doc-body">
+      <div class="field">
+        <p class="field-l">Approach — depth is already in the builder</p>
+        <p>Water-column depth is <em>free</em>: the mesh builder already samples both the surface and the
+          bed at every node, so carry <code>surface − bed</code> as a per-vertex attribute and mix a
+          shallow green-teal into a deep blue across it in the fragment. Because the gradient lives on the
+          geometry it is perfectly world-anchored — the opposite of a screen-space effect. For
+          reflections, size the planar RT from the drawing buffer (capped) and pull the oblique clip plane
+          ~0.5&nbsp;m below the surface to kill the razor-clipped near-black waterline slab. SSR is
+          declined — it's screen-space and would crawl.</p>
+      </div>
+      <div class="field">
+        <p class="field-l">Quality preset reflection contract</p>
+        <p>Boot publishes its one lexical water instance as <code>window.GT_waterBuilder</code> and invokes
+          the quality applicator when it exists. This applies a persisted preset before the asynchronous
+          water bake finishes while retaining the settings module's deferred pass. Ultra and High enable
+          reflections; Balanced and Low disable them, so <code>WaterBuilder._reflectPass</code> sets
+          <code>uReflAmt</code> to zero and avoids reflector work.</p>
+      </div>
+      <div class="field avoid">
+        <p class="field-l">Failure modes to avoid</p>
+        <ul>
+          <li>SSR (screen-space) — declined outright.</li>
+          <li>A bigger reflection RT with the toggle still dead → weak GPUs can't escape the cost. Fix the wiring first.</li>
+        </ul>
+      </div>
+      <div class="field">
+        <p class="field-l">Files</p>
+        <div class="files"><span class="path">terrain/src/WaterBuilder.js</span>
+          <span class="path">app/92-boot.js + app/96-settings.js — published water settings hook</span></div>
+      </div>
+      <div class="field">
+        <p class="field-l">Manual regression checklist — quality presets</p>
+        <ol>
+          <li>Stand near a reflective lake and change presets: select Balanced or Low, then Ultra or High.</li>
+          <li>Verify the mirror turns off and on immediately with each change.</li>
+          <li>Reload with the selected preset persisted and verify the mirror remains correct.</li>
+        </ol>
+      </div>
+      <div class="field">
+        <div class="meta-row">
+          <div class="mi"><span class="field-l">Effort</span><b class="eff m">M</b></div>
+          <div class="mi"><span class="field-l">Verify in-sim</span><b>Jenny/Jackson read green at the shore, blue at centre; sharper mirror; night look unchanged.</b></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ SIGNS ============ -->
+  <article class="doc" id="signs">
+    <div class="doc-head">
+      <div class="doc-top">
+        <span class="doc-id">05 · M4</span>
+        <h3>Road signs — derived NPS signage</h3>
+        <span class="chip proposed">Proposed</span>
+      </div>
+      <p class="doc-goal">Brown park guide signs, road-name plaques, and stop signs — with authentic
+        content derived from data already in the repo, no new dataset.</p>
+    </div>
+    <div class="doc-body">
+      <div class="field">
+        <p class="field-l">Approach — derive, don't source</p>
+        <p>There is no clean dataset of every physical sign, so derive them. Build a road graph from
+          <code>roads.json</code>; at each paved junction, generate a brown guide sign ("Jenny Lake ▸ 3&nbsp;mi")
+          from the nearest reachable named place/lake in <code>labels.json</code> plus distance and
+          bearing; drop a name plaque at the mouth of each named road; place a stop sign at each detected
+          intersection. Each is world-anchored static geometry — a post plus a canvas-text panel built
+          the same way as the tree billboards — facing the oncoming road direction, seated on
+          <code>terrain.heightAt</code>.</p>
+      </div>
+      <div class="field avoid">
+        <p class="field-l">Failure modes to avoid</p>
+        <ul>
+          <li><code>THREE.Sprite</code> billboards → they'd rotate to face the camera and read as crawling. Use fixed yaw-rotated quads.</li>
+          <li>Spamming a sign per segment. Cap to junctions and road mouths.</li>
+        </ul>
+      </div>
+      <div class="field">
+        <p class="field-l">Files</p>
+        <div class="files"><span class="path">terrain/src/SignBuilder.js (new)</span>
+          <span class="path">app/92-boot.js — wiring</span></div>
+      </div>
+      <div class="field">
+        <div class="meta-row">
+          <div class="mi"><span class="field-l">Effort</span><b class="eff m">M</b></div>
+          <div class="mi"><span class="field-l">Verify in-sim</span><b>A junction near Moose/Jenny — signs point the right way, sane count, readable at driving distance.</b></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ SHIELDS ============ -->
+  <article class="doc" id="shields">
+    <div class="doc-head">
+      <div class="doc-top">
+        <span class="doc-id">06 · pipeline</span>
+        <h3>Route shields</h3>
+        <span class="chip blocked">Blocked on a rebake</span>
+      </div>
+      <p class="doc-goal">US-26/89/191 and WY-390 shields on the highway signs and at route junctions.</p>
+    </div>
+    <div class="doc-body">
+      <div class="field">
+        <p class="field-l">Why it's blocked</p>
+        <p>The OSM <code>ref</code> tag (the route number) is read by <code>build_roads.py</code> but not
+          persisted into <code>roads.json</code> — no feature carries it today. So shields need a small
+          pipeline change to surface <code>ref</code>, a roads rebake, and an R2 re-upload before the
+          sign builder can draw them. Pure follow-on to <a href="#signs">Road signs</a>.</p>
+      </div>
+      <div class="field">
+        <p class="field-l">Files</p>
+        <div class="files"><span class="path">pipeline/roads/build_roads.py — persist ref</span>
+          <span class="path">roads.json rebake + R2 re-upload</span>
+          <span class="path">SignBuilder.js — shield painter</span></div>
+      </div>
+      <div class="field">
+        <div class="meta-row">
+          <div class="mi"><span class="field-l">Effort</span><b class="eff s">S · pipeline</b></div>
+          <div class="mi"><span class="field-l">Depends on</span><b>Road signs (05)</b></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ AO / DOF ============ -->
+  <article class="doc" id="ao">
+    <div class="doc-head">
+      <div class="doc-top">
+        <span class="doc-id">07 · M7.1</span>
+        <h3>Contact AO &amp; depth of field</h3>
+        <span class="chip partial">Partly shipped</span>
+      </div>
+      <p class="doc-goal">Grounding contact shadows and optional lens depth-of-field — closing out the
+        post-processing milestone.</p>
+    </div>
+    <div class="doc-body">
+      <div class="field">
+        <p class="field-l">What shipped, and what's deliberately declined</p>
+        <p>Baked, world-anchored contact AO is <strong>already in</strong>: a vertical darkening gradient
+          on building bases and a base-cavity on the tree cards, both baked into geometry — zero runtime
+          cost, MSAA-safe, and impossible to crawl. Screen-space <em>SSAO</em> was declined on purpose: it
+          needs a depth prepass (the vertex-displaced terrain can't feed a MeshDepth override), sacrifices
+          hardware MSAA, and — without a TAA system this pipeline doesn't have — crawls under motion, the
+          exact artifact class this whole project rejects. Depth-of-field is in the same bucket: only
+          worth it if it can be made world-stable, otherwise skipped.</p>
+      </div>
+      <div class="field">
+        <div class="meta-row">
+          <div class="mi"><span class="field-l">Effort</span><b class="eff s">S (remainder)</b></div>
+          <div class="mi"><span class="field-l">Recommendation</span><b>Consider M7.1 effectively done; do not chase screen-space SSAO/DoF.</b></div>
+        </div>
+      </div>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>Grand Teton render — remaining-roadmap design docs. Grounded in the shipped codebase and this session's build lessons.</span>
+    <span class="mono-note">7 features · 5 proposed · 1 blocked · 1 partly shipped</span>
+  </div>
+</footer>
+
+<script>
+  // Faint topographic contour backdrop for the masthead — canvas, not hand-authored SVG paths.
+  (function(){
+    const cv = document.getElementById('contour');
+    if(!cv) return;
+    const host = cv.parentElement;
+    function draw(){
+      const dpr = Math.min(window.devicePixelRatio||1, 2);
+      const w = host.clientWidth, h = host.clientHeight;
+      cv.width = w*dpr; cv.height = h*dpr;
+      const g = cv.getContext('2d'); g.scale(dpr,dpr);
+      g.clearRect(0,0,w,h);
+      const dark = matchMedia('(prefers-color-scheme: dark)').matches
+        && document.documentElement.getAttribute('data-theme') !== 'light'
+        || document.documentElement.getAttribute('data-theme') === 'dark';
+      g.strokeStyle = dark ? 'rgba(217,138,78,0.10)' : 'rgba(168,90,36,0.11)';
+      g.lineWidth = 1;
+      // concentric, gently perturbed contour rings around an off-canvas "summit" — reads as a topo map
+      const cx = w*0.82, cy = h*0.5, rings = 22;
+      for(let r=1;r<=rings;r++){
+        const rad = r*26 + 6;
+        g.beginPath();
+        for(let a=0;a<=Math.PI*2+0.05;a+=0.09){
+          const wob = Math.sin(a*3 + r*0.6)*7 + Math.sin(a*7 - r*0.4)*3;
+          const x = cx + Math.cos(a)*(rad+wob)*1.15;
+          const y = cy + Math.sin(a)*(rad+wob)*0.62;
+          a===0 ? g.moveTo(x,y) : g.lineTo(x,y);
+        }
+        g.stroke();
+      }
+    }
+    draw();
+    let t; addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(draw,120)});
+    const mo = new MutationObserver(draw);
+    mo.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+  })();
+</script>
+</body>
+</html>

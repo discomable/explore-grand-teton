@@ -1,0 +1,18 @@
+[
+  {
+    "name": "dornans-water-regression",
+    "pos": [1036.5, 96.4, 8583],
+    "yaw": -0.195,
+    "pitch": -0.057,
+    "time": 0.42,
+    "_": "Aerial regression view supplied from shot-159: the Snake must fill its terrain-derived channel."
+  },
+  {
+    "name": "taggart-water-regression",
+    "pos": [-2230, 207, 3458],
+    "yaw": 1.571,
+    "pitch": 0.05,
+    "time": 0.42,
+    "_": "Aerial Taggart Lake regression view: substantial lakes must not use the small-pond vector gate."
+  }
+]

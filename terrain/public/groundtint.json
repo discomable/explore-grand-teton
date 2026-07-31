@@ -1,0 +1,18 @@
+{
+ "crs": "EPSG:32612",
+ "res": 20.0,
+ "width": 1416,
+ "height": 2059,
+ "originE": 508020.8068557632,
+ "originN": 4863096.167973563,
+ "url": "groundtint.png",
+ "world": {
+  "centerEasting": 522180.8068557632,
+  "centerNorthing": 4842506.167973563,
+  "datum": 1897.3
+ },
+ "encode": {
+  "rgb": "ground colour 0..255"
+ },
+ "source": "NAIP z5 (5.0 m) open-ground mean (tree+water excluded), downsampled to 20 m, sat x1.12"
+}

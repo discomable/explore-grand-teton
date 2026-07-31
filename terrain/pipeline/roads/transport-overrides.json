@@ -1,0 +1,4 @@
+{
+  "$schema": "./transport-overrides.schema.json",
+  "_comment": "Authored corrections keyed by stable osm-way-N IDs. Supported fields: classification, width, alignment, bridgeType, exclude."
+}

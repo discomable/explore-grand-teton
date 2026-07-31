@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "name": "T. A. Moulton Barn",
+  "location": {
+    "latitude": 43.66073,
+    "longitude": -110.66462,
+    "accuracy": "approximate LiDAR discovery seed; runtime placement uses the named OSM footprint",
+    "search_radius_m": 80.0
+  },
+  "crs": {
+    "input": "EPSG:4326",
+    "processing": "EPSG:26912",
+    "runtime": "EPSG:32612"
+  },
+  "dimensions": {
+    "length_m": {"value": 18.0, "status": "estimate", "uncertainty_m": 4.0},
+    "width_m": {"value": 10.0, "status": "estimate", "uncertainty_m": 3.0},
+    "eave_height_m": {"value": 5.0, "status": "estimate", "uncertainty_m": 1.5},
+    "ridge_height_m": {"value": 9.0, "status": "estimate", "uncertainty_m": 2.0},
+    "orientation_deg_true_north": {"value": 5.0, "status": "rough_estimate", "uncertainty_deg": 20.0},
+    "roof_pitch_deg": {"value": 45.0, "status": "visual_estimate", "uncertainty_deg": 12.0}
+  },
+  "sources": [
+    {
+      "title": "USGS 3DEP: Grand Teton National Park / National Elk Refuge, Wyoming, 2014 lidar",
+      "type": "lidar",
+      "url": "https://apps.nationalmap.gov/downloader/"
+    },
+    {
+      "title": "National Park Service: Mormon Row Historic District",
+      "type": "historical_and_visual_reference",
+      "url": "https://www.nps.gov/places/000/mormon-row-historic-district.htm"
+    },
+    {
+      "title": "OpenStreetMap named building footprint",
+      "type": "runtime_placement",
+      "url": "https://www.openstreetmap.org/copyright"
+    }
+  ]
+}
+

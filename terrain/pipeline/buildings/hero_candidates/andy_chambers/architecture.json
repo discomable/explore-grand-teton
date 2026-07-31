@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "candidate_id": "andy_chambers",
+  "structures": [
+    {
+      "id": "cabin",
+      "historic_id": "Residence #1312",
+      "name": "Andy Chambers log cabin",
+      "date": "circa 1916",
+      "contribution": "contributing_building",
+      "source_confidence": "high",
+      "geometry_status": "measured_drawings_required",
+      "form": {
+        "storeys": 1,
+        "plan": "Square overall plan formed by a central side-gable log component and full-length shed-roof porches on the west and east elevations.",
+        "foundation": "Stone piers and concrete wall.",
+        "walls": "Log bearing walls with square-notched corners and cement daubing.",
+        "roof": "Wood shingles on the central side-gable roof, both shed roofs and gable ends.",
+        "front": "West elevation; open shed porch with a four-course log quarter-wall and log columns."
+      },
+      "recognition_cues": [
+        "Full-length west and east shed porches",
+        "Open west porch and enclosed/screened east porch",
+        "Five-plank front door north of centre and one window south of centre",
+        "Centered ground-floor and small attic windows in both gable ends",
+        "Square-notched logs with pale cement daubing"
+      ],
+      "lod_policy": {
+        "lod0": "Retain porch columns, quarter-wall, asymmetric west openings, rear screening rhythm and log/chinking relief.",
+        "lod1": "Retain both shed porches, primary door/window masses and side-gable profile.",
+        "lod2": "Retain central gable plus both full-length shed silhouettes."
+      },
+      "projection_elevations": [
+        "west",
+        "east"
+      ],
+      "measurement_policy": "Read dimensions and pitch from the HABS sheets; do not estimate them from perspective photographs."
+    },
+    {
+      "id": "stable_barn",
+      "historic_id": "Barn #1313",
+      "name": "Andy Chambers stable/barn",
+      "date": "circa 1912-1940",
+      "contribution": "contributing_building",
+      "source_confidence": "high",
+      "geometry_status": "site_map_and_lidar_measurement_required",
+      "historical_relationship": "The original 1912 log stable is understood to survive in the evolved central barn component.",
+      "form": {
+        "storeys": 2,
+        "plan": "Central log gambrel component with a later northward gambrel extension and one full west-elevation shed-roof frame addition.",
+        "foundation": "Concrete wall.",
+        "walls": "Square-notched logs in the southern core, axe-cut steeple notches in the northern addition, half-pole chinking, and eleven-inch board-and-batten on gable ends and west shed.",
+        "roof": "Gambrel roof plus a single west shed, all clad in galvanized metal panels over vertical planks.",
+        "front": "South elevation with hay hood, centered gambrel hay door, two small stall openings and a large shed sliding door."
+      },
+      "recognition_cues": [
+        "Gambrel central mass with only one west shed",
+        "Slight eave break and settlement where the northern addition meets the original component",
+        "Large projecting south hay hood",
+        "Log lower walls and board-and-batten gable ends",
+        "Galvanized metal roof",
+        "Four shuttered openings beneath the west shed eave"
+      ],
+      "lod_policy": {
+        "lod0": "Retain hay hood, single west shed, eave break, principal doors, shutters, mixed notch zones and log/chinking relief.",
+        "lod1": "Retain gambrel, west shed, hay hood and broad door masses.",
+        "lod2": "Retain the asymmetric gambrel-plus-one-shed silhouette; never substitute the two-shed T. A. or John Moulton form."
+      },
+      "projection_elevations": [
+        "south",
+        "west"
+      ],
+      "measurement_policy": "Use registered plan mapping and building-class LiDAR for envelope dimensions, then documentary descriptions for architectural decomposition."
+    },
+    {
+      "id": "windmill",
+      "historic_id": "association_unresolved",
+      "name": "Chambers 1946 generator windmill",
+      "date": "1946",
+      "contribution": "conditional_contributing_structure",
+      "source_confidence": "medium",
+      "geometry_status": "quarantined_pending_identity_and_transform",
+      "form": {
+        "type": "Open metal lattice tower with rotor and tail vane.",
+        "material": "Aged galvanized steel.",
+        "function": "Powered a private electrical generator before Rural Electrification Administration service."
+      },
+      "recognition_cues": [
+        "Open lattice tower",
+        "Readable rotor disc and tail vane",
+        "Slender silhouette visible above the low agricultural cluster"
+      ],
+      "lod_policy": {
+        "lod0": "Use efficient lattice geometry, a simplified rotor and a tail vane; no opaque projected tower.",
+        "lod1": "Reduce lattice diagonals while retaining tower taper, rotor and vane.",
+        "lod2": "Use a minimal open tower silhouette plus crossed rotor card or low-poly rotor."
+      },
+      "projection_elevations": [],
+      "measurement_policy": "Derive tower base, height and rotor diameter from registered mapping and LiDAR/photographic scale only after identity is resolved.",
+      "release_gate": "Prove the windmill belongs in the Andy candidate transform set and is not the adjacent Roy Chambers #RCST-1 structure."
+    }
+  ],
+  "cluster_rules": {
+    "coordinate_space": "Structure transforms are local to a surveyed EPSG:32612 cluster anchor.",
+    "grounding": "Sample terrain independently beneath every structure; preserve visible foundation type and do not flatten the entire cluster.",
+    "setting": "Keep Mormon Row Road, Ditch Creek, service road, corrals, fence divisions and cleared pasture legible.",
+    "vegetation": "Use per-structure clearance footprints with a small irregular margin; do not create one broad cluster exclusion zone.",
+    "materials": "Share calibrated material families and packed atlases, but keep façade projections structure-specific."
+  },
+  "known_uncertainties": [
+    "Exact building dimensions and relative transforms have not yet been transcribed from measured drawings or derived from LiDAR.",
+    "The stable-to-barn construction chronology is documented, but individual phase boundaries require drawing review.",
+    "The windmill identity and ownership across the Andy/Roy Chambers site boundary remain unresolved.",
+    "Current preservation condition must be checked against recent NPS imagery before modeling settled or missing fabric."
+  ]
+}

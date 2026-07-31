@@ -1,0 +1,83 @@
+name: Deploy to Cloudflare Pages
+
+# Push to main  -> PRODUCTION deploy   (https://grand-teton.pages.dev)
+# Pull request  -> PREVIEW deploy      (https://<branch>.grand-teton.pages.dev)
+# Both build the trimmed static bundle with build-web.sh and publish dist/ to the
+# `grand-teton` Pages project. Previews let you review a change live before merging.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:        # allow manual runs from the Actions tab
+
+concurrency:                # one deploy per branch; newer push cancels the older
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Fork PRs are not given repository secrets, so this job could only ever fail for an
+    # outside contributor. Skip it for them — test.yml provides their green check — and
+    # keep previews for same-repo branches.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      pull-requests: write   # to post the preview URL as a PR comment
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify code and asset provenance
+        run: npm run test:all && npm run validate:assets
+
+      - name: Build static bundle
+        run: bash build-web.sh      # -> dist/ and host metadata
+
+      # Production on main; otherwise a preview keyed to the source branch.
+      # Cloudflare slugifies the branch, so we mirror that for the URL we report.
+      - name: Resolve deploy target
+        id: target
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "branch=main" >> "$GITHUB_OUTPUT"
+            echo "env=production" >> "$GITHUB_OUTPUT"
+            echo "url=https://grand-teton.pages.dev" >> "$GITHUB_OUTPUT"
+          else
+            raw="${{ github.head_ref || github.ref_name }}"
+            slug=$(echo "$raw" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g' | cut -c1-28)
+            echo "branch=$slug" >> "$GITHUB_OUTPUT"
+            echo "env=preview" >> "$GITHUB_OUTPUT"
+            echo "url=https://$slug.grand-teton.pages.dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name grand-teton --branch ${{ steps.target.outputs.branch }}
+
+      - name: Comment preview URL on the PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = "${{ steps.target.outputs.url }}";
+            const body = `🌄 **Preview deployed:** ${url}\n\n_Updates on every push to this PR. Merging to \`main\` publishes to production._`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
+            });
+            const mine = comments.find(c => c.user.type === "Bot" && c.body.includes("Preview deployed"));
+            if (mine) {
+              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: mine.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body });
+            }

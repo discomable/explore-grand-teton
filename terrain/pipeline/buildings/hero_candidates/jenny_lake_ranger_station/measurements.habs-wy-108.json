@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "candidate_id": "jenny_lake_ranger_station",
+  "structure_id": "ranger_station",
+  "units": "metres",
+  "source_ref": "loc_habs_wy_108",
+  "source_sheets": [
+    "HABS WY-108 sheet 1 of 4: site, area, and location plans",
+    "HABS WY-108 sheet 2 of 4: floor plan and north, south, east, and west elevations",
+    "HABS WY-108 sheet 3 of 4: section A-A and north elevation",
+    "HABS WY-108 sheet 4 of 4: section B-B and sign support detail"
+  ],
+  "identity": {
+    "habs_name": "Lee Mangus Cabin",
+    "current_name": "Jenny Lake Ranger Station",
+    "historic_use": "Jenny Lake Museum and Visitor Center",
+    "excluded_lookalikes": [
+      "Jenny Lake Visitor Center / Harrison Crandall Studio",
+      "J. Manges Cabin / James or Jimmy Manges Cabin near Cottonwood Creek"
+    ]
+  },
+  "documented": {
+    "wall_envelope": {
+      "length": 11.2014,
+      "width": 6.2484,
+      "source_imperial": "36 feet 9 inches by 20 feet 6 inches",
+      "sheet": 2
+    },
+    "vertical": {
+      "ridge_above_floor": 5.4864,
+      "ceiling_line_above_floor": 2.3622,
+      "source_imperial": "peak 18 feet 0 inches; ceiling line 7 feet 9 inches",
+      "sheet": 3
+    },
+    "materials": {
+      "foundation": "stone",
+      "walls": "logs with saddle joints",
+      "roof": "wood shingles",
+      "sheet": 2
+    },
+    "roof": {
+      "topology": "single primary gable with ridge along the long building axis",
+      "pitch_deg_derived": 45.0,
+      "pitch_derivation": "Half of the documented 20-foot-6-inch width equals the difference between the documented 18-foot peak and 7-foot-9-inch ceiling line. Confirm eave/ceiling registration during clay review.",
+      "overhang": 0.45
+    },
+    "porch": {
+      "elevation": "west",
+      "topology": "supported shed canopy over a timber deck and central steps",
+      "depth_estimate": 1.2,
+      "width_estimate": 5.2,
+      "estimate_policy": "Provisional values traced from the scaled sheet-2 plan; retain explicit estimate status until full-resolution vector measurement."
+    },
+    "addition": {
+      "elevation": "east",
+      "year": 1937,
+      "description": "Room added at the east end, probably by Civilian Conservation Corps labor.",
+      "geometry_policy": "Preserve the documented internal wall/joint and exterior opening arrangement without inventing a separate roof mass."
+    },
+    "openings": {
+      "west": [
+        {
+          "type": "multi-light window",
+          "position": "left of entrance"
+        },
+        {
+          "type": "vertical-plank entrance door",
+          "position": "right of window beneath supported porch"
+        }
+      ],
+      "east": [
+        {
+          "type": "multi-light window",
+          "position": "left"
+        },
+        {
+          "type": "vertical-plank door",
+          "position": "right"
+        },
+        {
+          "type": "small gable window",
+          "position": "centered high in gable"
+        }
+      ],
+      "north": [
+        {
+          "type": "multi-light window",
+          "count": 3,
+          "position": "distributed along long wall"
+        }
+      ],
+      "south": [
+        {
+          "type": "multi-light window",
+          "count": 2,
+          "position": "asymmetric along long wall"
+        }
+      ],
+      "registration_policy": "The deterministic draft uses visually traced centers. Final production geometry must replace them with full-resolution sheet measurements."
+    },
+    "west_gable": {
+      "feature": "diagonal-log king-post treatment above the porch",
+      "signage_policy": "Omit lettering and sign surface until a target-period, rights-cleared same-building reference establishes it."
+    }
+  },
+  "runtime_placement": {
+    "source_file": "terrain/public/buildings.json",
+    "selector": {
+      "name": "Jenny Lake Ranger Station"
+    },
+    "source_sha256": "3620214757f3c3bbf7f71570248111fab455c01fb62eee458d31e3be57b70935",
+    "footprint_area_m2": 90.54,
+    "centroid_runtime_local": [
+      178.624851,
+      -1884.533201
+    ],
+    "source_height_m": 6.9,
+    "height_policy": "Use the HABS 5.4864-metre ridge above floor for geometry; retain the 6.9-metre field only as source-dataset provenance."
+  },
+  "uncertainty": {
+    "high_confidence": [
+      "identity",
+      "wall envelope",
+      "ridge height",
+      "primary roof topology",
+      "material families",
+      "opening counts and elevation assignment",
+      "west porch topology",
+      "1937 east addition"
+    ],
+    "provisional": [
+      "porch dimensions",
+      "exact opening centers and sizes",
+      "floor-to-ground offset",
+      "current surface colour",
+      "current repair and signage condition"
+    ]
+  }
+}

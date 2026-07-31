@@ -1,0 +1,22 @@
+{
+  "originX": -12269.3,
+  "originZ": -20790.0,
+  "res": 5.1,
+  "width": 5222,
+  "height": 8153,
+  "distMax": 40.0,
+  "encoding": {
+    "R": "distance to nearest road centerline, 0..255 maps 0..40 m (clamped)",
+    "G": "class of nearest road: 0 none (beyond distMax), 64 track, 128 gravel, 192 park_paved, 255 highway",
+    "B": "unused (0)"
+  },
+  "mapping": "worldX = originX + (px + 0.5) * res; worldZ = originZ + (py + 0.5) * res; u = (worldX - originX) / (width * res); v = (worldZ - originZ) / (height * res)",
+  "classes": [
+    "track",
+    "gravel",
+    "park_paved",
+    "highway"
+  ],
+  "source": "OpenStreetMap via Overpass (2026-07-10)",
+  "attribution": "(c) OpenStreetMap contributors, ODbL 1.0"
+}

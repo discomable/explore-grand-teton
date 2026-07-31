@@ -1,0 +1,8 @@
+{
+ "urlA": "horizon_a.png",
+ "urlB": "horizon_b.png",
+ "maxAngleDeg": 60.0,
+ "width": 708,
+ "height": 1029,
+ "res": 40.0
+}

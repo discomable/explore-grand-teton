@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grand-teton.local/schemas/hero-building-validation-report-v1.json",
+  "title": "Hero building draft validation report",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "candidateId",
+    "sources",
+    "placement",
+    "lods",
+    "textures",
+    "captures",
+    "performance"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "candidateId": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$"},
+    "sources": {
+      "type": "object",
+      "required": [
+        "passed",
+        "officialSources",
+        "sameBuildingElevations",
+        "allRightsResolved",
+        "artifacts"
+      ],
+      "properties": {
+        "passed": {"const": true},
+        "officialSources": {"type": "integer", "minimum": 1},
+        "sameBuildingElevations": {"type": "integer", "minimum": 2},
+        "allRightsResolved": {"const": true},
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["sha256"],
+            "properties": {
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        }
+      }
+    },
+    "placement": {
+      "type": "object",
+      "required": ["passed", "confidence", "evidence"],
+      "properties": {
+        "passed": {"const": true},
+        "confidence": {"type": "number", "minimum": 0.85, "maximum": 1},
+        "evidence": {"type": "array", "minItems": 1}
+      }
+    },
+    "lods": {
+      "type": "object",
+      "required": ["LOD0", "LOD1", "LOD2"],
+      "properties": {
+        "LOD0": {"$ref": "#/$defs/lod"},
+        "LOD1": {"$ref": "#/$defs/lod"},
+        "LOD2": {"$ref": "#/$defs/lod"}
+      }
+    },
+    "textures": {
+      "type": "object",
+      "required": ["totalBytes", "files"],
+      "properties": {
+        "totalBytes": {"type": "integer", "minimum": 0},
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "bytes"],
+            "properties": {
+              "path": {"type": "string"},
+              "bytes": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
+    "captures": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "path",
+          "consoleErrors",
+          "failedRequests",
+          "visibleTerrainCoverage"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "path": {"type": "string"},
+          "consoleErrors": {"type": "array", "maxItems": 0},
+          "failedRequests": {"type": "array", "maxItems": 0},
+          "visibleTerrainCoverage": {
+            "type": "object",
+            "required": ["complete"],
+            "properties": {"complete": {"const": true}}
+          }
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "required": ["passed"],
+      "properties": {"passed": {"const": true}}
+    }
+  },
+  "$defs": {
+    "lod": {
+      "type": "object",
+      "required": ["path", "triangles", "materialPrimitives"],
+      "properties": {
+        "path": {"type": "string"},
+        "triangles": {"type": "integer", "minimum": 1},
+        "materialPrimitives": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

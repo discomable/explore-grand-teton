@@ -1,0 +1,12 @@
+# bake_forestmask.py scratch outputs (the shipped mask lives in ../public/forestmask.png)
+forestmask_new.png
+forestmask_new.json
+forestmask_overlay.png
+groundtint_new.png
+groundtint_new.json
+groundtint_preview.png
+treepoints_overlay.png
+treepoints_zoom.png
+treepoints.json
+treepoints.bin
+treepoints_meta.json

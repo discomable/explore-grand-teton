@@ -1,0 +1,9 @@
+{
+ "url": "imagery/{z}/{x}/{y}.webp",
+ "tileSize": 512,
+ "minZoom": 0,
+ "maxZoom": 7,
+ "nativePixelSize": 1.25,
+ "width": 22656,
+ "height": 32944
+}

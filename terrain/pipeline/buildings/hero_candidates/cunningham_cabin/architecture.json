@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "candidate_id": "cunningham_cabin",
+  "modeled_state": {
+    "state": "present_restored_exterior",
+    "date_basis": "post-1956 restoration, checked against current NPS imagery",
+    "note": "The National Register record says the wall logs were reset and the roof rebuilt. Do not present the model as an untouched 1888 fabric reconstruction."
+  },
+  "structures": [
+    {
+      "id": "cunningham_dogtrot",
+      "name": "J. Pierce Cunningham Cabin",
+      "type": "double_pen_dogtrot_log_cabin",
+      "architectural_contract": {
+        "must_have": [
+          "Two separate rectangular saddle-V-notched log pens.",
+          "A 10 ft 2 in central breezeway that remains visibly open from east to west.",
+          "One continuous, shallow gable roof spanning both pens and the breezeway.",
+          "A sod-covered double-board roof with irregular natural edge and restrained thickness.",
+          "Horizontal log courses, visible chinking and projecting notched corner ends.",
+          "Openings placed from HABS sheets 2 through 4 rather than inferred from photographs."
+        ],
+        "must_not_have": [
+          "A single solid rectangular cabin with the breezeway painted onto its facade.",
+          "A steep barn roof, gambrel roof, porch addition, chimney or modern glazing not shown by HABS/current NPS sources.",
+          "Closed doors, dark quads or alpha cards blocking the through-view.",
+          "Historic outbuildings reconstructed from foundation traces in this single-building candidate."
+        ]
+      },
+      "measured_envelope": {
+        "source": "HABS WY-25 sheet 2 of 5",
+        "overall_length": {
+          "feet_inches": "41 ft 5 in",
+          "meters": 12.624,
+          "uncertainty_m": 0.03,
+          "status": "measured"
+        },
+        "left_pen_length": {
+          "feet_inches": "15 ft 7 in",
+          "meters": 4.75,
+          "uncertainty_m": 0.03,
+          "status": "measured"
+        },
+        "breezeway_clear_width": {
+          "feet_inches": "10 ft 2 in",
+          "meters": 3.099,
+          "uncertainty_m": 0.03,
+          "status": "measured"
+        },
+        "right_pen_length": {
+          "feet_inches": "15 ft 8 in",
+          "meters": 4.775,
+          "uncertainty_m": 0.03,
+          "status": "measured"
+        },
+        "left_pen_depth": {
+          "feet_inches": "15 ft 9 in",
+          "meters": 4.801,
+          "uncertainty_m": 0.03,
+          "status": "measured"
+        },
+        "right_pen_depth": {
+          "feet_inches": "15 ft 8 in",
+          "meters": 4.775,
+          "uncertainty_m": 0.03,
+          "status": "measured"
+        },
+        "height_and_roof_pitch": {
+          "status": "transcribed_and_scaled_from_habs",
+          "wall_height_m": 1.6764,
+          "ridge_height_m": 2.286,
+          "structural_roof_pitch_deg": 14.2,
+          "roof_pitch_uncertainty_deg": 1.5,
+          "source": "HABS WY-25 sheets 3 and 5",
+          "measurement_record": "documentary-measurements.json",
+          "note": "Wall height is dimensioned 5 ft 6 in. Ridge height and pitch are scaled/derived from the measured elevation and remain explicitly uncertain."
+        }
+      },
+      "spatial_layout": {
+        "long_axis": "north_south_pending_orthophoto_confirmation",
+        "long_axis_draft_bearing_deg_true": 178.2,
+        "breezeway_open_faces": [
+          "east",
+          "west"
+        ],
+        "roof_ridge": "continuous along the long axis over both pens and breezeway",
+        "origin": "center of the HABS overall wall envelope at grade",
+        "terrain_contact": "terrain-snap each corner conservatively; keep the cabin level and bury only an irregular 0.05-0.12 m footing band"
+      },
+      "construction": {
+        "walls": "Horizontal round/hewn logs with chinking; saddle-V-notched corners documented by NRHP/HABS.",
+        "roof": "Low common gable, double-board construction with sod cover; avoid a clean modern turf slab.",
+        "floor_and_foundation": "Exterior grade contact and sparse historic foundation evidence only; do not invent a continuous modern concrete foundation.",
+        "breezeway": "True open volume. Interior side walls, ground, roof underside and through-view receive normal game lighting and depth.",
+        "openings": "Trace dimensions and offsets directly from the registered HABS floor plan/elevations. Treat the sheet-2 note that one breezeway log wall appears to be a later addition as uncertain interior detail and omit it unless present-day photographs confirm it."
+      },
+      "materials": {
+        "log_and_chinking": "One compact, evenly lit tileable atlas family with restrained color variation and no landscape or baked sunlight.",
+        "sod_roof": "Shader-compatible muted soil/grass material, sparse at edges; no high-density grass geometry outside LOD0.",
+        "boards_and_openings": "Share one dark weathered-board material; actual voids and recess depth remain geometry.",
+        "max_texture_resolution": "1024x1024 per atlas",
+        "max_total_deployed_bytes": 1048576
+      },
+      "geometry_policy": {
+        "lod0": "Spend geometry on the open dogtrot, roof edge, log-end silhouette and shallow opening depth; batch repeated logs/materials.",
+        "lod1": "Replace log relief with baked/material detail but retain separate pens and open breezeway.",
+        "lod2": "Use a minimal two-material silhouette with a real central void; never collapse to a solid box."
+      },
+      "confidence": {
+        "typology": "highest",
+        "plan_dimensions": "highest",
+        "roof_construction": "high",
+        "current_placement": "medium_high_pending_local_extract",
+        "orientation": "medium_pending_orthophoto_or_lidar",
+        "current_opening_treatment": "high_after_habs_photo_registration",
+        "terrain_contact": "low_until_runtime_height_sampling"
+      }
+    }
+  ],
+  "acceptance_checks": [
+    "Measured overall plan is 12.624 m long and each pen is approximately 4.8 m deep.",
+    "The clear breezeway is 3.099 m wide and remains open in all LODs.",
+    "The HABS-derived model fits within the mapped 13.1 m by 5.3 m upstream footprint/roof envelope after overhang is accounted for.",
+    "Close east and west captures show real parallax and terrain through the breezeway.",
+    "South/north gable silhouette, eaves, wall height and roof pitch match registered HABS elevations.",
+    "No geometry represents undocumented vanished ranch buildings."
+  ]
+}

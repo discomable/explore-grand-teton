@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "candidate_id": "john_moulton",
+  "measurement_policy": {
+    "precedence": [
+      "HABS measured drawings",
+      "classified LiDAR",
+      "georeferenced current footprint",
+      "multiple same-building photographs",
+      "explicit estimate"
+    ],
+    "rule": "Image generation may change registered surface appearance only; it may not determine geometry, placement, roof topology, or openings.",
+    "units": "metres"
+  },
+  "structures": [
+    {
+      "id": "barn",
+      "name": "John Moulton Homestead Barn",
+      "role": "hero",
+      "source_refs": [
+        "loc_homestead_habs_wy_152",
+        "loc_barn_habs_wy_152_c",
+        "nps_john_moulton_barn",
+        "nps_mormon_row_history"
+      ],
+      "source_backed_facts": [
+        {
+          "fact": "A large two-story gambrel barn with lower shed portions.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The construction is described by HABS as a gambrel-with-shed log barn.",
+          "confidence": "high"
+        },
+        {
+          "fact": "It was constructed between 1908 and 1916.",
+          "confidence": "high"
+        },
+        {
+          "fact": "HABS records the barn approximately 135 feet northeast of the house.",
+          "confidence": "high"
+        }
+      ],
+      "massing": {
+        "storeys": 2,
+        "primary_roof": "symmetric gambrel",
+        "secondary_roofs": "lower shed roof portions",
+        "wall_system": "log",
+        "must_preserve_at_all_lods": [
+          "gambrel break on both main roof slopes",
+          "lower shed silhouette",
+          "main barn-to-shed massing relationship"
+        ]
+      },
+      "surface_family": {
+        "walls": "weathered horizontal logs with restrained chinking",
+        "gable_and_doors": "weathered vertical or framed timber as confirmed by HABS elevations",
+        "roof": "weathered timber/shingle field as confirmed by close reference",
+        "foundation": "derive from HABS drawing and current photographs; do not invent a continuous exposed plinth"
+      },
+      "openings": {
+        "status": "extract_from_habs",
+        "rule": "Use WY-152-C measured elevations and exterior photographs; do not copy the T. A. Moulton opening pattern."
+      },
+      "dimensions": {
+        "status": "documentary_primary_envelope_resolved",
+        "measurement_ref": "measurements.documentary.json#structures/barn",
+        "unresolved_fields": [
+          "orientation_deg_true_north"
+        ]
+      },
+      "confidence": {
+        "identity": "high",
+        "roof_topology": "high",
+        "materials": "medium_high",
+        "dimensions_before_sheet_extraction": "low",
+        "placement_before_georeferencing": "low"
+      }
+    },
+    {
+      "id": "pink_house",
+      "name": "John and Bartha Moulton Residence (Pink House)",
+      "role": "companion",
+      "source_refs": [
+        "loc_homestead_habs_wy_152",
+        "loc_house_habs_wy_152_a",
+        "nps_john_moulton_residence"
+      ],
+      "source_backed_facts": [
+        {
+          "fact": "A 1.5-story frame residence finished in pink-tinted stucco.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The current NPS place page describes the house as built around 1934; the HABS parent record and a 2021 NPS preservation release describe it as circa 1938.",
+          "confidence": "high",
+          "note": "Retain the date discrepancy as provenance; it does not authorize geometry interpolation."
+        },
+        {
+          "fact": "HABS locates the house approximately 70 feet west of Mormon Row Road and 300 feet north of Antelope Flats Road.",
+          "confidence": "high"
+        },
+        {
+          "fact": "NPS historic-condition reporting describes bright green doors and windows.",
+          "confidence": "medium_high"
+        }
+      ],
+      "massing": {
+        "storeys": 1.5,
+        "structural_system": "frame",
+        "primary_roof": "extract exact topology from HABS WY-152-A plans and elevations",
+        "must_preserve_at_all_lods": [
+          "1.5-story domestic scale",
+          "primary roof silhouette",
+          "relationship of main body and documented additions"
+        ]
+      },
+      "surface_family": {
+        "walls": "muted salmon/pink stucco; avoid modern saturated pink",
+        "trim": "historically supported green doors and window trim, calibrated from rights-cleared current references",
+        "roof": "derive material and colour from HABS/current same-building references",
+        "foundation": "derive from HABS and post-stabilization references; do not reproduce temporary preservation works"
+      },
+      "openings": {
+        "status": "extract_from_habs",
+        "rule": "Use WY-152-A plans/elevations for count and placement; projection may add surface detail but not change openings."
+      },
+      "dimensions": {
+        "status": "documentary_outer_envelope_resolved",
+        "measurement_ref": "measurements.documentary.json#structures/pink_house",
+        "unresolved_fields": [
+          "addition_dimensions_m",
+          "dormer_dimensions_m",
+          "orientation_deg_true_north"
+        ]
+      },
+      "confidence": {
+        "identity": "high",
+        "storeys_and_finish": "high",
+        "trim_colour": "medium_high",
+        "dimensions_before_sheet_extraction": "low",
+        "placement_before_georeferencing": "low"
+      }
+    },
+    {
+      "id": "minor_cluster",
+      "name": "John Moulton Homestead Minor Buildings and Corral",
+      "role": "context_cluster",
+      "source_refs": [
+        "loc_homestead_habs_wy_152",
+        "nps_mormon_row_cultural_landscape"
+      ],
+      "source_backed_facts": [
+        {
+          "fact": "The HABS parent record lists two outhouses, a shower house, bunkhouse, granary, pumphouse, and corral among the extant homestead features.",
+          "confidence": "high"
+        },
+        {
+          "fact": "Fences, corrals, irrigation features, cleared fields, and pasturage are significant parts of the Mormon Row cultural landscape.",
+          "confidence": "high"
+        }
+      ],
+      "included_components": [
+        "bunkhouse",
+        "granary",
+        "pumphouse",
+        "two outhouses",
+        "shower house"
+      ],
+      "context_components": [
+        "corral",
+        "fences",
+        "irrigation traces"
+      ],
+      "generation_policy": {
+        "buildings": "Use shared low-cost timber and roof materials; create only structures whose identity and footprint can be resolved from HABS/site evidence.",
+        "context": "Represent corrals, fences, and irrigation through existing prop/setting systems when available, not as baked building geometry.",
+        "fallback": "Omit an unresolved minor component rather than invent its position or form."
+      },
+      "dimensions": {
+        "status": "pending_site_record_and_footprint_resolution"
+      },
+      "confidence": {
+        "component_inventory": "high",
+        "individual_forms": "low",
+        "individual_placements": "low"
+      }
+    }
+  ],
+  "shared_materials": [
+    {
+      "id": "weathered_log",
+      "uses": [
+        "barn",
+        "minor_cluster"
+      ]
+    },
+    {
+      "id": "weathered_roof",
+      "uses": [
+        "barn",
+        "pink_house",
+        "minor_cluster"
+      ]
+    },
+    {
+      "id": "pink_stucco",
+      "uses": [
+        "pink_house"
+      ]
+    },
+    {
+      "id": "historic_green_trim",
+      "uses": [
+        "pink_house"
+      ]
+    }
+  ],
+  "unresolved_before_generation": [
+    "Resolve unique barn and house footprints and orientations against the present geospatial data.",
+    "Determine which minor-building footprints can be identified without speculation.",
+    "Confirm current roof and foundation materials from item-level, rights-cleared references.",
+    "Reconcile historic versus post-stabilization house foundation appearance for the target presentation date."
+  ]
+}

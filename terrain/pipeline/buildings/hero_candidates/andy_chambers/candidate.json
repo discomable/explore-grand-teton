@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "id": "andy_chambers",
+  "name": "Andy Chambers Homestead",
+  "kind": "landmark_cluster",
+  "status": "draft",
+  "priority": 2,
+  "structures": [
+    "cabin",
+    "stable_barn",
+    "windmill"
+  ],
+  "placement": {
+    "strategy": "georeferenced_cluster",
+    "discovery_seed": {
+      "latitude": 43.6567031418106,
+      "longitude": -110.662801363028,
+      "source": "https://www.loc.gov/pictures/item/wy0032/",
+      "accuracy": "HABS catalogue coordinate; cluster search seed only"
+    },
+    "crs": {
+      "input": "EPSG:4326",
+      "processing": "EPSG:26912",
+      "runtime": "EPSG:32612"
+    },
+    "runtime_seed": {
+      "world_x_m": 5009.2,
+      "world_z_m": 8706.2,
+      "derivation": "HABS catalogue coordinate transformed into the terrain world frame",
+      "authoritative": false
+    },
+    "current_extract": {
+      "path": "terrain/public/buildings.json",
+      "named_footprint_available": false,
+      "policy": "Do not bind to an unnamed footprint by nearest-centroid distance alone."
+    },
+    "resolution_steps": [
+      "Georeference the HABS measured site plan and National Register site map against Mormon Row Road, Ditch Creek, the east-west service road and surviving fence lines.",
+      "Intersect the registered plan with building-class LiDAR and current orthophotography to identify the cabin and evolved stable/barn footprints.",
+      "Resolve the windmill against the registered map and visible tower base; do not inherit a transform from the adjacent Roy Chambers complex.",
+      "Store every structure transform relative to a single surveyed cluster anchor in EPSG:32612.",
+      "Suppress a generic runtime building only after its footprint overlap and orientation pass the placement gates."
+    ],
+    "required_evidence": {
+      "plan_control_points_min": 4,
+      "lidar_or_orthophoto_matches_per_building_min": 2,
+      "footprint_overlap_ratio_min": 0.75,
+      "orientation_error_deg_max": 8,
+      "anchor_residual_m_max": 2.5
+    }
+  },
+  "lod": {
+    "switch_distances_m": {
+      "lod0_to_lod1": 90,
+      "lod1_to_lod2": 260
+    },
+    "cluster_budgets": {
+      "lod0": {
+        "triangles_max": 12000,
+        "material_primitives_max": 8
+      },
+      "lod1": {
+        "triangles_max": 3000,
+        "material_primitives_max": 5
+      },
+      "lod2": {
+        "triangles_max": 750,
+        "material_primitives_max": 3
+      },
+      "deployed_textures_bytes_max": 1572864
+    },
+    "policy": "Export one cluster LOD per distance tier, keep per-structure transforms inspectable, and display exactly one tier at a time."
+  },
+  "materials": {
+    "shared_atlas": true,
+    "families": [
+      "weathered_log_and_cement_chinking",
+      "weathered_vertical_board",
+      "galvanized_metal_roof",
+      "wood_shingle",
+      "aged_steel"
+    ],
+    "projection": {
+      "allowed_for": [
+        "cabin",
+        "stable_barn"
+      ],
+      "disallowed_for": [
+        "windmill"
+      ],
+      "constraints": [
+        "Render a fixed orthographic clay target from approved geometry before any image-assisted edit.",
+        "Use only same-structure HABS or NPS references; never mix the cabin, barn, adjacent homesteads or Moulton buildings.",
+        "Preserve target silhouette, pixel registration, roof topology, openings and background exactly.",
+        "Do not infer dimensions, placement, roof topology or structural members from generated imagery.",
+        "Do not add baked landscape, directional sunlight, text, watermarks, extra windows or featureless black openings.",
+        "Regenerate every projection after any geometry or camera change."
+      ]
+    }
+  },
+  "quarantine_gates": [
+    {
+      "id": "sources",
+      "failure_status": "quarantined_sources",
+      "rule": "Each projected structure needs an official HABS/NPS source plus two useful same-structure elevations with reviewable rights."
+    },
+    {
+      "id": "windmill_identity",
+      "failure_status": "quarantined_sources",
+      "rule": "The windmill is excluded from exports until the registered site map proves that its tower belongs in this cluster rather than the adjacent Roy Chambers complex."
+    },
+    {
+      "id": "placement",
+      "failure_status": "quarantined_geometry",
+      "rule": "All three transforms must satisfy the documented control-point, footprint, orientation and residual limits."
+    },
+    {
+      "id": "architecture",
+      "failure_status": "quarantined_geometry",
+      "rule": "The cabin must retain both full-length shed porches; the barn must retain its gambrel core and single west shed; the windmill must remain open lattice geometry."
+    },
+    {
+      "id": "projection_registration",
+      "failure_status": "quarantined_visual",
+      "rule": "Reject silhouette drift, cross-building contamination, pure-black placeholder openings and baked scenery."
+    },
+    {
+      "id": "ground_contact",
+      "failure_status": "quarantined_visual",
+      "rule": "Reject floating foundations, buried doors, broad vegetation clearing and lost fence or ditch context."
+    },
+    {
+      "id": "performance",
+      "failure_status": "quarantined_performance",
+      "rule": "Reject any tier or texture set above the declared cluster budgets."
+    }
+  ],
+  "retry_policy": {
+    "targeted_retries": 1,
+    "continue_other_candidates_after_failure": true
+  },
+  "review_views": [
+    "close_public_approach",
+    "mormon_row_context",
+    "distant_teton_silhouette"
+  ]
+}

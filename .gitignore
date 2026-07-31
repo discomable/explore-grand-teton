@@ -1,0 +1,48 @@
+# build output (regenerated in CI by build-web.sh)
+/dist/
+
+# large source downloads + regenerable pipeline scratch — NOT in the repo.
+# The pipeline SCRIPTS are tracked; only their heavy intermediates/outputs are ignored.
+# Provenance for this data now ships as terrain/pipeline/SOURCES.md (tracked).
+# (gitignore has no inline comments — keep each pattern on its own line, no trailing text.)
+# data/    = 807 MB raw geodata downloads
+# work/    = DEM processing intermediates (regenerable .tif)
+# workimg/ = NAIP imagery chunk intermediates (regenerable .jpg)
+/terrain/pipeline/data/
+/terrain/pipeline/work/
+/terrain/pipeline/workimg/
+
+# raw CC0 atlas sources — the baked terrain/public/veg-atlas.png ships instead.
+# Provenance for these sources now ships as terrain/pipeline/VEG-ATLAS-SOURCES.md (tracked).
+/terrain/public/atlas-candidates/
+
+# bulk height + imagery tile pyramids (~483 MB) — hosted on Cloudflare R2, not in git.
+# Kept locally for offline dev; see window.GT_TILE_CDN and DEPLOY.md. Regenerate via terrain/pipeline.
+/terrain/public/tiles/
+/terrain/public/imagery/
+
+# review screenshots + per-feature capture view lists (dev only).
+# views.json (the canonical review suite) IS tracked; the per-feature sets live in views/
+/shots/
+/visual-results/
+/benchmark-results/
+/views/
+/views-*.json
+
+# tooling / cruft
+node_modules/
+.wrangler/
+*.log
+*.bak
+.DS_Store
+__pycache__/
+
+# snap.py transient subset list
+/views.auto-subset.json
+/routes.auto-subset.json
+
+# stray committed caches
+terrain/public/.DS_Store
+
+# tree-dot point set (~20 MB) — hosted on Cloudflare R2 like the tiles, not in git
+/terrain/public/treepoints.bin

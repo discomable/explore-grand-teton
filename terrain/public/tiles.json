@@ -1,0 +1,33 @@
+{
+  "crs": "EPSG:32612",
+  "dataset": "USGS1m+10m",
+  "geoTransform": [
+    508020.8068557632,
+    1.25,
+    0.0,
+    4863096.167973563,
+    0.0,
+    -1.25
+  ],
+  "width": 22656,
+  "height": 32944,
+  "nativePixelSize": 1.25,
+  "tileSize": 512,
+  "minZoom": 0,
+  "maxZoom": 7,
+  "encoding": {
+    "scheme": "mapbox",
+    "baseval": -10000.0,
+    "interval": 0.1
+  },
+  "elevation": {
+    "min": 1897.341552734375,
+    "max": 4198.0283203125
+  },
+  "url": "tiles/{z}/{x}/{y}.webp",
+  "world": {
+    "centerEasting": 522180.8068557632,
+    "centerNorthing": 4842506.167973563,
+    "datum": 1897.3
+  }
+}

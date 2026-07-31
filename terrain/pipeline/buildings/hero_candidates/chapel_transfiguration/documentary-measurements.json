@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "candidateId": "chapel_transfiguration",
+  "units": "metres",
+  "target": "closed exterior documentary draft",
+  "sources": {
+    "nationalRegister": {
+      "id": "nps_nrhp_nomination_80004057",
+      "localPath": "terrain/pipeline/data/hero-buildings/chapel_transfiguration/nps/nrhp-80004057.pdf",
+      "sha256": "1c619bee2fa9459dcd2579cf88b09f489b5a53126275f5f00fc70b065633c545"
+    },
+    "currentFootprints": {
+      "id": "runtime_named_building_footprints",
+      "localPath": "terrain/public/buildings.json",
+      "note": "The source heights are procedural lodge-class fallbacks when explicit OSM height tags are absent and are not documentary measurements."
+    },
+    "currentNpsImage": {
+      "id": "nps_chapel_activity_image",
+      "localPath": "terrain/pipeline/data/hero-buildings/chapel_transfiguration/nps/chapel-current-1300.jpg",
+      "sha256": "8c99b0a480c06eca07d8b36c19fba492ff821608fb0cedc1143859393f7ff488",
+      "usage": "same-building identity, roof-form and proportion cross-check only; no projection or redistribution approval"
+    }
+  },
+  "measurements": {
+    "chapel": {
+      "primaryLength": {
+        "value": 15.24,
+        "evidence": "National Register nomination page 2: rectangular building approximately 22 feet by 50 feet",
+        "confidence": "high"
+      },
+      "primaryWidth": {
+        "value": 6.7056,
+        "evidence": "National Register nomination page 2: rectangular building approximately 22 feet by 50 feet",
+        "confidence": "high"
+      },
+      "sacristyLength": {
+        "value": 4.2672,
+        "evidence": "National Register nomination continuation: small fourteen-foot-square sacristy",
+        "confidence": "high"
+      },
+      "sacristyWidth": {
+        "value": 4.2672,
+        "evidence": "National Register nomination continuation: small fourteen-foot-square sacristy",
+        "confidence": "high"
+      },
+      "wallHeight": {
+        "value": 3.2,
+        "evidence": "explicit estimate calibrated from the official current NPS frontal image and documented 6.7056 metre width",
+        "confidence": "low"
+      },
+      "ridgeHeight": {
+        "value": 5.4,
+        "evidence": "explicit estimate calibrated from the official current NPS frontal image; yields a moderate approximately 33 degree primary pitch",
+        "confidence": "low"
+      },
+      "entryProjectionWidth": {
+        "value": 3.2,
+        "evidence": "explicit estimate from the official current NPS frontal image",
+        "confidence": "low"
+      },
+      "entryProjectionLength": {
+        "value": 1.75,
+        "evidence": "explicit estimate constrained within the named current footprint envelope",
+        "confidence": "low"
+      },
+      "entryEaveHeight": {
+        "value": 2.65,
+        "evidence": "explicit estimate from the official current NPS frontal image",
+        "confidence": "low"
+      },
+      "entryRidgeHeight": {
+        "value": 4.1,
+        "evidence": "explicit estimate from the official current NPS frontal image",
+        "confidence": "low"
+      },
+      "logCourseDiameter": {
+        "value": 0.23,
+        "evidence": "explicit construction-detail estimate consistent with lodgepole-log walls",
+        "confidence": "low"
+      }
+    },
+    "bridesRoom": {
+      "footprintWidth": {
+        "value": 5.91,
+        "evidence": "minimum oriented extent of exact named current footprint",
+        "confidence": "medium_high"
+      },
+      "footprintLength": {
+        "value": 6.74,
+        "evidence": "minimum oriented extent of exact named current footprint",
+        "confidence": "medium_high"
+      },
+      "wallHeight": {
+        "value": 2.6,
+        "evidence": "explicit subordinate-massing estimate; current extract height 9.1 metres rejected as procedural lodge fallback",
+        "confidence": "low"
+      },
+      "ridgeHeight": {
+        "value": 4.15,
+        "evidence": "explicit subordinate-massing estimate; roof form remains unverified",
+        "confidence": "low"
+      },
+      "relativeCenter": {
+        "value": [
+          3.5,
+          -15.78
+        ],
+        "evidence": "difference between centroids of the two exact named runtime footprints before local-axis rotation",
+        "confidence": "high"
+      }
+    }
+  },
+  "documentedExteriorFeatures": [
+    "horizontal stripped lodgepole-pine logs",
+    "saddle-notched corners with sawn log ends extending beyond walls",
+    "moderately pitched wood-shake primary gable",
+    "smaller gables over documented projections",
+    "tapered spear-like raking fascia ends",
+    "beveled vertical-plank front door with wrought-iron surface hardware",
+    "lattice casement side windows",
+    "large centered fixed-sash altar-end window"
+  ],
+  "unresolved": [
+    "verified chapel eave and ridge heights",
+    "verified primary and secondary roof pitches",
+    "exact opening centers and dimensions",
+    "Brides' Room architectural form, roof, height, materials, and openings",
+    "terrain contact elevation",
+    "two item-level rights-resolved exterior elevations"
+  ],
+  "generationPolicy": "Use high-confidence documentary plan dimensions and named footprint placement. Low-confidence values must remain visibly labelled estimates in reports. Image generation cannot modify geometry or produce an interior."
+}

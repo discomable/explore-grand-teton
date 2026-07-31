@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "building": "T. A. Moulton Barn",
+  "measurements": {
+    "length_m": 18.0,
+    "width_m": 10.0,
+    "eave_height_m": 5.0,
+    "ridge_height_m": 9.0,
+    "orientation_deg_true_north": 5.0,
+    "roof_pitch_deg": 45.0
+  },
+  "provenance": {
+    "length_m": "configuration_estimate",
+    "width_m": "configuration_estimate",
+    "eave_height_m": "configuration_estimate",
+    "ridge_height_m": "configuration_estimate",
+    "orientation_deg_true_north": "configuration_rough_estimate",
+    "roof_pitch_deg": "configuration_visual_estimate"
+  },
+  "uncertainty": [
+    "Fallback envelope only; replace values after LiDAR and photographic QA.",
+    "Runtime centre and collision come from the named OSM footprint, not the LiDAR seed."
+  ]
+}
+

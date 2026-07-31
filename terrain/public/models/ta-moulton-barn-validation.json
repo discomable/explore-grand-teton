@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "building": "T. A. Moulton Barn",
+  "status": "measured_pending_photographic_qa",
+  "source": "terrain/pipeline/buildings/moulton_barn/measurements.lidar-2022.json",
+  "triangle_counts": {
+    "LOD0": 2676,
+    "LOD1": 148,
+    "LOD2": 88
+  },
+  "material_primitives_per_lod": {
+    "LOD0": 4,
+    "LOD1": 3,
+    "LOD2": 2
+  },
+  "measurements": {
+    "length_m": 17.346197233669027,
+    "width_m": 10.548916884303319,
+    "eave_height_m": 2.8899999999998727,
+    "ridge_height_m": 5.839999999999918,
+    "orientation_deg_true_north": 177.39943855667633,
+    "roof_pitch_deg": 48.20404995262033
+  },
+  "provenance": {
+    "length_m": "USGS_3DEP_2022_lidar_class_6",
+    "width_m": "USGS_3DEP_2022_lidar_class_6",
+    "eave_height_m": "USGS_3DEP_2022_lidar_class_6",
+    "ridge_height_m": "USGS_3DEP_2022_lidar_class_6",
+    "orientation_deg_true_north": "USGS_3DEP_2022_lidar_class_6",
+    "roof_pitch_deg": "USGS_3DEP_2022_lidar_class_6"
+  },
+  "uncertainty": [
+    "The oriented rectangle describes the combined visible building return envelope.",
+    "Use the NPS preservation plan and angle photographs to separate the central gable from its north and south shed additions before production export."
+  ]
+}

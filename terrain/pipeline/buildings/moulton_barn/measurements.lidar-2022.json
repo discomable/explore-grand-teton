@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "building": "T. A. Moulton Barn",
+  "status": "measured_pending_photographic_qa",
+  "origin": {
+    "easting_m": 527041.5469192379,
+    "northing_m": 4834246.632179395,
+    "ground_elevation_m": 2015.1,
+    "crs": "EPSG:26912"
+  },
+  "measurements": {
+    "length_m": 17.346197233669027,
+    "width_m": 10.548916884303319,
+    "eave_height_m": 2.8899999999998727,
+    "ridge_height_m": 5.839999999999918,
+    "orientation_deg_true_north": 177.39943855667633,
+    "roof_pitch_deg": 48.20404995262033
+  },
+  "provenance": {
+    "length_m": "USGS_3DEP_2022_lidar_class_6",
+    "width_m": "USGS_3DEP_2022_lidar_class_6",
+    "eave_height_m": "USGS_3DEP_2022_lidar_class_6",
+    "ridge_height_m": "USGS_3DEP_2022_lidar_class_6",
+    "orientation_deg_true_north": "USGS_3DEP_2022_lidar_class_6",
+    "roof_pitch_deg": "USGS_3DEP_2022_lidar_class_6"
+  },
+  "point_counts": {
+    "cropped": 472349,
+    "ground_class_2": 205263,
+    "building_class_6": 3900,
+    "building_used": 3879
+  },
+  "source": {
+    "title": "USGS Lidar Point Cloud WY_GrandTetonNP_D22 12WTP270340",
+    "url": "https://rockyweb.usgs.gov/vdelivery/Datasets/Staged/Elevation/LPC/Projects/WY_GrandTetonNP_D22/WY_GrandTetonNP_1_D22/LAZ/USGS_LPC_WY_GrandTetonNP_D22_12WTP270340.laz",
+    "sha256": "6f9fde54076ee6c52c34c2c6926b1be576f270b5f6cb744fba8deddf4499101e",
+    "local_file": "terrain/pipeline/data/moulton-barn/USGS_LPC_WY_GrandTetonNP_D22_12WTP270340.laz"
+  },
+  "uncertainty": [
+    "The oriented rectangle describes the combined visible building return envelope.",
+    "Use the NPS preservation plan and angle photographs to separate the central gable from its north and south shed additions before production export."
+  ]
+}
+

@@ -1,0 +1,37 @@
+name: Test
+
+# Runs on every push and every pull request, including from forks. Deliberately
+# needs NO secrets, so an outside contributor's PR gets a real green check —
+# deploy.yml cannot do that, because fork PRs are not given the Cloudflare
+# credentials it needs and would fail at the publish step.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:                # supersede an in-flight run for the same ref
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # npm run verify == test:all && validate:assets && build.
+      # validate:assets enforces that every shipped runtime asset under
+      # terrain/public/ has a provenance entry in assets-manifest.json — see
+      # LICENSE-ASSETS.md. It derives "shipped" from git, so it needs the real
+      # checkout above rather than a shallow export.
+      - name: Verify code, asset provenance, and build
+        run: npm run verify

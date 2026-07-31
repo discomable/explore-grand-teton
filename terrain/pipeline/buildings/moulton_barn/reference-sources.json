@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "download_root": "terrain/pipeline/data/moulton-barn/photos",
+  "references": [
+    {
+      "file": "nps-2014-preservation-plan.pdf",
+      "title": "2014 Moulton Barn Preservation Plan",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/grte/learn/historyculture/upload/2014-Moulton-Barn-Preservation-Plan-opt-red.pdf",
+      "retrieved_via": "https://web.archive.org/web/20170209044303id_/https://www.nps.gov/grte/learn/historyculture/upload/2014-Moulton-Barn-Preservation-Plan-opt-red.pdf",
+      "license": "NPS publication; reference use. Inspect embedded third-party photo credits before redistribution.",
+      "sha256": "95cfdb79b62f69ff404ae7df6241f96d4b91dc59b5fd4fde02eea6b3d74af05a"
+    },
+    {
+      "file": "nps-ta-moulton-place.jpg",
+      "title": "T.A. Moulton Barn place photograph",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/places/000/t-a-moulton-barn.htm",
+      "download": "https://www.nps.gov/common/uploads/place/import/e42f6ecc-a418-417b-80a6-ad58fa2e5430_image_350.jpg",
+      "license": "Public domain under the NPS image usage guidance; source page carries no third-party credit.",
+      "sha256": "fd6e1c3f85d46ca69d17039f09b7083bb2f17a27912cfeb39ef2cda2e4fde807"
+    },
+    {
+      "file": "habs-1977.jpg",
+      "title": "T.A. Moulton Barn, Historic American Buildings Survey",
+      "author": "Historic American Buildings Survey",
+      "source": "https://commons.wikimedia.org/wiki/File:TA_Moulton_Barn_HABS1.jpg",
+      "download": "https://upload.wikimedia.org/wikipedia/commons/f/f4/TA_Moulton_Barn_HABS1.jpg",
+      "license": "Public domain",
+      "sha256": "be4b85e8921311d29eac95373709b2245335e5b0deaa1b9739b22590f1c0e86b"
+    },
+    {
+      "file": "autumn-2024-hodged.jpg",
+      "title": "T.A. Moulton Barn, Grand Tetons National Park",
+      "author": "Hodged",
+      "source": "https://commons.wikimedia.org/wiki/File:T.A._Moulton_Barn,_Grand_Tetons_National_Park.jpg",
+      "download": "https://upload.wikimedia.org/wikipedia/commons/6/64/T.A._Moulton_Barn%2C_Grand_Tetons_National_Park.jpg",
+      "license": "CC BY 4.0",
+      "sha256": "15a13ebaba9929e8b24e88f33610c255ff867fc7337df1dab9bac19065d37138"
+    },
+    {
+      "file": "summer-2024-thomas-wildcat.jpg",
+      "title": "T.A. Moulton Barn",
+      "author": "Thomas Wildcat",
+      "source": "https://commons.wikimedia.org/wiki/File:T.A.Moulton_Barn.jpg",
+      "download": "https://upload.wikimedia.org/wikipedia/commons/f/fc/T.A.Moulton_Barn.jpg",
+      "license": "CC BY-SA 4.0",
+      "sha256": "6c6808f8f935fcc477f33edf199f443c45938008f055a6e7cb771bccd6b4d8d7"
+    },
+    {
+      "file": "west-2018-marcela-gallo.jpg",
+      "title": "West at the T. A. Moulton barn",
+      "author": "Marcela Liliana Gallo",
+      "source": "https://commons.wikimedia.org/wiki/File:West_at_the_T._A._Moulton_barn,_Sep_18jpg.jpg",
+      "download": "https://upload.wikimedia.org/wikipedia/commons/4/41/West_at_the_T._A._Moulton_barn%2C_Sep_18jpg.jpg",
+      "license": "CC BY-SA 4.0",
+      "sha256": "8d8a9fb98d118d6ad9346b890a1c0a3cdfd8e77a278387952509eae0dadabed1"
+    }
+  ]
+}
+

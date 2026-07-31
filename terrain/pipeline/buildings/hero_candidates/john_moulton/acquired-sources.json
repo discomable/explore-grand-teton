@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "candidate_id": "john_moulton",
+  "retrieved_utc": "2026-07-28",
+  "storage_root": "terrain/pipeline/data/hero-buildings/john_moulton/habs",
+  "rights": {
+    "source": "Library of Congress Prints and Photographs Online Catalog",
+    "statement": "No known restrictions on images made by the U.S. Government; images copied from other sources may be restricted.",
+    "advisory": "https://www.loc.gov/pictures/collection/hh/access.html",
+    "use": "Documentary reconstruction evidence only; preserve item-level provenance."
+  },
+  "records": [
+    {
+      "id": "loc_barn_habs_wy_152_c",
+      "record_url": "https://www.loc.gov/pictures/item/wy0575/",
+      "creator": "Historic American Buildings Survey; measured drawings by Barrett Powley; photographs by Arnold Thallheimer",
+      "artifacts": [
+        {
+          "file": "barn-wy152c-sheet-1.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0575/sheet/00001v.jpg",
+          "bytes": 147406,
+          "sha256": "b63d480a24644566e6665a9270ae9679fc86c766ecb65af947e5334484233047",
+          "kind": "measured_drawing"
+        },
+        {
+          "file": "barn-wy152c-sheet-2.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0575/sheet/00002v.jpg",
+          "bytes": 135655,
+          "sha256": "bd5ddd9e47c9eea6483a19b45db135e347fa4cb05e495284b73789e4c2eae67e",
+          "kind": "measured_drawing"
+        },
+        {
+          "file": "barn-wy152c-sheet-1-east-detail.jpg",
+          "source_url": "https://tile.loc.gov/image-services/iiif/service:pnp:habshaer:wy:wy0500:wy0575:sheet:00001a/1800,800,6500,3500/full/0/gray.jpg",
+          "bytes": 2580128,
+          "sha256": "f53ddeeec79e6ac240b88b0f1188e3264be2e4dc287f3801481d0c5d568884cd",
+          "kind": "measurement_crop"
+        },
+        {
+          "file": "barn-wy152c-sheet-2-plan-detail.jpg",
+          "source_url": "https://tile.loc.gov/image-services/iiif/service:pnp:habshaer:wy:wy0500:wy0575:sheet:00002a/6800,850,6200,6600/full/0/gray.jpg",
+          "bytes": 3567676,
+          "sha256": "1e06bcb49cb5e18f77f769cd480c9fa77f7545bd15ab98b1377d95a3c92facae",
+          "kind": "measurement_crop"
+        },
+        {
+          "file": "barn-wy152c-photo-1.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0575/photos/580706pr.jpg",
+          "bytes": 75524,
+          "sha256": "c836ac60cbb5401bd0ef94d4b58ad94ef213621c63fcc32c607761f5a973643f",
+          "kind": "exterior_photo"
+        },
+        {
+          "file": "barn-wy152c-photo-2.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0575/photos/580707pr.jpg",
+          "bytes": 84810,
+          "sha256": "032d87527a839090b19e779ba61562e1fe4e3325286f37c0eb0054e07b119555",
+          "kind": "exterior_photo"
+        },
+        {
+          "file": "barn-wy152c-photo-3.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0575/photos/580708pr.jpg",
+          "bytes": 77258,
+          "sha256": "364759127659fea0b50cd22517933b657d5036600a742f973db1265b2a8a33eb",
+          "kind": "exterior_photo"
+        }
+      ]
+    },
+    {
+      "id": "loc_house_habs_wy_152_a",
+      "record_url": "https://www.loc.gov/pictures/item/wy0573/",
+      "creator": "Historic American Buildings Survey; measured drawings by Jeff Farnum; photographs by Arnold Thallheimer",
+      "artifacts": [
+        {
+          "file": "house-wy152a-sheet-1.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0573/sheet/00001v.jpg",
+          "bytes": 92723,
+          "sha256": "0738eaa1cb6c7aa9d8969bf964b4e9278460c055b9c8b63d09ce6c5bf7b9cda7",
+          "kind": "measured_drawing"
+        },
+        {
+          "file": "house-wy152a-sheet-2.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0573/sheet/00002v.jpg",
+          "bytes": 133563,
+          "sha256": "c1be0699d60b9dddf4e3ca883b34f9d70c867bccc0fd5c495ac9abf0bf0f4c41",
+          "kind": "measured_drawing"
+        },
+        {
+          "file": "house-wy152a-sheet-3.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0573/sheet/00003v.jpg",
+          "bytes": 66915,
+          "sha256": "e100dbf5de81085d16ae601abd5bf1a603debda121fec60355dce1953febfbcf",
+          "kind": "measured_drawing"
+        },
+        {
+          "file": "house-wy152a-sheet-1-plan-detail.jpg",
+          "source_url": "https://tile.loc.gov/image-services/iiif/service:pnp:habshaer:wy:wy0500:wy0573:sheet:00001a/2500,1500,4800,6500/full/0/gray.jpg",
+          "bytes": 1566613,
+          "sha256": "44e9c9e7743f4b8f77aac606402881ec7fee88076eaf845ecc142b8cdd4390b4",
+          "kind": "measurement_crop"
+        },
+        {
+          "file": "house-wy152a-sheet-1-depth-detail.jpg",
+          "source_url": "https://tile.loc.gov/image-services/iiif/service:pnp:habshaer:wy:wy0500:wy0573:sheet:00001a/1600,1500,1400,6100/full/0/gray.jpg",
+          "bytes": 203044,
+          "sha256": "c218b025f00b73ab27bb37094b1c83129bce34dddd2f0eb60265f0c6902fdf02",
+          "kind": "measurement_crop"
+        },
+        {
+          "file": "house-wy152a-sheet-3-section-detail.jpg",
+          "source_url": "https://tile.loc.gov/image-services/iiif/service:pnp:habshaer:wy:wy0500:wy0573:sheet:00003a/7000,2000,5200,4700/full/0/gray.jpg",
+          "bytes": 1143731,
+          "sha256": "277a25c5dbb537b16309df4534f4aed91edfd4b193ba967fc56e4ad451ab4fbe",
+          "kind": "measurement_crop"
+        },
+        {
+          "file": "house-wy152a-photo-1.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0573/photos/580694pr.jpg",
+          "bytes": 93188,
+          "sha256": "acd650390b34ecb77389cb45fc674177ad0ee0479e601248c7bf2c8d294a6cd5",
+          "kind": "exterior_photo"
+        },
+        {
+          "file": "house-wy152a-photo-2.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0573/photos/580695pr.jpg",
+          "bytes": 91095,
+          "sha256": "2c0c919b24cff15995b198b31b9655f29291bef9ef96672944f7a25431c15964",
+          "kind": "exterior_photo"
+        },
+        {
+          "file": "house-wy152a-photo-3.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0573/photos/580696pr.jpg",
+          "bytes": 92170,
+          "sha256": "6b96382c7e9b257e61628377f209e911c2987cbc3414903b0f2fa271ac150b77",
+          "kind": "exterior_photo"
+        },
+        {
+          "file": "house-wy152a-photo-4.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0500/wy0573/photos/580697pr.jpg",
+          "bytes": 90908,
+          "sha256": "6c995affc31fb095b337cb4c394e5288490c041b4fba40c7118c6248cf3f8c43",
+          "kind": "exterior_photo"
+        }
+      ]
+    },
+    {
+      "id": "loc_homestead_habs_wy_152",
+      "record_url": "https://www.loc.gov/pictures/item/wy0339/",
+      "creator": "Historic American Buildings Survey",
+      "artifacts": [
+        {
+          "file": "site-wy152-sheet-1.jpg",
+          "source_url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0300/wy0339/sheet/00001v.jpg",
+          "bytes": 291081,
+          "sha256": "7682030746990372880b21a55d777d4fa612cf3650510f4bca00501113b65758",
+          "kind": "measured_site_drawing"
+        },
+        {
+          "file": "site-wy152-sheet-1-plan-detail.jpg",
+          "source_url": "https://tile.loc.gov/image-services/iiif/service:pnp:habshaer:wy:wy0000:wy0339:sheet:00001a/1000,800,8000,5400/full/0/gray.jpg",
+          "bytes": 3623010,
+          "sha256": "241809cb322630419ab3fd7619e3ae4fd49e6b07d09db9811a2fc591c796dce1",
+          "kind": "measurement_crop"
+        }
+      ]
+    }
+  ]
+}

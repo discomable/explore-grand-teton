@@ -1,0 +1,4 @@
+laspy[lazrs]>=2.5,<3
+numpy>=1.26,<3
+pyproj>=3.6,<4
+Shapely>=2.0,<3

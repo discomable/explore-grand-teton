@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "candidate_id": "john_moulton",
+  "status": "documentary_primary_resolved_with_blockers",
+  "units": "metres",
+  "required_structures_buildable": true,
+  "full_cluster_buildable": false,
+  "method": {
+    "explicit_dimensions": "Converted printed HABS feet-and-inches dimensions at exactly 0.3048 metres per foot.",
+    "vertical_dimensions": "Read against the printed 1/4 inch = 1 foot graphical scale on the measured elevation/section; uncertainty records the scale-reading tolerance.",
+    "rule": "No photographic perspective measurement or image-generation output is used as geometry."
+  },
+  "structures": {
+    "barn": {
+      "source_record": "HABS WY-152-C",
+      "buildable": true,
+      "plan": {
+        "overall_x_m": {
+          "value": 16.9034,
+          "source_file": "barn-wy152c-sheet-2-plan-detail.jpg",
+          "sheet": 2,
+          "printed_value": "55'-5 1/2\"",
+          "method": "explicit_dimension"
+        },
+        "overall_y_m": {
+          "value": 8.89,
+          "source_file": "barn-wy152c-sheet-2-plan-detail.jpg",
+          "sheet": 2,
+          "printed_value": "29'-2\"",
+          "method": "explicit_dimension"
+        },
+        "facade_bays_m": [
+          {
+            "value": 5.3848,
+            "printed_value": "17'-8\""
+          },
+          {
+            "value": 5.4102,
+            "printed_value": "17'-9\""
+          },
+          {
+            "value": 5.5626,
+            "printed_value": "18'-3\""
+          }
+        ]
+      },
+      "profile": {
+        "core_half_span_m": {
+          "value": 2.7813,
+          "derivation": "half of explicit 18'-3\" central bay"
+        },
+        "gambrel_break_half_span_m": {
+          "value": 2.32,
+          "uncertainty_m": 0.1,
+          "source_file": "barn-wy152c-sheet-1-east-detail.jpg",
+          "sheet": 1,
+          "method": "graphical_scale"
+        },
+        "shed_eave_height_m": {
+          "value": 1.77,
+          "uncertainty_m": 0.15,
+          "source_file": "barn-wy152c-sheet-1-east-detail.jpg",
+          "sheet": 1,
+          "method": "graphical_scale"
+        },
+        "core_eave_height_m": {
+          "value": 3.2,
+          "uncertainty_m": 0.12,
+          "source_file": "barn-wy152c-sheet-1-east-detail.jpg",
+          "sheet": 1,
+          "method": "graphical_scale"
+        },
+        "gambrel_break_height_m": {
+          "value": 5.27,
+          "uncertainty_m": 0.15,
+          "source_file": "barn-wy152c-sheet-1-east-detail.jpg",
+          "sheet": 1,
+          "method": "graphical_scale"
+        },
+        "ridge_height_m": {
+          "value": 6.55,
+          "uncertainty_m": 0.15,
+          "source_file": "barn-wy152c-sheet-1-east-detail.jpg",
+          "sheet": 1,
+          "method": "graphical_scale"
+        }
+      }
+    },
+    "pink_house": {
+      "source_record": "HABS WY-152-A",
+      "buildable": true,
+      "scope": "Documentary outer-envelope draft; additions and dormer details are omitted pending explicit exterior dimensions.",
+      "plan": {
+        "overall_x_m": {
+          "value": 9.1694,
+          "source_file": "house-wy152a-sheet-1-plan-detail.jpg",
+          "sheet": 1,
+          "printed_value": "30'-1\"",
+          "method": "explicit_dimension"
+        },
+        "overall_y_m": {
+          "value": 9.9822,
+          "source_file": "house-wy152a-sheet-1-depth-detail.jpg",
+          "sheet": 1,
+          "printed_value": "32'-9\"",
+          "method": "explicit_dimension"
+        }
+      },
+      "profile": {
+        "eave_height_m": {
+          "value": 2.74,
+          "uncertainty_m": 0.15,
+          "source_file": "house-wy152a-sheet-3-section-detail.jpg",
+          "sheet": 3,
+          "method": "graphical_scale"
+        },
+        "ridge_height_m": {
+          "value": 6.55,
+          "uncertainty_m": 0.15,
+          "source_file": "house-wy152a-sheet-3-section-detail.jpg",
+          "sheet": 3,
+          "method": "graphical_scale"
+        }
+      }
+    }
+  },
+  "draft_relationship": {
+    "barn_from_house": {
+      "distance_m": 41.15,
+      "direction": "northeast",
+      "printed_value": "approximately 135 feet northeast",
+      "source": "HABS WY-152-C catalog description",
+      "use": "draft-space separation only; not runtime placement"
+    }
+  },
+  "blockers": [
+    {
+      "code": "runtime_placement",
+      "status": "unresolved",
+      "detail": "Absolute georeferenced footprints and true-north orientations are not resolved."
+    },
+    {
+      "code": "site_relationship_review",
+      "status": "unresolved",
+      "detail": "The catalog's northeast relationship and the scanned site-plan reading require independent-agent reconciliation before placement."
+    },
+    {
+      "code": "house_secondary_massing",
+      "status": "unresolved",
+      "detail": "Exact exterior dimensions for additions and dormer geometry are not explicit enough in the acquired sheets; they are omitted."
+    },
+    {
+      "code": "minor_cluster",
+      "status": "unresolved",
+      "detail": "Individual dimensions and documentary forms for the bunkhouse, granary, shower, pumphouse, and outhouses were not acquired; optional structures are omitted."
+    }
+  ]
+}

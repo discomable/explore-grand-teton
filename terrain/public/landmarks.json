@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "landmarks": [
+    {
+      "name": "T. A. Moulton Barn",
+      "footprintName": "T. A. Moulton Barn",
+      "position": [
+        4830.2,
+        8264.4
+      ],
+      "setting": {
+        "apron": {
+          "radius": [
+            17.5,
+            13
+          ],
+          "rotation": -0.045,
+          "color": "#765b38",
+          "opacity": 0.58
+        }
+      },
+      "lods": [
+        {
+          "url": "terrain/public/models/ta-moulton-barn-lod0.glb",
+          "maxDistance": 90
+        },
+        {
+          "url": "terrain/public/models/ta-moulton-barn-lod1.glb",
+          "maxDistance": 260
+        },
+        {
+          "url": "terrain/public/models/ta-moulton-barn-lod2.glb",
+          "maxDistance": 100000
+        }
+      ],
+      "source": "2022 USGS LiDAR envelope; NPS/HABS massing; runtime placement from named OSM footprint"
+    },
+    {
+      "name": "Chapel of the Transfiguration",
+      "footprintName": "Chapel of the Transfiguration",
+      "position": [
+        768.8,
+        8339.9
+      ],
+      "setting": {
+        "apron": {
+          "radius": [
+            13.5,
+            15.5
+          ],
+          "rotation": 0.889,
+          "color": "#6d6350",
+          "opacity": 0.5
+        }
+      },
+      "lods": [
+        {
+          "url": "terrain/public/models/chapel-mesh-lod0.glb",
+          "maxDistance": 90
+        },
+        {
+          "url": "terrain/public/models/chapel-mesh-lod1.glb",
+          "maxDistance": 260
+        },
+        {
+          "url": "terrain/public/models/chapel-mesh-lod2.glb",
+          "maxDistance": 100000
+        }
+      ],
+      "_measuredLods": [
+        {
+          "url": "terrain/public/models/chapel-of-the-transfiguration-lod0.glb",
+          "maxDistance": 90
+        },
+        {
+          "url": "terrain/public/models/chapel-of-the-transfiguration-lod1.glb",
+          "maxDistance": 260
+        },
+        {
+          "url": "terrain/public/models/chapel-of-the-transfiguration-lod2.glb",
+          "maxDistance": 100000
+        }
+      ],
+      "source": "image-to-3D mesh fitted to the 2022 USGS 3DEP footprint and ridge, decimated and re-baked through the elevation cameras; swap lods with _measuredLods for the LiDAR-measured version"
+    },
+    {
+      "name": "John Moulton Barn",
+      "footprintName": "John Moulton Barn",
+      "position": [
+        4848.7,
+        7616.5
+      ],
+      "setting": {
+        "apron": {
+          "radius": [
+            14,
+            17
+          ],
+          "rotation": 0,
+          "color": "#6f5a3c",
+          "opacity": 0.5
+        }
+      },
+      "lods": [
+        {
+          "url": "terrain/public/models/john-moulton-barn-lod0.glb",
+          "maxDistance": 300
+        },
+        {
+          "url": "terrain/public/models/john-moulton-barn-lod1.glb",
+          "maxDistance": 600
+        },
+        {
+          "url": "terrain/public/models/john-moulton-barn-lod2.glb",
+          "maxDistance": 100000
+        }
+      ],
+      "source": "image-to-3D gambrel-barn mesh, footprint-fitted to the named OSM footprint (no LiDAR), ridge aligned to the footprint long axis; re-baked through footprint-derived cameras"
+    }
+  ]
+}

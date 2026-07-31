@@ -1,0 +1,25 @@
+{
+ "crs": "EPSG:32612",
+ "res": 20.0,
+ "width": 1416,
+ "height": 2059,
+ "originE": 508020.8068557632,
+ "originN": 4863096.167973563,
+ "url": "vegheight.png",
+ "world": {
+  "centerEasting": 522180.8068557632,
+  "centerNorthing": 4842506.167973563,
+  "datum": 1897.3
+ },
+ "encode": {
+  "heightR": {
+   "maxM": 50.0,
+   "scale": 250.0
+  },
+  "coverG": {
+   "maxPct": 100.0,
+   "scale": 200.0
+  }
+ },
+ "source": "LANDFIRE LF2025 EVH+EVC (detailed coded VALUE decode)"
+}

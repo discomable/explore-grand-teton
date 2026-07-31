@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "id": "jenny_lake_ranger_station",
+  "name": "Jenny Lake Ranger Station",
+  "status": "draft",
+  "priority": 6,
+  "batch_mode": "single",
+  "output_slug": "jenny-lake-ranger-station",
+  "summary": "Exterior-only reconstruction of the relocated Lee Mangus/Manges homestead cabin using HABS WY-108 for geometry and the exact named Jenny Lake Ranger Station footprint for runtime placement.",
+  "scope": {
+    "included": [
+      "Jenny Lake Ranger Station exterior",
+      "Lee Mangus/Manges cabin fabric and documented 1937 east-end addition",
+      "attached entrance porch and exterior steps",
+      "immediate ground contact needed to seat the cabin beneath the existing tree canopy"
+    ],
+    "excluded": [
+      "Jenny Lake Visitor Center and its Crandall Studio fabric",
+      "James or Jimmy Manges Cabin near Cottonwood Creek",
+      "other Jenny Lake Ranger Station Historic District buildings",
+      "walkable interior",
+      "visitor-service props, people, permit displays, and temporary signs"
+    ]
+  },
+  "structures": [
+    {
+      "id": "ranger_station",
+      "name": "Jenny Lake Ranger Station (Lee Mangus/Manges Cabin)",
+      "role": "hero",
+      "architecture_ref": "architecture.json#ranger_station",
+      "required": true,
+      "output_stem": "jenny-lake-ranger-station"
+    }
+  ],
+  "placement": {
+    "status": "resolved_from_named_current_footprint",
+    "authoritative_crs": "runtime_local_coordinates",
+    "source_file": "terrain/public/buildings.json",
+    "source_attribution": "OpenStreetMap contributors (ODbL); Microsoft Building Footprints (ODbL)",
+    "strategy": "Select the exact named Jenny Lake Ranger Station record, retain its polygon without buffering or rectangular replacement, and use HABS WY-108 to reconcile the wall envelope, porch, height, and orientation. Re-resolve by exact name and compare the source-file hash before every deterministic rebuild.",
+    "features": [
+      {
+        "structure": "ranger_station",
+        "selector": {
+          "name": "Jenny Lake Ranger Station"
+        },
+        "source_height_m": 6.9,
+        "source_height_policy": "Do not use as measured architectural truth; HABS WY-108 documents an 18-foot ridge height. Treat the extract height as a placement-dataset value to be reconciled before export.",
+        "footprint_area_m2_approx": 90.54,
+        "centroid_runtime_local": [
+          178.624851,
+          -1884.533201
+        ],
+        "footprint_snapshot": [
+          [
+            183.9,
+            -1889.5
+          ],
+          [
+            180.3,
+            -1877.5
+          ],
+          [
+            173.1,
+            -1879.9
+          ],
+          [
+            177.3,
+            -1891.6
+          ]
+        ]
+      }
+    ],
+    "known_excluded_footprints": [
+      {
+        "name": "Jenny Lake Visitor Center",
+        "reason": "The relocated Harrison Crandall Studio is a different building and is outside this candidate."
+      },
+      {
+        "name": "Manges Cabin",
+        "reason": "This repository record is the separate James/Jimmy Manges Cabin near Cottonwood Creek, not Lee Manges' relocated cabin."
+      }
+    ],
+    "resolution_steps": [
+      "Hash terrain/public/buildings.json and persist the hash in the run artifact.",
+      "Resolve exactly one record named Jenny Lake Ranger Station; reject zero or multiple matches.",
+      "Reject any selector or fallback that resolves Jenny Lake Visitor Center or Manges Cabin.",
+      "Compare the resolved vertices, centroid, and source height with this package snapshot.",
+      "Fit the HABS 20-foot-6-inch by 36-foot-9-inch wall envelope and documented porch within the named current footprint; quarantine rather than scale non-uniformly if they cannot be reconciled.",
+      "Use the current terrain sampler for ground elevation and re-basing; never bake an assumed absolute elevation.",
+      "Confirm the west entrance and building axis against the HABS north arrow and current same-building evidence before capture approval."
+    ],
+    "acceptance": {
+      "exact_named_match_required": true,
+      "maximum_vertex_drift_m": 0.25,
+      "maximum_center_drift_m": 0.25,
+      "maximum_orientation_drift_deg": 2.0,
+      "habs_envelope_reconciliation_required": true,
+      "manual_review_required": true
+    },
+    "stable_runtime_ids": {
+      "ranger_station": "jenny_lake_ranger_station.ranger_station"
+    }
+  },
+  "budgets": {
+    "single": {
+      "lod0": {
+        "max_triangles": 5000,
+        "max_draw_calls": 4
+      },
+      "lod1": {
+        "max_triangles": 1000,
+        "max_draw_calls": 3
+      },
+      "lod2": {
+        "max_triangles": 250,
+        "max_draw_calls": 2
+      },
+      "max_deployed_texture_bytes": 1572864
+    },
+    "material_policy": "Use one compact weathered-log and wood-shingle atlas with a small registered entrance treatment only if source-image rights clear. Keep glazing, stone, and dark hardware within the primitive budget."
+  },
+  "lods": [
+    {
+      "id": "lod0",
+      "max_distance_m": 90,
+      "intent": "Retain measured openings, saddle-notched log ends, entrance porch, gable truss, restrained stone footing, and close canopy contact."
+    },
+    {
+      "id": "lod1",
+      "max_distance_m": 260,
+      "intent": "Retain the long gabled cabin, west entrance porch, primary door and window rhythm, and documented east-end addition."
+    },
+    {
+      "id": "lod2",
+      "max_distance_m": 100000,
+      "intent": "Preserve the low rectangular wall mass, steep gable silhouette, and west porch projection."
+    }
+  ],
+  "projection": {
+    "enabled": true,
+    "target_method": "fixed_orthographic_render_from_habs_approved_geometry",
+    "required_views": [
+      {
+        "id": "west_entrance",
+        "structure": "ranger_station",
+        "source_refs": [
+          "loc_habs_wy_108",
+          "nps_jenny_lake_ranger_station"
+        ],
+        "purpose": "Entrance porch, vertical-plank door, multi-light window, diagonal-log king-post gable treatment, and public identity."
+      },
+      {
+        "id": "north_long_elevation",
+        "structure": "ranger_station",
+        "source_refs": [
+          "loc_habs_wy_108",
+          "nps_jenny_lake_historic_district"
+        ],
+        "purpose": "Long-wall proportions, three-window rhythm, log courses, addition junction, and roof character."
+      },
+      {
+        "id": "east_service_end",
+        "structure": "ranger_station",
+        "source_refs": [
+          "loc_habs_wy_108"
+        ],
+        "purpose": "Documented east-end addition, door and window positions, and gable-end log treatment."
+      }
+    ],
+    "minimum_reference_gate": {
+      "official_identity_source_required": true,
+      "measured_drawing_required": true,
+      "minimum_useful_same_building_photographic_exterior_elevations": 2,
+      "rights_resolved_before_image_tool": true
+    },
+    "prompt_constraints": [
+      "Preserve the exact registered target silhouette, measured roof, porch, openings, crop, camera, and transparent/background mask.",
+      "Use only references proven to depict the Jenny Lake Ranger Station built from Lee Mangus/Manges' cabin.",
+      "Exclude the Crandall Studio Jenny Lake Visitor Center and the separate James/Jimmy Manges Cabin near Cottonwood Creek.",
+      "Keep HABS-documented saddle-jointed horizontal log walls, wood-shingle gable roof, stone footing, multi-light windows, plank doors, west entrance porch, and diagonal-log gable treatment.",
+      "Do not infer geometry, dimensions, placement, roof topology, openings, additions, or interior content from image generation.",
+      "Do not add people, visitor displays, modern furniture, vehicles, text, watermark, landscape, lake, mountains, sky, featureless black rectangles, or baked directional shadows.",
+      "Keep tileable materials free of perspective, vegetation, sky, and directional sunlight."
+    ],
+    "audit_required": [
+      "target_path",
+      "reference_paths",
+      "prompt",
+      "model_or_tool",
+      "output_path",
+      "sha256",
+      "review_status"
+    ]
+  },
+  "validation": {
+    "required_capture_views": [
+      "close_west_entrance",
+      "approach_from_south_jenny_lake",
+      "distant_tree_canopy_context"
+    ],
+    "required_lighting": [
+      "daylight",
+      "overcast"
+    ],
+    "checks": [
+      "single-candidate triangle, material-primitive, and texture budgets",
+      "one active LOD for the landmark",
+      "terrain contact and re-basing",
+      "exact named footprint retention",
+      "HABS envelope, ridge height, porch, and opening registration",
+      "projection registration at frontal and grazing angles",
+      "closed exterior envelope with no walkable interior",
+      "collision footprint retention",
+      "existing canopy, paths, and visitor-area context retained outside physical clearance",
+      "no production asset or manifest mutation"
+    ]
+  },
+  "quarantine": {
+    "retry_limit": 1,
+    "gates": [
+      {
+        "code": "sources",
+        "status_on_failure": "quarantined_sources",
+        "conditions": [
+          "The candidate lacks the official HABS WY-108 identity and measured drawing record.",
+          "Fewer than two useful, same-building photographic exterior elevations have item-level creator and rights metadata before projection.",
+          "Any acquired artifact lacks final URL, creator, rights statement, retrieval date, byte count, and SHA-256.",
+          "A visual reference may show the Jenny Lake Visitor Center, James/Jimmy Manges Cabin, or another rustic ranger station."
+        ]
+      },
+      {
+        "code": "placement",
+        "status_on_failure": "quarantined_geometry",
+        "conditions": [
+          "The exact Jenny Lake Ranger Station footprint is absent or non-unique.",
+          "The selected footprint is Jenny Lake Visitor Center or Manges Cabin.",
+          "Vertex or center drift exceeds 0.25 metres without an approved source migration.",
+          "The HABS envelope, current footprint, and building orientation cannot be reconciled without unsupported distortion."
+        ]
+      },
+      {
+        "code": "geometry",
+        "status_on_failure": "quarantined_geometry",
+        "conditions": [
+          "The 20-foot-6-inch by 36-foot-9-inch wall envelope, 18-foot ridge, primary gable, west porch, or documented east addition is not traceable to HABS WY-108.",
+          "The west entrance porch and primary gable silhouette are not recognizable in every LOD.",
+          "Image generation determines dimensions, roof topology, placement, additions, or openings.",
+          "Roofs intersect walls incorrectly, daylight gaps appear, or the stone footing floats."
+        ]
+      },
+      {
+        "code": "visual",
+        "status_on_failure": "quarantined_visual",
+        "conditions": [
+          "Projection edges drift from the approved orthographic target.",
+          "Black placeholder openings, baked landscape, cross-building contamination, invented architectural features, or unsupported signage is visible.",
+          "Vegetation clearing removes the surrounding canopy beyond physical building, porch, and collision clearance."
+        ]
+      },
+      {
+        "code": "performance",
+        "status_on_failure": "quarantined_performance",
+        "conditions": [
+          "Any LOD, material-primitive, or texture budget is exceeded.",
+          "More than one landmark LOD is active.",
+          "The required capture suite reports console errors, failed asset requests, or unacceptable frame-time regression."
+        ]
+      }
+    ]
+  },
+  "promotion": {
+    "allowed": false,
+    "reason": "This package is draft-only. Promotion requires separate user approval for this named candidate."
+  }
+}

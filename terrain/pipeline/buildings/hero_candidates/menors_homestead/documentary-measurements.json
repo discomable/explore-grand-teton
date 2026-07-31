@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "candidate_id": "menors_homestead",
+  "units": "metres",
+  "source": {
+    "id": "loc_menors_ferry_habs_wy_24",
+    "survey_number": "HABS WY-24",
+    "call_number": "HABS WYO,20-MOOS,2-",
+    "record_url": "https://www.loc.gov/item/wy0036/"
+  },
+  "presentation_basis": "HABS measured main-building record with documentary openings; no ferry, storehouse, smokehouse, Maud Noble Cabin, or transportation barn geometry.",
+  "conversion": {
+    "foot_to_m": 0.3048,
+    "inch_to_m": 0.0254
+  },
+  "measurements": {
+    "overall_frontage_m": {
+      "value": 14.0843,
+      "imperial": "46 ft 2.5 in",
+      "source_sheet": 8,
+      "method": "dimension_transcription",
+      "confidence": "high"
+    },
+    "original_cabin_width_m": {
+      "value": 5.4864,
+      "imperial": "18 ft 0 in",
+      "source_sheet": 8,
+      "method": "dimension_transcription",
+      "confidence": "high"
+    },
+    "original_cabin_depth_m": {
+      "value": 5.3975,
+      "imperial": "17 ft 8.5 in",
+      "source_sheet": 8,
+      "method": "dimension_transcription",
+      "confidence": "medium_high"
+    },
+    "central_addition_width_m": {
+      "value": 3.7846,
+      "imperial": "12 ft 5 in",
+      "source_sheet": 8,
+      "method": "dimension_transcription",
+      "confidence": "high"
+    },
+    "central_addition_depth_m": {
+      "value": 5.207,
+      "imperial": "17 ft 1 in",
+      "source_sheet": 8,
+      "method": "dimension_transcription",
+      "confidence": "medium_high"
+    },
+    "store_width_m": {
+      "value": 4.8133,
+      "imperial": "15 ft 9.5 in",
+      "source_sheet": 8,
+      "method": "dimension_transcription",
+      "confidence": "high"
+    },
+    "store_body_depth_m": {
+      "value": 6.6294,
+      "imperial": "21 ft 9 in",
+      "source_sheet": 8,
+      "method": "dimension_transcription",
+      "confidence": "high"
+    },
+    "store_south_porch_depth_m": {
+      "value": 1.9558,
+      "imperial": "6 ft 5 in",
+      "source_sheet": 8,
+      "method": "dimension_transcription",
+      "confidence": "high"
+    },
+    "exterior_door_height_m": {
+      "value": 1.9431,
+      "imperial": "6 ft 4.5 in",
+      "source_sheet": 12,
+      "method": "dimension_transcription",
+      "confidence": "high"
+    },
+    "cabin_eave_height_m": {
+      "value": 2.31,
+      "source_sheets": [
+        9,
+        10,
+        11
+      ],
+      "method": "scaled_from_habs_graphic_bar",
+      "confidence": "medium",
+      "uncertainty_m": 0.15
+    },
+    "cabin_ridge_height_m": {
+      "value": 2.72,
+      "source_sheets": [
+        9,
+        10,
+        11
+      ],
+      "method": "scaled_from_habs_graphic_bar",
+      "confidence": "medium",
+      "uncertainty_m": 0.18
+    },
+    "store_eave_height_m": {
+      "value": 2.34,
+      "source_sheets": [
+        9,
+        10,
+        11
+      ],
+      "method": "scaled_from_habs_graphic_bar",
+      "confidence": "medium",
+      "uncertainty_m": 0.15
+    },
+    "store_ridge_height_m": {
+      "value": 3.25,
+      "source_sheets": [
+        9,
+        10,
+        11
+      ],
+      "method": "scaled_from_habs_graphic_bar",
+      "confidence": "medium",
+      "uncertainty_m": 0.2
+    },
+    "world_anchor_xz_m": {
+      "value": [
+        1020.244,
+        8431.765
+      ],
+      "source": "terrain/public/buildings.json named Menor's Homestead footprint",
+      "method": "area_weighted_centroid",
+      "confidence": "medium_high"
+    },
+    "storehouse_check_anchor_xz_m": {
+      "value": [
+        1033.324,
+        8433.308
+      ],
+      "source": "terrain/public/buildings.json named Menor's Storehouse footprint",
+      "method": "area_weighted_centroid",
+      "confidence": "medium_high"
+    },
+    "world_rotation_y_deg": {
+      "value": -6.07,
+      "source": "terrain/public/buildings.json named Menor's Homestead longest edge",
+      "method": "footprint_edge_bearing",
+      "confidence": "medium",
+      "uncertainty_deg": 5.0
+    }
+  },
+  "documentary_openings": {
+    "rule": "LOD0/1 opening panels follow HABS sheets 8-12. They remain shallow, non-black surface cues until a rights-cleared registered facade is approved.",
+    "south_elevation": [
+      "paired window in original west cabin",
+      "window and door in central board-and-batten addition",
+      "glazed exterior door in store gable"
+    ],
+    "north_elevation": [
+      "single store window",
+      "glazed exterior door in central addition"
+    ],
+    "east_elevation": [
+      "single store window",
+      "south porch recess"
+    ],
+    "west_elevation": [
+      "single window and glazed exterior door arrangement documented by HABS"
+    ]
+  },
+  "known_uncertainties": [
+    "Vertical dimensions and pitches are scale-derived estimates because sheets 9-11 provide graphic scales but no explicit overall height dimensions.",
+    "The HABS notes identify restoration-era opening changes; final target presentation date remains unresolved.",
+    "The named runtime footprint is simplified and must be registered against the HABS site plan before production promotion.",
+    "No LiDAR vertical cross-check has been completed."
+  ]
+}

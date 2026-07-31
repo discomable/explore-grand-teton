@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "candidate_id": "andy_chambers",
+  "download_root": "terrain/pipeline/data/hero-candidates/andy-chambers/sources",
+  "references": [
+    {
+      "id": "loc_habs_wy83",
+      "title": "Andy Chambers Homestead, HABS WY-83",
+      "author": "Historic American Buildings Survey",
+      "source": "Library of Congress",
+      "url": "https://www.loc.gov/pictures/item/wy0032/",
+      "type": "measured_drawings_photographs_history",
+      "coverage": "Ranch house/cabin; six photographs, five measured drawings, eight data pages and one caption page",
+      "license": "No known restrictions on images made by the U.S. Government; verify any item explicitly identified as copied from another source.",
+      "rights_url": "https://www.loc.gov/rr/print/res/114_habs.html",
+      "retrieval_status": "registered_not_downloaded",
+      "sha256": null,
+      "confidence": "high"
+    },
+    {
+      "id": "nps_nrhp_mormon_row",
+      "title": "National Register of Historic Places Registration Form: Mormon Row Historic District",
+      "author": "National Park Service",
+      "source": "National Park Service NPGallery",
+      "url": "https://npgallery.nps.gov/GetAsset/b57255e6-80fd-4a0d-8a03-674367c83d1b",
+      "type": "site_map_architectural_descriptions_history",
+      "coverage": "Andy Chambers residence #1312, barn #1313, full agricultural complex and adjacent Chambers sites",
+      "license": "U.S. Government publication; use as documentary reference. Inspect individual embedded image credits before redistributing images.",
+      "retrieval_status": "registered_not_downloaded",
+      "sha256": null,
+      "confidence": "high"
+    },
+    {
+      "id": "nps_mormon_row_history",
+      "title": "Mormon Row",
+      "author": "National Park Service",
+      "source": "Grand Teton National Park",
+      "url": "https://www.nps.gov/grte/learn/historyculture/mormon.htm",
+      "type": "historical_and_visual_reference",
+      "coverage": "Official overview of the cabin, stable and surviving Chambers windmill narrative",
+      "license": "NPS web content; reference use. Do not assume third-party historical images are public domain without checking their credits.",
+      "retrieval_status": "registered_not_downloaded",
+      "sha256": null,
+      "confidence": "high"
+    },
+    {
+      "id": "nps_andrew_chambers_barn",
+      "title": "Andrew Chambers Barn",
+      "author": "National Park Service",
+      "source": "Grand Teton National Park",
+      "url": "https://www.nps.gov/places/000/andrew-chambers-barn.htm",
+      "type": "historical_and_visual_reference",
+      "coverage": "Official place record for the homestead, log house and stable",
+      "license": "NPS web content; source page image may be reused only after its displayed credit and NPS image guidance are recorded.",
+      "retrieval_status": "registered_not_downloaded",
+      "sha256": null,
+      "confidence": "high"
+    },
+    {
+      "id": "nps_cultural_landscape",
+      "title": "Mormon Row Historic District Cultural Landscape",
+      "author": "National Park Service",
+      "source": "National Park Service Cultural Landscapes",
+      "url": "https://home.nps.gov/articles/890056.htm",
+      "type": "setting_and_landscape_reference",
+      "coverage": "Cluster relationships, fences, ditches, fields, windrows and NPS overview photograph",
+      "license": "NPS page text is a U.S. Government work; use page images only according to their displayed credit. The Andy Chambers overview is credited NPS/C. Mardorf.",
+      "retrieval_status": "registered_not_downloaded",
+      "sha256": null,
+      "confidence": "high"
+    },
+    {
+      "id": "nps_photo_k_finch",
+      "title": "Andy Chambers homestead",
+      "author": "K. Finch",
+      "source": "National Park Service media gallery",
+      "url": "https://www.nps.gov/media/photo/gallery-item.htm?gid=FCF8CFA1-155D-451F-67A5268A72280213&id=59ea9ea5-155d-451f-67e8-3706acd2e25d",
+      "type": "overview_photograph",
+      "coverage": "Modern homestead context and structure relationships",
+      "license": "NPS states that images credited to NPS without a copyright symbol are public domain; preserve the displayed K. Finch/NPS credit and recheck the item before redistribution.",
+      "retrieval_status": "registered_not_downloaded",
+      "sha256": null,
+      "confidence": "medium"
+    }
+  ],
+  "identity_exclusions": [
+    "Roy Chambers Homestead structures south of Ditch Creek",
+    "Clark and Veda Moulton Homestead",
+    "T. A. Moulton Barn",
+    "John Moulton Homestead"
+  ],
+  "acquisition_rules": [
+    "Download only selected HABS sheets and reference-sized images required by the worker; do not mirror complete collections.",
+    "Record the resolved download URL, retrieval date, item-level credit, licence and SHA-256 before using a local file.",
+    "A page-level source record is not sufficient permission to redistribute an embedded third-party image."
+  ],
+  "known_uncertainties": [
+    "The HABS catalogue coordinate is a search seed, not a surveyed cluster anchor.",
+    "The NPS visitor narrative loosely associates a 1946 windmill with the Chambers homestead, while the National Register description labels a contributing 1946 windmill in the adjacent Roy Chambers complex; placement must be resolved from the site map and field evidence.",
+    "The current condition of openings and fabric may differ from the HABS and National Register documentation."
+  ]
+}

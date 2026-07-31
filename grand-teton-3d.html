@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Grand Teton — Floating Range</title>
+<style>
+  :root{
+    --ink:#eef3f6; --dim:#b9c6cd; --glass:rgba(12,20,26,0.62);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0b141a;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--ink)}
+  canvas{display:block}
+
+  #overlay{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 30%, rgba(30,52,66,.92), rgba(8,14,18,.96));
+    z-index:50;transition:opacity .5s;cursor:pointer;
+  }
+  #overlay.hidden{opacity:0;pointer-events:none}
+  .panel{max-width:520px;padding:36px 42px;text-align:center}
+  .eyebrow{letter-spacing:.35em;font-size:11px;color:#8fb6c9;text-transform:uppercase;margin-bottom:10px}
+  h1{font-size:34px;font-weight:300;letter-spacing:.04em;margin-bottom:6px}
+  h1 b{font-weight:700}
+  .sub{color:var(--dim);font-size:14px;margin-bottom:26px;line-height:1.5}
+  .keys{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;text-align:left;font-size:13px;color:var(--dim);margin:0 auto 28px;max-width:340px}
+  kbd{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 8px;font-size:12px;color:var(--ink);font-family:inherit;white-space:nowrap}
+  .cta{font-size:15px;color:#dff0f8;border:1px solid rgba(180,220,240,.4);border-radius:999px;padding:10px 26px;display:inline-block;animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(160,215,240,.25)}50%{box-shadow:0 0 0 12px rgba(160,215,240,0)}}
+  #loadmsg{margin-top:18px;font-size:12px;color:#7fa3b3;letter-spacing:.1em}
+  .ft-title{letter-spacing:.3em;font-size:10px;color:#8fb6c9;text-transform:uppercase;margin:2px 0 10px}
+  #ftGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px}
+  .ft{
+    pointer-events:auto;cursor:pointer;font:inherit;font-size:12px;color:var(--ink);
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:9px;
+    padding:8px 6px;transition:background .15s,border-color .15s;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ft:hover{background:rgba(160,215,240,.18);border-color:rgba(180,220,240,.5)}
+
+  .hud{position:fixed;z-index:20;pointer-events:none;user-select:none}
+  #title{top:16px;left:18px;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:rgba(238,243,246,.85);text-shadow:0 1px 4px rgba(0,0,0,.5)}
+  #mode{top:16px;right:18px;font-size:11px;letter-spacing:.2em;background:var(--glass);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:6px 14px;backdrop-filter:blur(6px)}
+  #stats{bottom:16px;right:18px;font-size:11px;color:rgba(238,243,246,.75);text-align:right;text-shadow:0 1px 3px rgba(0,0,0,.6);line-height:1.6}
+  #hint{bottom:16px;left:18px;font-size:11px;color:rgba(238,243,246,.6);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  #crosshair{top:50%;left:50%;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.85);transform:translate(-50%,-50%);box-shadow:0 0 4px rgba(0,0,0,.6)}
+  /* Skyrim-style location HUD: compass strip (canvas draws its own glass) + discovery splash */
+  #compass{top:14px;left:50%;transform:translateX(-50%);width:520px;height:64px;display:none}
+  #discovery{top:23%;left:0;right:0;text-align:center;opacity:0}
+  #discovery .kicker{font-size:11px;letter-spacing:.45em;text-transform:uppercase;color:#cfe0ea;text-shadow:0 1px 6px rgba(0,0,0,.85);margin-bottom:10px}
+  #discovery .rule{width:240px;height:1px;margin:0 auto;background:linear-gradient(90deg,transparent,rgba(238,243,246,.7),transparent)}
+  #discovery .name{font-family:Georgia,'Times New Roman',serif;font-size:40px;font-weight:400;letter-spacing:.1em;color:#f4f8fb;text-shadow:0 2px 12px rgba(0,0,0,.8);padding:10px 0 12px}
+  #underwater{position:fixed;inset:0;background:rgba(16,58,66,.45);z-index:15;pointer-events:none;display:none}
+  /* minimap: glass panel top-right, below the #mode pill */
+  #minimap{top:52px;right:18px;width:230px;height:230px;border-radius:16px;border:1px solid rgba(255,255,255,.15);background:var(--glass);backdrop-filter:blur(6px);box-shadow:0 6px 22px rgba(0,0,0,.4);display:none}
+  /* data attribution (ODbL requires visible credit) */
+  #credit{bottom:4px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.02em;color:rgba(238,243,246,.5);text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap;pointer-events:none}
+  /* quality settings */
+  #gear{position:fixed;z-index:22;top:16px;right:260px;width:30px;height:30px;border-radius:50%;background:var(--glass);border:1px solid rgba(255,255,255,.15);color:var(--ink);font-size:15px;line-height:30px;text-align:center;cursor:pointer;backdrop-filter:blur(6px);user-select:none}
+  #gear:hover{background:rgba(160,215,240,.2)}
+  #settings{position:fixed;z-index:40;top:56px;right:18px;width:230px;padding:14px;border-radius:12px;background:var(--glass);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);box-shadow:0 8px 26px rgba(0,0,0,.5);display:none;color:var(--ink)}
+  #settings.open{display:block}
+  .set-h{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8fb6c9;margin-bottom:10px}
+  #set-opts{display:flex;flex-direction:column;gap:6px}
+  .set-opt{pointer-events:auto;cursor:pointer;font:inherit;font-size:12px;color:var(--ink);text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:7px 10px}
+  .set-opt:hover{background:rgba(160,215,240,.16)}
+  .set-opt.on{background:rgba(160,215,240,.28);border-color:rgba(180,220,240,.55)}
+  .set-note{font-size:10px;color:var(--dim);line-height:1.45;margin-top:10px}
+
+  /* touch controls */
+  .touch{display:none;position:fixed;z-index:30;user-select:none;-webkit-user-select:none;touch-action:none}
+  body.touchmode .touch{display:block}
+  #joy{left:26px;bottom:36px;width:118px;height:118px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22)}
+  #joyknob{position:absolute;left:50%;top:50%;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.22);transform:translate(-50%,-50%)}
+  .tbtn{right:24px;width:58px;height:58px;border-radius:50%;background:var(--glass);border:1px solid rgba(255,255,255,.25);color:var(--ink);font-size:12px;display:flex;align-items:center;justify-content:center;letter-spacing:.05em}
+  #btnFly{bottom:180px}
+  #btnUp{bottom:112px}
+  #btnDown{bottom:44px}
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div class="panel">
+    <div class="eyebrow">Wyoming · 43.74° N, 110.80° W</div>
+    <h1>GRAND <b>TETON</b></h1>
+    <div class="sub">A floating slice of the Teton Range and Jackson Hole — Jenny Lake, Jackson Lake, the Snake River and the Cathedral Group, adrift in open sky.</div>
+    <div class="keys">
+      <kbd>W A S D</kbd><span>move</span>
+      <kbd>Mouse</kbd><span>look around</span>
+      <kbd>F</kbd><span>toggle walk / fly</span>
+      <kbd>G</kbd><span>drive / park the car</span>
+      <kbd>Space</kbd><span>jump · ascend (fly)</span>
+      <kbd>C</kbd><span>descend (fly) · camera (drive)</span>
+      <kbd>Shift</kbd><span>sprint / fly fast</span>
+      <kbd>L</kbd><span>labels: compass · pills · off</span>
+      <kbd>R</kbd><span>return to trailhead</span>
+      <kbd>T</kbd><span>play / pause the sun</span>
+      <kbd>[ ]</kbd><span>scrub time of day</span>
+      <kbd>P</kbd><span>save screenshot for review</span>
+    </div>
+    <div class="ft-title">Fast travel</div>
+    <div id="ftGrid"></div>
+    <div class="cta" id="ctaText">Click to enter the park</div>
+    <div id="loadmsg">Carving the range…</div>
+  </div>
+</div>
+
+<div class="hud" id="title">Grand Teton · Floating Range</div>
+<div class="hud" id="mode">⛰ WALK</div>
+<div class="hud" id="stats"></div>
+<div class="hud" id="hint">Esc to release mouse</div>
+<div class="hud" id="crosshair"></div>
+<div class="hud" id="credit">Terrain USGS · imagery USDA NAIP · roads/buildings © OpenStreetMap contributors &amp; Microsoft (ODbL) · names USGS GNIS · car &ldquo;Range Rover&rdquo; by IvOfficial (CC-BY) via Poly Pizza</div>
+<div id="gear" title="Graphics quality (O)">⚙</div>
+<div class="hud" id="toast" style="top:88px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.15em;background:var(--glass);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:6px 14px;opacity:0;transition:opacity .3s"></div>
+<canvas class="hud" id="compass"></canvas>
+<div class="hud" id="discovery">
+  <div class="kicker">Location discovered</div>
+  <div class="rule"></div>
+  <div class="name" id="discName"></div>
+  <div class="rule"></div>
+</div>
+<canvas class="hud" id="minimap"></canvas>
+<div id="underwater"></div>
+
+<div class="touch" id="joy"><div id="joyknob"></div></div>
+<div class="touch tbtn" id="btnFly">FLY</div>
+<div class="touch tbtn" id="btnUp">▲</div>
+<div class="touch tbtn" id="btnDown">▼</div>
+
+<script>
+/* Bulk height+imagery tiles are hosted on Cloudflare R2 so the git repo + deploy stay lean
+   (code only). Local dev (localhost) serves them from ./terrain/public as before; the public
+   deploy pulls them from R2. Override for testing with ?tiles=<baseUrl> ( ?tiles= forces local ).
+   Only the ~13 MB of small baked assets (manifests, ao/roads/landcover/horizon, atlas) stay on-origin. */
+(function(){
+  var R2='https://pub-7e6650521824431097870dcf01f3e4e2.r2.dev/';
+  var local=['localhost','127.0.0.1',''].indexOf(location.hostname)>=0;
+  var qs=new URLSearchParams(location.search).get('tiles');
+  // SECURITY: ?tiles repoints the tile source (dev/testing). On the public deploy an ARBITRARY
+  // origin would let a crafted ?tiles=… link load a stranger's imagery into a victim's view (and
+  // send their browser to that host), so off localhost accept only same-origin / R2 / relative.
+  if(qs!==null && !local){
+    var ok = qs==='' || qs.charAt(0)==='/' || qs.indexOf(R2)===0 || qs.indexOf(location.origin)===0;
+    if(!ok) qs=null;                               // reject foreign origins → fall back to R2
+  }
+  var base = (qs!==null) ? qs : (local ? '' : R2);
+  if(base){ if(base.slice(-1)!=='/') base+='/'; window.GT_TILE_CDN=base; }
+  // Published so 92-boot.js can fall back to R2 when localhost has no tiles baked yet
+  // (fresh clone). GT_TILE_EXPLICIT records that ?tiles= was given, so an author who
+  // deliberately forced local ( ?tiles= ) is never silently redirected off-origin.
+  window.GT_TILE_R2=R2;
+  window.GT_TILE_EXPLICIT=(qs!==null);
+})();
+</script>
+<script>
+/* WebGL2 capability gate — a public audience includes old phones and locked-down laptops. Show a
+   plain message instead of a blank/half-broken page when WebGL2 is unavailable. Runs BEFORE the app
+   scripts so the message stands even if renderer init later throws. */
+(function(){
+  var ok=false; try{ ok=!!document.createElement('canvas').getContext('webgl2'); }catch(e){}
+  if(ok) return;
+  window.GT_NO_WEBGL2=true;
+  var cta=document.getElementById('ctaText'), msg=document.getElementById('loadmsg');
+  if(cta){ cta.textContent='This experience needs WebGL2'; cta.style.pointerEvents='none'; cta.style.opacity='.55'; }
+  if(msg){ msg.textContent='Your browser or GPU doesn’t support WebGL2 — try an up-to-date Chrome, Edge or Firefox on desktop.'; }
+})();
+</script>
+<script type="importmap">
+{"imports":{
+  "three":"/node_modules/three/build/three.module.js",
+  "three/addons/":"/node_modules/three/examples/jsm/"
+}}
+</script>
+<script type="module" src="terrain/src/main.js"></script>
+</body>
+</html>

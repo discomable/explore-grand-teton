@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "candidate_id": "cunningham_cabin",
+  "download_root": "terrain/pipeline/data/hero-candidates/cunningham-cabin/sources",
+  "references": [
+    {
+      "source_id": "loc_habs_wy0038",
+      "title": "Cunningham Cabin, Between Snake River & U.S. Route 89, Moose, Teton County, WY",
+      "author": "Historic American Buildings Survey",
+      "source": "https://www.loc.gov/pictures/item/wy0038/",
+      "type": "primary_measured_drawings_and_photographs",
+      "call_number": "HABS WYO,20-MOOS.V,2-",
+      "survey_number": "HABS WY-25",
+      "holdings": {
+        "photographs": 3,
+        "measured_drawings": 5,
+        "data_pages": 5
+      },
+      "license": "No known restrictions on images made by the U.S. Government; verify the HABS rights advisory for any image copied from another source.",
+      "rights_url": "https://www.loc.gov/rr/print/res/114_habs.html",
+      "redistribution": "allowed_after_item_level_rights_check",
+      "confidence": "highest",
+      "uses": [
+        "dimensions",
+        "floor_plan",
+        "all_elevations",
+        "construction_details",
+        "same-building photographic identity"
+      ],
+      "acquisition": {
+        "status": "deferred",
+        "required": true,
+        "sha256": null,
+        "note": "Acquire all five sheets and three photographs through the LOC record; hash each file in source-acquisition.json."
+      }
+    },
+    {
+      "source_id": "nps_nrhp_73000225",
+      "title": "Cunningham Cabin National Register of Historic Places Inventory—Nomination Form",
+      "author": "National Park Service",
+      "source": "https://npgallery.nps.gov/AssetDetail/b97e9eb5-3e62-41e4-8b92-a0c156935f02/",
+      "download": "https://npgallery.nps.gov/GetAsset/b97e9eb5-3e62-41e4-8b92-a0c156935f02",
+      "type": "primary_historic_register_record",
+      "nris_id": "73000225",
+      "license": "United States federal government record; public-domain documentary text and form. Confirm any embedded credited imagery separately.",
+      "redistribution": "documentary_record_allowed",
+      "confidence": "high",
+      "uses": [
+        "historic_identity",
+        "restoration_state",
+        "double-pen typology",
+        "saddle-V notching",
+        "sod-covered double-board roof",
+        "site context"
+      ],
+      "acquisition": {
+        "status": "deferred",
+        "required": true,
+        "reported_size_bytes": 434864,
+        "sha256": null
+      }
+    },
+    {
+      "source_id": "nps_cunningham_place",
+      "title": "Cunningham Cabin",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/places/000/cunningham-cabin.htm",
+      "type": "official_current_site_and_history",
+      "license": "NPS page text is a federal-government source. The displayed photograph is credited NPS Photo/C. Adams; do not redistribute or use it as a texture until item-level rights are confirmed.",
+      "redistribution": "text_reference_only_until_photo_rights_confirmed",
+      "confidence": "high",
+      "uses": [
+        "current appearance review",
+        "dogtrot definition",
+        "visitor approach context",
+        "same-building identity"
+      ],
+      "acquisition": {
+        "status": "metadata_only",
+        "required": true,
+        "sha256": null
+      }
+    },
+    {
+      "source_id": "nps_jackson_hole_history_ch9",
+      "title": "A Place Called Jackson Hole: Chapter 9",
+      "author": "National Park Service",
+      "source": "https://npshistory.com/publications/grte/hrs/chap9.htm",
+      "type": "official_historic_context",
+      "license": "National Park Service historical publication; use as documentary reference. Confirm item-level rights before redistributing its photograph.",
+      "redistribution": "text_reference_only_until_photo_rights_confirmed",
+      "confidence": "high",
+      "uses": [
+        "sod_roof_confirmation",
+        "historic_context"
+      ],
+      "acquisition": {
+        "status": "metadata_only",
+        "required": false,
+        "sha256": null
+      }
+    },
+    {
+      "source_id": "osm_way_106472595",
+      "title": "OpenStreetMap Cunningham Cabin building footprint",
+      "author": "OpenStreetMap contributors",
+      "source": "https://www.openstreetmap.org/way/106472595",
+      "type": "georeferenced_placement",
+      "license": "Open Database License 1.0 (ODbL); attribute OpenStreetMap contributors.",
+      "rights_url": "https://www.openstreetmap.org/copyright",
+      "redistribution": "derived_data_requires_ODbL_attribution_and_compliance",
+      "confidence": "medium_high",
+      "uses": [
+        "draft_centroid",
+        "draft_orientation",
+        "footprint_cross_check"
+      ],
+      "observed": {
+        "queried_at": "2026-07-28",
+        "element_version": 3,
+        "centroid_latitude": 43.7786094,
+        "centroid_longitude": -110.5582988,
+        "long_axis_m": 13.1,
+        "short_axis_m": 5.3,
+        "long_axis_bearing_deg_true": 178.2
+      },
+      "acquisition": {
+        "status": "queried_not_archived",
+        "required": true,
+        "sha256": null,
+        "note": "Archive the exact OSM element response with timestamp before production promotion."
+      }
+    },
+    {
+      "source_id": "commons_mayer_2006",
+      "title": "Cunningham Cabin in Jackson Hole",
+      "author": "Daniel Mayer",
+      "source": "https://commons.wikimedia.org/wiki/File:Cunningham_Cabin_in_Jackson_Hole.JPG",
+      "type": "licensed_context_photograph",
+      "license": "CC BY-SA 3.0 Unported (also offered under GFDL and earlier CC BY-SA versions); retain author attribution and share-alike obligations for derivatives.",
+      "rights_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "redistribution": "allowed_with_attribution_and_share_alike",
+      "confidence": "high",
+      "uses": [
+        "current_materials",
+        "landscape_context",
+        "same-building_visual_check"
+      ],
+      "object_location": {
+        "latitude": 43.778889,
+        "longitude": -110.557778
+      },
+      "acquisition": {
+        "status": "deferred",
+        "required": false,
+        "sha256": null
+      }
+    }
+  ],
+  "source_exclusions": [
+    "Do not use photographs of similarly named Cunningham cabins outside Grand Teton National Park.",
+    "Do not use the attraction or parking coordinates as the building origin.",
+    "Do not use uncredited search-result images for projection or texture synthesis.",
+    "Do not infer the historic pre-1956 cabin state from the documented restored present structure."
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "candidate_id": "chapel_transfiguration",
+  "measurement_policy": {
+    "precedence": [
+      "official measured architectural record",
+      "classified LiDAR",
+      "named georeferenced current footprint",
+      "calibrated multiple same-building photographs",
+      "explicit estimate"
+    ],
+    "rule": "Image generation may change registered exterior surface appearance only; it may not determine geometry, placement, roof topology, openings, or any interior content.",
+    "units": "metres"
+  },
+  "structures": [
+    {
+      "id": "chapel",
+      "name": "Chapel of the Transfiguration",
+      "role": "hero",
+      "source_refs": [
+        "nps_nrhp_nomination_80004057",
+        "nps_chapel_place",
+        "nps_historic_properties_guide",
+        "nps_menors_ferry_district",
+        "runtime_named_building_footprints"
+      ],
+      "source_backed_facts": [
+        {
+          "fact": "The chapel was constructed in 1925 by local craftsmen and is identified as Western Craftsman architecture.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The main chapel is a rectangular building measuring approximately 22 feet by 50 feet.",
+          "metric": {
+            "width_m_approx": 6.71,
+            "length_m_approx": 15.24
+          },
+          "confidence": "high"
+        },
+        {
+          "fact": "The walls are horizontally laid, bark-stripped lodgepole pine logs with saddle-notched corners and sawn log ends extending beyond the walls.",
+          "confidence": "high"
+        },
+        {
+          "fact": "A moderately pitched wood-shake gable covers the main body and similar smaller gables cover documented projections.",
+          "confidence": "high"
+        },
+        {
+          "fact": "Raking-edge fascias extend beyond the roof plane and terminate in tapered spear-like ends.",
+          "confidence": "high"
+        },
+        {
+          "fact": "The front entrance is a beveled vertical-plank door with decorative surface-mounted wrought-iron latch and hinges.",
+          "confidence": "high"
+        },
+        {
+          "fact": "Lattice casement windows occur along the nave and sacristy side walls; a large fixed-sash altar window is centered in the altar-end wall.",
+          "confidence": "high"
+        },
+        {
+          "fact": "A roughly 14-foot-square sacristy flanks the sanctuary to the northeast.",
+          "metric": {
+            "sacristy_side_m_approx": 4.27
+          },
+          "confidence": "high"
+        },
+        {
+          "fact": "The complex is described as oriented toward the southeast and enclosed by a lodgepole-pine buck-and-pole fence.",
+          "confidence": "high"
+        }
+      ],
+      "massing": {
+        "storeys": 1,
+        "primary_body": "long rectangular nave and sanctuary",
+        "primary_roof": "moderately pitched gable",
+        "secondary_roofs": "smaller gables over documented projections",
+        "wall_system": "horizontal saddle-notched lodgepole pine logs",
+        "must_preserve_at_all_lods": [
+          "long low axial chapel proportion",
+          "primary gable and documented projecting-gable relationship",
+          "sacristy asymmetry",
+          "altar-window opening",
+          "southeast public-approach orientation"
+        ],
+        "lod0_only_details": [
+          "extended corner log ends",
+          "spear-ended raking fascias",
+          "lattice muntin relief where within budget",
+          "wrought-iron door hardware as texture or minimal geometry"
+        ]
+      },
+      "surface_family": {
+        "walls": "weathered, bark-stripped lodgepole pine logs with restrained chinking and no glossy varnish",
+        "roof": "weathered wood shakes with silhouette-safe edge breakup",
+        "doors": "beveled vertical timber planks with dark wrought-iron hardware",
+        "windows": "dark reflective glazing with historically supported lattice pattern; no featureless black rectangles",
+        "fascia": "weathered timber with documented tapered spear ends",
+        "foundation": "derive from current same-building exterior evidence; do not invent a continuous exposed stone plinth"
+      },
+      "openings": {
+        "status": "typology_documented_positions_pending",
+        "documented_types": [
+          "front beveled vertical-plank entrance door",
+          "side lattice casements along nave and sacristy",
+          "large centered fixed-sash altar window"
+        ],
+        "rule": "Resolve exact counts, centers, and sizes from official elevation evidence or calibrated multi-view references before modelling; projection may not create, delete, or move an opening."
+      },
+      "dimensions": {
+        "documented": {
+          "primary_length_m_approx": 15.24,
+          "primary_width_m_approx": 6.71,
+          "sacristy_side_m_approx": 4.27
+        },
+        "footprint_snapshot": {
+          "area_m2_approx": 118.26,
+          "minimum_oriented_extent_m_approx": [
+            16.46,
+            9.31
+          ],
+          "note": "The current named polygon includes exterior projections, so its envelope is larger than the documented 22-by-50-foot main body."
+        },
+        "pending_fields": [
+          "eave_height_m",
+          "ridge_height_m",
+          "primary_roof_pitch_deg",
+          "secondary_roof_pitch_deg",
+          "projection_dimensions_m",
+          "opening_centers_and_sizes_m"
+        ]
+      },
+      "confidence": {
+        "identity": "high",
+        "primary_plan_dimensions": "high",
+        "construction_and_materials": "high",
+        "roof_topology": "medium_high",
+        "exact_roof_pitches": "low",
+        "opening_typology": "high",
+        "opening_positions_before_elevation_registration": "low",
+        "runtime_placement": "high"
+      }
+    },
+    {
+      "id": "brides_room",
+      "name": "Chapel of the Transfiguration Brides' Room",
+      "role": "immediate_companion_massing",
+      "source_refs": [
+        "runtime_named_building_footprints"
+      ],
+      "source_backed_facts": [
+        {
+          "fact": "The current repository building extract contains a distinct, exact named footprint for the Chapel of the Transfiguration Brides' Room.",
+          "confidence": "high"
+        }
+      ],
+      "massing": {
+        "policy": "Preserve the named footprint and relative placement as low-detail immediate companion massing. Do not infer historical age, construction, openings, or relationship to the nomination's separate storage shed.",
+        "primary_roof": "unresolved; require same-building exterior evidence before detail generation",
+        "must_preserve_at_all_lods": [
+          "separate footprint",
+          "relative placement and orientation",
+          "subordinate scale"
+        ]
+      },
+      "surface_family": {
+        "policy": "Use a restrained, shared exterior material family only after same-building photographs verify its current wall and roof treatment."
+      },
+      "openings": {
+        "status": "unresolved",
+        "rule": "Omit surface openings rather than invent them."
+      },
+      "dimensions": {
+        "footprint_area_m2_approx": 37.28,
+        "minimum_oriented_extent_m_approx": [
+          6.74,
+          5.91
+        ],
+        "height_status": "source extract reports 9.1 metres; treat as unverified and replace with LiDAR or calibrated exterior evidence before final geometry"
+      },
+      "confidence": {
+        "identity_in_current_extract": "high",
+        "runtime_placement": "high",
+        "architectural_form": "low",
+        "height": "low",
+        "materials": "low"
+      }
+    }
+  ],
+  "shared_materials": [
+    {
+      "id": "weathered_lodgepole_log",
+      "uses": [
+        "chapel"
+      ]
+    },
+    {
+      "id": "weathered_wood_shake",
+      "uses": [
+        "chapel",
+        "brides_room"
+      ],
+      "conditional": "Brides' Room use requires current photographic confirmation."
+    },
+    {
+      "id": "dark_window_and_ironwork",
+      "uses": [
+        "chapel"
+      ]
+    },
+    {
+      "id": "weathered_board_and_timber",
+      "uses": [
+        "brides_room"
+      ],
+      "conditional": "Use only if verified by current same-building exterior evidence."
+    }
+  ],
+  "unresolved_before_generation": [
+    "Resolve chapel roof pitches, eave and ridge heights from LiDAR, an official measured source, or calibrated multiple same-building elevations.",
+    "Resolve exact exterior opening centers and sizes without using image generation.",
+    "Verify the Brides' Room height, roof form, exterior materials, and its identity relative to the National Register complex description.",
+    "Acquire two useful same-building exterior elevations with item-level creator and rights metadata before projection.",
+    "Confirm the target exterior condition date and distinguish original fabric from later repair work."
+  ]
+}

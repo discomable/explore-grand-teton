@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "candidate_id": "chapel_transfiguration",
+  "download_root": "terrain/pipeline/data/hero-buildings/chapel_transfiguration",
+  "same_building_exclusions": [
+    {
+      "name": "Chapel of the Sacred Heart",
+      "reason": "A different log chapel elsewhere in Grand Teton National Park; its photographs must not guide Transfiguration geometry or projections."
+    },
+    {
+      "name": "Our Father's House, Ethete",
+      "reason": "A documented design influence, not the same building; use only as historical context and never as an elevation reference."
+    }
+  ],
+  "references": [
+    {
+      "id": "nps_nrhp_nomination_80004057",
+      "title": "Chapel of the Transfiguration National Register of Historic Places Inventory—Nomination Form",
+      "author": "National Park Service; nomination prepared for the Wyoming State Historic Preservation Office",
+      "source": "https://npgallery.nps.gov/GetAsset/13c502de-4a9b-4555-9557-56f6dcb6f8f0/",
+      "provider": "National Park Service, National Register of Historic Places",
+      "type": "official_architectural_and_site_record",
+      "national_register_number": "80004057",
+      "coverage": {
+        "pages": 8,
+        "documented_dimensions": [
+          "chapel approximately 22 feet by 50 feet",
+          "sacristy approximately 14 feet square"
+        ],
+        "documented_structures": [
+          "chapel",
+          "bell canopy",
+          "storage shed"
+        ]
+      },
+      "license": "Official U.S. National Park Service National Register record. Use factual and measured information as public-record reference; verify the credit and rights of any embedded photograph before redistributing it.",
+      "usage": [
+        "chapel dimensions",
+        "site orientation",
+        "roof and wall construction",
+        "opening types",
+        "sacristy massing",
+        "material character",
+        "same-building verification"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_reviewed",
+      "sha256": null
+    },
+    {
+      "id": "nps_chapel_place",
+      "title": "Chapel of the Transfiguration",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/places/000/chapel-of-the-transfiguration.htm",
+      "provider": "National Park Service",
+      "type": "official_current_place_and_visual_reference",
+      "license": "U.S. National Park Service web publication. Page text is used as factual reference; inspect the credit and rights metadata for each selected image before reuse or projection input.",
+      "usage": [
+        "current identity",
+        "current exterior condition",
+        "historic setting",
+        "altar-window significance",
+        "same-building verification"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_historic_properties_guide",
+      "title": "Built Beneath the Mountains: Historic Properties in Grand Teton National Park",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/grte/planyourvisit/upload/Historic-Properties-guide-access.pdf",
+      "provider": "National Park Service",
+      "type": "official_historic_context_and_visual_reference",
+      "license": "U.S. National Park Service publication. Use factual text as government reference; verify individual photograph credits before downloading, editing, or redistributing imagery.",
+      "usage": [
+        "Western Craftsman classification",
+        "1925 construction history",
+        "current public context",
+        "same-building exterior review"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_reviewed",
+      "sha256": null
+    },
+    {
+      "id": "nps_menors_ferry_district",
+      "title": "Menors Ferry Historic District",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/grte/learn/historyculture/menors.htm",
+      "provider": "National Park Service",
+      "type": "official_setting_and_identity_context",
+      "license": "U.S. National Park Service web publication. Text is used as factual reference; inspect image-level credits before any image reuse.",
+      "usage": [
+        "relationship to Menors Ferry",
+        "public approach context",
+        "altar-window and Teton-axis significance"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "runtime_named_building_footprints",
+      "title": "Current Grand Teton named building-footprint extract",
+      "author": "OpenStreetMap contributors; Microsoft Building Footprints contributors",
+      "source": "terrain/public/buildings.json",
+      "provider": "Grand Teton repository derived dataset",
+      "type": "current_geospatial_footprint",
+      "license": "Open Database License (ODbL) attribution recorded in the source dataset: © OpenStreetMap contributors; Microsoft Building Footprints (ODbL).",
+      "rights_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "usage": [
+        "chapel footprint",
+        "Brides' Room footprint",
+        "runtime placement",
+        "relative orientation",
+        "collision footprint"
+      ],
+      "confidence": "high",
+      "acquisition_status": "available_in_repository",
+      "sha256": null
+    }
+  ],
+  "source_assessment": {
+    "habs_status": "No same-building HABS record was identified in the initial official-source search; the official National Register nomination is the primary architectural record.",
+    "geometry_readiness": "The nomination supplies primary dimensions and construction facts, while the existing exact named footprints supply current runtime placement. Roof pitches and detailed elevations remain unresolved.",
+    "projection_readiness": "Blocked until at least two useful same-building exterior images have item-level creator and rights metadata."
+  },
+  "acquisition_requirements": {
+    "download_large_files_by_default": false,
+    "required_before_geometry": [
+      "Acquire only the National Register pages needed for exterior dimensions, construction, and site relationships.",
+      "Record retrieval date, final URL, byte count, and SHA-256 for every acquired artifact.",
+      "Hash terrain/public/buildings.json and persist the two resolved named records.",
+      "Resolve roof pitches and all opening centers from an official measured source, LiDAR, or calibrated multi-view evidence; mark any remaining value as an explicit estimate."
+    ],
+    "required_before_projection": [
+      "Resolve item-level authorship and rights for every selected image.",
+      "Confirm each image depicts the Chapel of the Transfiguration rather than the Chapel of the Sacred Heart.",
+      "Require at least two useful exterior elevations before invoking an image tool.",
+      "Do not use an interior altar-window photograph as facade texture input."
+    ]
+  }
+}

@@ -1,0 +1,252 @@
+{
+  "schema_version": 1,
+  "id": "john_moulton",
+  "name": "John and Bartha Moulton Homestead",
+  "status": "draft",
+  "priority": 1,
+  "batch_mode": "cluster",
+  "output_slug": "john-moulton",
+  "summary": "A three-part northern Mormon Row cluster: the gambrel-with-shed log barn is the hero, the pink stucco house is a companion landmark, and the surviving minor buildings are a shared-material context batch.",
+  "structures": [
+    {
+      "id": "barn",
+      "name": "John and Bartha Moulton Barn",
+      "role": "hero",
+      "architecture_ref": "architecture.json#barn",
+      "required": true,
+      "output_stem": "john-moulton-barn"
+    },
+    {
+      "id": "pink_house",
+      "name": "John and Bartha Moulton Residence (Pink House)",
+      "role": "companion",
+      "architecture_ref": "architecture.json#pink_house",
+      "required": true,
+      "output_stem": "john-moulton-pink-house"
+    },
+    {
+      "id": "minor_cluster",
+      "name": "John Moulton Homestead Minor Buildings",
+      "role": "context_cluster",
+      "architecture_ref": "architecture.json#minor_cluster",
+      "required": false,
+      "output_stem": "john-moulton-outbuildings"
+    }
+  ],
+  "placement": {
+    "status": "requires_georeferencing",
+    "reason": "The current buildings extract contains plausible unnamed footprints but no stable John Moulton names.",
+    "authoritative_crs": "EPSG:4326",
+    "runtime_crs": "EPSG:32612",
+    "strategy": "Match the northern Mormon Row unnamed building footprints to the HABS site geometry and measured plans; do not place from a single photograph or from the nearby T. A. Moulton landmark.",
+    "constraints": [
+      {
+        "subject": "pink_house",
+        "relationship": "approximately 70 feet west of Mormon Row Road and 300 feet north of Antelope Flats Road",
+        "metric_offsets_m": {
+          "west_of_mormon_row_road": 21.34,
+          "north_of_antelope_flats_road": 91.44
+        },
+        "source_ref": "loc_house_habs_wy_152_a"
+      },
+      {
+        "subject": "barn",
+        "relationship": "approximately 135 feet northeast of the house",
+        "distance_m": 41.15,
+        "source_ref": "loc_barn_habs_wy_152_c"
+      }
+    ],
+    "resolution_steps": [
+      "Extract plan dimensions and north arrows from HABS WY-152-A and WY-152-C.",
+      "Derive the Mormon Row Road and Antelope Flats Road intersection and road bearings from the current geospatial source.",
+      "Score unnamed footprints by HABS offset residual, plan dimensions, orientation, topology, and agreement with current orthophotography.",
+      "Accept only a unique primary-structure match; otherwise georeference the HABS site plan to orthophotography and digitize explicit replacement footprints.",
+      "Persist source feature IDs, source hashes, centers, rotations, footprints, residuals, and confidence in the draft placement artifact."
+    ],
+    "acceptance": {
+      "unique_match_required": true,
+      "minimum_confidence": 0.85,
+      "maximum_primary_center_uncertainty_m": 3.0,
+      "maximum_primary_orientation_uncertainty_deg": 5.0,
+      "independent_agent_review_required": true
+    },
+    "stable_runtime_ids": {
+      "barn": "john_moulton.barn",
+      "pink_house": "john_moulton.pink_house",
+      "minor_cluster": "john_moulton.minor_cluster"
+    }
+  },
+  "budgets": {
+    "cluster": {
+      "lod0": {
+        "max_triangles": 12000,
+        "max_draw_calls": 8
+      },
+      "lod1": {
+        "max_triangles": 3000,
+        "max_draw_calls": 5
+      },
+      "lod2": {
+        "max_triangles": 750,
+        "max_draw_calls": 3
+      },
+      "max_deployed_texture_bytes": 1572864
+    },
+    "triangle_allocations": {
+      "barn": {
+        "lod0": 4200,
+        "lod1": 1000,
+        "lod2": 240
+      },
+      "pink_house": {
+        "lod0": 2800,
+        "lod1": 700,
+        "lod2": 170
+      },
+      "minor_cluster": {
+        "lod0": 2200,
+        "lod1": 600,
+        "lod2": 140
+      }
+    },
+    "material_policy": "Share compact timber, roof, stucco, and trim material families across the cluster; a registered projection may be added only to close-facing hero surfaces."
+  },
+  "lods": [
+    {
+      "id": "lod0",
+      "max_distance_m": 90,
+      "intent": "Recognizable openings, gambrel transitions, house trim, and restrained ground-contact detail."
+    },
+    {
+      "id": "lod1",
+      "max_distance_m": 260,
+      "intent": "Retain the barn's gambrel-with-shed silhouette, the house's 1.5-story profile, and primary openings."
+    },
+    {
+      "id": "lod2",
+      "max_distance_m": 100000,
+      "intent": "Silhouette and broad barn/house material split only."
+    }
+  ],
+  "projection": {
+    "enabled": true,
+    "target_method": "fixed_orthographic_render_from_approved_geometry",
+    "required_views": [
+      {
+        "id": "barn_east",
+        "structure": "barn",
+        "source_refs": [
+          "loc_barn_habs_wy_152_c"
+        ],
+        "purpose": "Primary public-facing elevation and opening layout."
+      },
+      {
+        "id": "barn_south_east",
+        "structure": "barn",
+        "source_refs": [
+          "loc_barn_habs_wy_152_c",
+          "nps_john_moulton_barn"
+        ],
+        "purpose": "Gambrel-to-shed transition, log character, and corner continuity."
+      },
+      {
+        "id": "house_primary",
+        "structure": "pink_house",
+        "source_refs": [
+          "loc_house_habs_wy_152_a",
+          "nps_john_moulton_residence"
+        ],
+        "purpose": "Pink stucco field, green trim, and measured opening arrangement."
+      }
+    ],
+    "prompt_constraints": [
+      "Preserve the exact registered target silhouette, roof topology, framing, crop, camera, and transparent/background mask.",
+      "Use only references identified as the same John Moulton structure; never use T. A. Moulton Barn imagery.",
+      "The barn must remain a two-story gambrel-with-shed log barn; do not convert it to a simple gable or T. A.'s gable-with-sheds form.",
+      "The house must remain a 1.5-story frame house with restrained salmon/pink stucco and historically supported green door/window trim.",
+      "Do not infer dimensions, roof pitch, placement, openings, or additions from image generation.",
+      "Do not add landscape, mountains, people, animals, vehicles, text, watermarks, extra windows, new doors, featureless black rectangles, or baked cast shadows.",
+      "Keep tileable materials free of perspective, vegetation, sky, and directional sunlight."
+    ],
+    "audit_required": [
+      "target_path",
+      "reference_paths",
+      "prompt",
+      "model_or_tool",
+      "output_path",
+      "sha256",
+      "review_status"
+    ]
+  },
+  "validation": {
+    "required_capture_views": [
+      "close_public_approach",
+      "mormon_row_combined",
+      "distant_teton_silhouette"
+    ],
+    "required_lighting": [
+      "daylight",
+      "overcast"
+    ],
+    "checks": [
+      "geometry budgets",
+      "material and texture budgets",
+      "one active LOD per structure",
+      "terrain contact and re-basing",
+      "projection registration at frontal and grazing angles",
+      "collision footprints",
+      "vegetation and fence continuity",
+      "no production asset or manifest mutation"
+    ]
+  },
+  "quarantine": {
+    "retry_limit": 1,
+    "gates": [
+      {
+        "code": "sources",
+        "status_on_failure": "quarantined_sources",
+        "conditions": [
+          "Barn or house lacks an official HABS/NPS identity source.",
+          "Barn or house lacks one measured drawing and at least two useful exterior elevations.",
+          "Any acquired artifact lacks URL, author/creator, rights statement, retrieval date, and SHA-256.",
+          "A visual reference cannot be proven to show the John Moulton structure rather than T. A. Moulton Barn."
+        ]
+      },
+      {
+        "code": "placement",
+        "status_on_failure": "quarantined_geometry",
+        "conditions": [
+          "Primary footprint match is not unique at confidence 0.85 or higher.",
+          "Primary center uncertainty exceeds 3 metres or orientation uncertainty exceeds 5 degrees.",
+          "Barn-to-house arrangement conflicts with the HABS site geometry."
+        ]
+      },
+      {
+        "code": "geometry",
+        "status_on_failure": "quarantined_geometry",
+        "conditions": [
+          "Barn gambrel-with-shed topology or house 1.5-story profile is not recognizable in every LOD.",
+          "Generated dimensions are not traceable to HABS drawings, LiDAR, or an explicitly marked estimate.",
+          "Roofs intersect walls incorrectly, daylight gaps appear at roof junctions, or foundations float."
+        ]
+      },
+      {
+        "code": "visual",
+        "status_on_failure": "quarantined_visual",
+        "conditions": [
+          "Projection edges drift from the approved orthographic target.",
+          "Black placeholder openings, cross-building reference contamination, baked landscape, or invented architectural features are visible.",
+          "Vegetation clearing removes documented trees, corrals, fences, or irrigation context beyond physical clearance."
+        ]
+      },
+      {
+        "code": "performance",
+        "status_on_failure": "quarantined_performance",
+        "conditions": [
+          "Any cluster triangle, draw-call, texture-transfer, or LOD activation budget is exceeded.",
+          "The combined Mormon Row capture regresses the agreed High-quality performance baseline."
+        ]
+      }
+    ]
+  }
+}

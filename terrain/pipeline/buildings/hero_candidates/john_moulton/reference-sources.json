@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "candidate_id": "john_moulton",
+  "download_root": "terrain/pipeline/data/hero-buildings/john-moulton/sources",
+  "same_building_exclusions": [
+    {
+      "name": "T. A. Moulton Barn",
+      "reason": "Adjacent homestead with a different gable-with-sheds roof; its photographs must not guide John Moulton geometry or projections."
+    }
+  ],
+  "references": [
+    {
+      "id": "loc_homestead_habs_wy_152",
+      "title": "John Moulton Homestead",
+      "author": "Historic American Buildings Survey",
+      "source": "https://www.loc.gov/pictures/item/wy0339/",
+      "provider": "Library of Congress",
+      "call_number": "HABS WY-152",
+      "type": "homestead_site_record",
+      "coverage": {
+        "photos": 9,
+        "measured_drawings": 1,
+        "caption_pages": 1
+      },
+      "license": "No known restrictions on images made by the U.S. Government; images copied from other sources may be restricted. Verify each selected image's credit before redistribution.",
+      "rights_url": "https://www.loc.gov/rr/print/res/114_habs.html",
+      "usage": [
+        "site layout",
+        "structure inventory",
+        "historical identity",
+        "same-building verification"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "loc_house_habs_wy_152_a",
+      "title": "John Moulton Homestead, House",
+      "author": "Historic American Buildings Survey; Jeff Farnum, delineator; Arnold Thallheimer, photographer",
+      "source": "https://www.loc.gov/pictures/item/wy0573/",
+      "provider": "Library of Congress",
+      "call_number": "HABS WY-152-A",
+      "type": "measured_architectural_record",
+      "coverage": {
+        "photos": 8,
+        "measured_drawings": 3,
+        "caption_pages": 1
+      },
+      "license": "No known restrictions on images made by the U.S. Government; images copied from other sources may be restricted. Verify each selected image's credit before redistribution.",
+      "rights_url": "https://www.loc.gov/rr/print/res/114_habs.html",
+      "usage": [
+        "house dimensions",
+        "elevations and openings",
+        "roof topology",
+        "placement constraint"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "loc_barn_habs_wy_152_c",
+      "title": "John Moulton Homestead, Barn",
+      "author": "Historic American Buildings Survey; Barrett E. Powley, delineator; Arnold Thallheimer, photographer",
+      "source": "https://www.loc.gov/pictures/item/wy0575/",
+      "provider": "Library of Congress",
+      "call_number": "HABS WY-152-C",
+      "type": "measured_architectural_record",
+      "coverage": {
+        "photos": 6,
+        "measured_drawings": 2,
+        "caption_pages": 1,
+        "documented_exterior_views": [
+          "east side looking west",
+          "east and south sides looking northwest",
+          "north and west sides looking southeast"
+        ]
+      },
+      "license": "No known restrictions on images made by the U.S. Government; images copied from other sources may be restricted. Verify each selected image's credit before redistribution.",
+      "rights_url": "https://www.loc.gov/rr/print/res/114_habs.html",
+      "usage": [
+        "barn dimensions",
+        "gambrel-with-shed topology",
+        "elevations and openings",
+        "barn-to-house placement constraint",
+        "projection references"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_john_moulton_barn",
+      "title": "John & Bartha Moulton Barn",
+      "author": "National Park Service; page image credited NPS/Tobiason",
+      "source": "https://www.nps.gov/places/000/john-bartha-moulton-barn.htm",
+      "provider": "National Park Service",
+      "type": "current_place_and_visual_reference",
+      "license": "U.S. National Park Service source page; page-level credit is NPS/Tobiason. Treat as reference-only until the original asset metadata confirms public-domain or reuse terms.",
+      "usage": [
+        "current exterior condition",
+        "public approach view",
+        "fence and corral context",
+        "same-building verification"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_john_moulton_residence",
+      "title": "John & Bartha Moulton Residence",
+      "author": "National Park Service; page image credited NPS/Bonney",
+      "source": "https://www.nps.gov/places/000/john-bartha-moulton-residence.htm",
+      "provider": "National Park Service",
+      "type": "current_place_and_visual_reference",
+      "license": "U.S. National Park Service source page; page-level credit is NPS/Bonney. Treat as reference-only until the original asset metadata confirms public-domain or reuse terms.",
+      "usage": [
+        "current pink stucco appearance",
+        "current exterior condition",
+        "same-building verification"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_mormon_row_history",
+      "title": "Mormon Row",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/grte/learn/historyculture/mormon.htm",
+      "provider": "National Park Service",
+      "type": "historical_context",
+      "license": "U.S. National Park Service web publication. Text may be used as factual reference; inspect image credits separately before any image reuse.",
+      "usage": [
+        "distinguish John and T. A. barns",
+        "historic setting",
+        "public-view significance"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    },
+    {
+      "id": "nps_mormon_row_cultural_landscape",
+      "title": "Mormon Row Historic District Cultural Landscape",
+      "author": "National Park Service",
+      "source": "https://www.nps.gov/articles/890056.htm",
+      "provider": "National Park Service",
+      "type": "cultural_landscape_context",
+      "license": "U.S. National Park Service web publication. Text may be used as factual reference; inspect image credits separately before any image reuse.",
+      "usage": [
+        "corrals and fences",
+        "irrigation context",
+        "vegetation and field continuity",
+        "cluster significance"
+      ],
+      "confidence": "high",
+      "acquisition_status": "metadata_only",
+      "sha256": null
+    }
+  ],
+  "acquisition_requirements": {
+    "download_large_files_by_default": false,
+    "required_before_geometry": [
+      "Download only the selected HABS measured sheets and caption pages needed for the two primary structures.",
+      "Record retrieval date, final URL, byte count, and SHA-256 for every acquired artifact.",
+      "Confirm drawing scale and north arrow are legible before measurement extraction."
+    ],
+    "required_before_projection": [
+      "Resolve item-level authorship and rights for each selected image.",
+      "Confirm each image depicts the intended John Moulton structure.",
+      "Require at least two useful exterior elevations for the barn and house."
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "candidate_id": "andy_chambers",
+  "retrieved_at": "2026-07-28",
+  "source_record": "https://www.loc.gov/pictures/item/wy0032/",
+  "rights": {
+    "advisory": "No known restrictions on images made by the U.S. Government; images copied from other sources may be restricted.",
+    "url": "https://www.loc.gov/rr/print/res/114_habs.html",
+    "assessment": "The acquired files are HABS drawings and photographs credited by the item records to HABS delineator Bruce MacKnight and HABS photographers Lorin Wiggins or Arnold Thallheimer. Retain item-level credit on derived reference boards."
+  },
+  "files": [
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/drawings/00002v.jpg",
+      "title": "Sheet 2 of 5: Site Plan",
+      "call_number": "HABS WYO,20-KEL.V,1- (sheet 2 of 5)",
+      "author": "Bruce MacKnight, delineator",
+      "published": "1977",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/sheet/00002v.jpg",
+      "bytes": 60980,
+      "sha256": "a6555cbe762d0bf75059e114a963b3d9e2e5ec1f91b068822b9efa40c7158fa8"
+    },
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/drawings/00003v.jpg",
+      "title": "Sheet 3 of 5: First and Second Floor Plans",
+      "call_number": "HABS WYO,20-KEL.V,1- (sheet 3 of 5)",
+      "author": "Bruce MacKnight, delineator",
+      "published": "1977",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/sheet/00003v.jpg",
+      "bytes": 118271,
+      "sha256": "b067de2e9b45200904a505cbd3dec598bad7bfa8ca2b88cae0d841973db1b5f9"
+    },
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/drawings/00004v.jpg",
+      "title": "Sheet 4 of 5: South and West Elevations",
+      "call_number": "HABS WYO,20-KEL.V,1- (sheet 4 of 5)",
+      "author": "Bruce MacKnight, delineator",
+      "published": "1977",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/sheet/00004v.jpg",
+      "bytes": 94774,
+      "sha256": "3f68382c3e37b4c34c6811c49b9a6ecb568a3fc85190e70bbd80b47a2e7e557a"
+    },
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/drawings/00005v.jpg",
+      "title": "Sheet 5 of 5: North and East Elevations",
+      "call_number": "HABS WYO,20-KEL.V,1- (sheet 5 of 5)",
+      "author": "Bruce MacKnight, delineator",
+      "published": "1977",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/sheet/00005v.jpg",
+      "bytes": 97265,
+      "sha256": "5f79d01d1865639bff5d688c97921754b9508937cb5fb4261922fd8efc886927"
+    },
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/photos/174535pr.jpg",
+      "title": "West facade of Chambers Ranch House",
+      "call_number": "HABS WYO,20-KEL.V,1--1",
+      "author": "Lorin Wiggins, photographer",
+      "published": "1977",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/photos/174535pr.jpg",
+      "bytes": 22792,
+      "sha256": "eb4e1bcc8eb660ec3bccf2d14a943b37d15b53cfed24fe73f817effb3619b0cb"
+    },
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/photos/580666pr.jpg",
+      "title": "Ranch House front and right sides, looking northeast",
+      "call_number": "HABS WYO,20-KEL.V,1--2",
+      "author": "Arnold Thallheimer, photographer",
+      "published": "1997",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/photos/580666pr.jpg",
+      "bytes": 75656,
+      "sha256": "6226e2645ac395e200c33c4318e2259bb9524b6d9e44d2b310e5a5cb27d6b5b2"
+    },
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/photos/580667pr.jpg",
+      "title": "Ranch House rear and left sides, looking southwest",
+      "call_number": "HABS WYO,20-KEL.V,1--3",
+      "author": "Arnold Thallheimer, photographer",
+      "published": "1997",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/photos/580667pr.jpg",
+      "bytes": 71005,
+      "sha256": "fce3e0e70000b350f54d76be68ab841e5e248ebe7ca6c422714ff240b97156ed"
+    },
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/photos/580668pr.jpg",
+      "title": "Overall Andy Chambers Homestead, looking northwest",
+      "call_number": "HABS WYO,20-KEL.V,1--4",
+      "author": "Arnold Thallheimer, photographer",
+      "published": "1997",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/photos/580668pr.jpg",
+      "bytes": 76144,
+      "sha256": "0b487b2e06baa6705e264035e9dcfbd7ca4388e3280d95839648610b8af133fe"
+    },
+    {
+      "path": "terrain/pipeline/data/hero-buildings/andy_chambers/loc-habs-wy83/photos/580670pr.jpg",
+      "title": "Andy Chambers Homestead, looking southeast",
+      "call_number": "HABS WYO,20-KEL.V,1--6",
+      "author": "Arnold Thallheimer, photographer",
+      "published": "1997",
+      "url": "https://tile.loc.gov/storage-services/service/pnp/habshaer/wy/wy0000/wy0032/photos/580670pr.jpg",
+      "bytes": 71086,
+      "sha256": "aaf77c0fd1104bbff2445dd1be093e9dfbc4baec69e93a39e0205d283a271af5"
+    }
+  ]
+}

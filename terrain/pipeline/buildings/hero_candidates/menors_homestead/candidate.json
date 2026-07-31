@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "id": "menors_homestead",
+  "name": "Menor's Homestead Cabin and Country Store",
+  "status": "draft",
+  "priority": 4,
+  "batch_mode": "cluster",
+  "output_slug": "menors-homestead",
+  "summary": "A tightly joined two-part hero cluster: Bill Menor's west/central cabin and the circa-1905 country-store east wing. The separate storehouse footprint is a registration anchor, not the country store; the ferry is explicitly excluded.",
+  "structures": [
+    {
+      "id": "cabin",
+      "name": "Bill Menor Homestead Cabin",
+      "role": "hero_component",
+      "architecture_ref": "architecture.json#cabin",
+      "required": true,
+      "output_stem": "menors-cabin"
+    },
+    {
+      "id": "country_store",
+      "name": "Bill Menor Country Store Wing",
+      "role": "hero_component",
+      "architecture_ref": "architecture.json#country_store",
+      "required": true,
+      "output_stem": "menors-country-store"
+    }
+  ],
+  "excluded": [
+    {
+      "id": "ferry",
+      "reason": "The replica ferry and cable system require independent water-contact, current, cable, and thin-structure rules."
+    },
+    {
+      "id": "storehouse",
+      "reason": "Menor's Storehouse is a separate storage/root-cellar building and must not be mistaken for the country-store wing. Its named footprint is used only as a site-registration anchor in this slice."
+    },
+    {
+      "id": "maud_noble_cabin",
+      "reason": "A separately documented building outside this cabin-and-store slice."
+    },
+    {
+      "id": "transportation_barn",
+      "reason": "The current barn occupies only the approximate site of Menor's lost barn and is not part of this reconstruction."
+    }
+  ],
+  "placement": {
+    "status": "named_footprints_available_requires_verification",
+    "authoritative_crs": "EPSG:4326",
+    "runtime_crs": "EPSG:32612",
+    "world_frame": "x = easting - centerEasting; z = centerNorthing - northing",
+    "strategy": "Resolve the composite cabin/country-store geometry against the named Menor's Homestead footprint in terrain/public/buildings.json. Use the named Menor's Storehouse footprint as a second registration anchor to verify site orientation, scale, and topology against HABS WY-24. Never substitute the storehouse footprint for the attached shop.",
+    "footprint_source": {
+      "path": "terrain/public/buildings.json",
+      "attribution": "OpenStreetMap contributors (ODbL); Microsoft Building Footprints (ODbL)",
+      "features": [
+        {
+          "name": "Menor's Homestead",
+          "purpose": "primary composite cabin-and-country-store footprint",
+          "world_centroid_xz_m": [
+            1020.244,
+            8431.765
+          ],
+          "area_m2": 98.02,
+          "points_xz_m": [
+            [
+              1026.6,
+              8436.0
+            ],
+            [
+              1012.5,
+              8434.5
+            ],
+            [
+              1012.6,
+              8428.7
+            ],
+            [
+              1021.9,
+              8429.1
+            ],
+            [
+              1022.0,
+              8427.2
+            ],
+            [
+              1026.9,
+              8427.4
+            ]
+          ]
+        },
+        {
+          "name": "Menor's Storehouse",
+          "purpose": "secondary site-registration anchor only",
+          "world_centroid_xz_m": [
+            1033.324,
+            8433.308
+          ],
+          "area_m2": 20.6,
+          "points_xz_m": [
+            [
+              1035.5,
+              8435.7
+            ],
+            [
+              1030.8,
+              8435.3
+            ],
+            [
+              1031.2,
+              8430.9
+            ],
+            [
+              1035.8,
+              8431.3
+            ]
+          ]
+        }
+      ]
+    },
+    "resolution_steps": [
+      "Record the buildings.json attribution, file hash, exact named feature rings, and world-frame origin used by the run.",
+      "Extract the site plan, plan dimensions, elevations, scale, and north arrow from HABS WY-24.",
+      "Fit the HABS cabin/store outline to the named Homestead footprint without independently stretching its three construction phases.",
+      "Check the fitted transform against the named Storehouse centroid and orientation; record residuals for both anchors.",
+      "Persist the approved cluster anchor, true-north rotation, component transforms, footprint hashes, residuals, and confidence."
+    ],
+    "acceptance": {
+      "primary_named_match_required": true,
+      "secondary_anchor_required": true,
+      "minimum_confidence": 0.9,
+      "maximum_primary_center_residual_m": 2.0,
+      "maximum_secondary_center_residual_m": 3.0,
+      "maximum_orientation_residual_deg": 5.0,
+      "manual_review_required": true
+    },
+    "stable_runtime_ids": {
+      "cabin": "menors_homestead.cabin",
+      "country_store": "menors_homestead.country_store"
+    }
+  },
+  "budgets": {
+    "cluster": {
+      "lod0": {
+        "max_triangles": 12000,
+        "max_draw_calls": 8
+      },
+      "lod1": {
+        "max_triangles": 3000,
+        "max_draw_calls": 5
+      },
+      "lod2": {
+        "max_triangles": 750,
+        "max_draw_calls": 3
+      },
+      "max_deployed_texture_bytes": 1572864
+    },
+    "triangle_allocations": {
+      "cabin": {
+        "lod0": 6000,
+        "lod1": 1500,
+        "lod2": 375
+      },
+      "country_store": {
+        "lod0": 6000,
+        "lod1": 1500,
+        "lod2": 375
+      }
+    },
+    "material_policy": "Share one compact whitewashed-timber, roof, trim, glass, and foundation family across the attached phases. A registered facade projection is permitted only on close-facing surfaces."
+  },
+  "lods": [
+    {
+      "id": "lod0",
+      "max_distance_m": 90,
+      "intent": "Preserve phase junctions, documentary openings, whitewashed timber character, and restrained foundation contact."
+    },
+    {
+      "id": "lod1",
+      "max_distance_m": 260,
+      "intent": "Preserve the three-phase stepped plan, joined roof silhouette, store/cabin distinction, and primary openings."
+    },
+    {
+      "id": "lod2",
+      "max_distance_m": 100000,
+      "intent": "Preserve the composite outline, roof breaks, and broad whitewashed material field."
+    }
+  ],
+  "projection": {
+    "enabled": true,
+    "target_method": "fixed_orthographic_render_from_approved_habs_and_footprint_geometry",
+    "required_views": [
+      {
+        "id": "public_front",
+        "structures": [
+          "cabin",
+          "country_store"
+        ],
+        "source_refs": [
+          "loc_menors_ferry_habs_wy_24",
+          "nps_menors_general_store"
+        ],
+        "purpose": "Joined cabin/store facade, whitewash, documentary openings, and phase continuity."
+      },
+      {
+        "id": "store_east",
+        "structures": [
+          "country_store"
+        ],
+        "source_refs": [
+          "loc_menors_ferry_habs_wy_24",
+          "nps_menors_general_store"
+        ],
+        "purpose": "Country-store wing end elevation and roof/wall junction."
+      },
+      {
+        "id": "phase_oblique",
+        "structures": [
+          "cabin",
+          "country_store"
+        ],
+        "source_refs": [
+          "loc_menors_ferry_habs_wy_24",
+          "nps_menors_ferry_history"
+        ],
+        "purpose": "Legibility of the west, central, and east construction phases without changing measured geometry."
+      }
+    ],
+    "prompt_constraints": [
+      "Preserve the exact registered target silhouette, roof topology, phase junctions, openings, crop, camera, and background mask.",
+      "Use only references proven to show Bill Menor's cabin and attached country-store wing.",
+      "Keep the country store attached to the east end of the cabin; do not replace it with the separate Menor's Storehouse.",
+      "Retain restrained lime whitewash with visible timber character; do not turn the building into clean modern painted siding.",
+      "Do not infer dimensions, roof pitch, openings, placement, or additions from image generation.",
+      "Do not add the ferry, cableworks, river, Maud Noble Cabin, barn, mountains, people, merchandise, signs, text, vehicles, featureless black rectangles, or baked cast shadows.",
+      "Keep tileable materials free of perspective, vegetation, sky, and directional sunlight."
+    ],
+    "audit_required": [
+      "target_path",
+      "reference_paths",
+      "prompt",
+      "model_or_tool",
+      "output_path",
+      "sha256",
+      "review_status"
+    ]
+  },
+  "validation": {
+    "required_views": [
+      "close-day",
+      "approach-day",
+      "distant-day",
+      "close-overcast",
+      "approach-overcast",
+      "distant-overcast"
+    ],
+    "checks": [
+      "same-building identity and phase chronology",
+      "named-footprint and HABS registration residuals",
+      "three LODs and exactly one active LOD",
+      "cluster triangle, draw-call, texture, and transfer budgets",
+      "projection registration at corners and openings",
+      "roof/wall seams and phase junctions at grazing angles",
+      "collision footprint",
+      "documented trees, paths, storehouse, and riverbank context remain intact",
+      "no production asset or manifest mutation"
+    ]
+  },
+  "quarantine": {
+    "retry_limit": 1,
+    "gates": [
+      {
+        "code": "sources",
+        "status_on_failure": "quarantined_sources",
+        "conditions": [
+          "The cabin/store lacks the official HABS WY-24 identity and measured record.",
+          "There are fewer than two useful same-building exterior elevations for projection review.",
+          "Any acquired artifact lacks URL, author/creator, rights statement, retrieval date, and SHA-256.",
+          "A reference cannot distinguish the attached country store from the separate storehouse, Maud Noble Cabin, or replica ferry."
+        ]
+      },
+      {
+        "code": "placement",
+        "status_on_failure": "quarantined_geometry",
+        "conditions": [
+          "The named Menor's Homestead footprint cannot be reconciled with HABS WY-24 at confidence 0.90 or higher.",
+          "Primary center residual exceeds 2 metres, Storehouse anchor residual exceeds 3 metres, or orientation residual exceeds 5 degrees.",
+          "The country-store wing is placed on the separate Storehouse footprint."
+        ]
+      },
+      {
+        "code": "geometry",
+        "status_on_failure": "quarantined_geometry",
+        "conditions": [
+          "The cabin-to-country-store relationship or three documented construction phases are not recognizable in every LOD.",
+          "Dimensions, roof topology, phase junctions, or openings are not traceable to HABS, LiDAR, the named footprint, or an explicit estimate.",
+          "Roofs intersect walls incorrectly, daylight gaps appear between joined phases, foundations float, or coplanar component faces flicker."
+        ]
+      },
+      {
+        "code": "visual",
+        "status_on_failure": "quarantined_visual",
+        "conditions": [
+          "Projection edges drift from the approved orthographic targets.",
+          "Black placeholder openings, invented architecture, a baked landscape, or imagery of the wrong Menors Ferry structure is visible.",
+          "Vegetation or path clearing removes documented site context beyond physical building clearance."
+        ]
+      },
+      {
+        "code": "performance",
+        "status_on_failure": "quarantined_performance",
+        "conditions": [
+          "Any cluster triangle, draw-call, deployed-texture, transfer-size, or LOD activation budget is exceeded.",
+          "The required High-quality capture set introduces runtime errors or regresses the agreed performance baseline."
+        ]
+      }
+    ]
+  }
+}

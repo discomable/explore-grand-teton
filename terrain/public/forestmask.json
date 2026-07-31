@@ -1,0 +1,20 @@
+{
+ "crs": "EPSG:32612",
+ "res": 20.0,
+ "width": 1416,
+ "height": 2059,
+ "originE": 508020.8068557632,
+ "originN": 4863096.167973563,
+ "url": "forestmask.png",
+ "world": {
+  "centerEasting": 522180.8068557632,
+  "centerNorthing": 4842506.167973563,
+  "datum": 1897.3
+ },
+ "encode": {
+  "probR": {
+   "scale": 255.0
+  }
+ },
+ "source": "NAIP z3 (20 m) darkness+green-dominance forest-likelihood; smoothstep(bright 155->100)*smoothstep(gdom 0.56->0.60), 2x box blur"
+}
