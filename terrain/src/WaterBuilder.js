@@ -390,6 +390,7 @@
       };
 
       this.group = new THREE.Group();
+      this.group.name = 'waterSurfaces';
       this.scene.add(this.group);
       // build stamp — open DevTools console to confirm which reflection build a tab is running
       // (cuts through browser-cache ambiguity). PLANAR = the current correct build.

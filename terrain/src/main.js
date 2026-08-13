@@ -1,5 +1,6 @@
 import * as ThreeModule from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { AppContext } from './app-context.js';
 import { WorkerPool } from './workers/WorkerPool.js';
 import { WorldIndexClient } from './workers/WorldIndexClient.js';
@@ -25,7 +26,7 @@ import {
   VEGETATION_SPECIES,
 } from './vegetation-batch-contract.js';
 
-const THREE = { ...ThreeModule, GLTFLoader };
+const THREE = { ...ThreeModule, GLTFLoader, mergeGeometries };
 window.THREE = THREE;
 
 const params = new URLSearchParams(location.search);

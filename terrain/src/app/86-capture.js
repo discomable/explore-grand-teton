@@ -135,6 +135,7 @@ function captureMeta(name){
     sceneBreakdownMode:'visible-object-group-estimate',
     sceneBreakdown:sceneBreakdown.slice(0,24),
     renderBreakdown:window.GT_RENDER_BREAKDOWN||null,
+    vehicleRender:window.GT_VEHICLE_RENDER||null,
     webgl:gl ? {
       version:gl.getParameter(gl.VERSION),
       shadingLanguageVersion:gl.getParameter(gl.SHADING_LANGUAGE_VERSION),

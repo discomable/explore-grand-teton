@@ -10,7 +10,7 @@
 /* ============================================================
    PLACE-NAME SPRITES
    ============================================================ */
-const labelGroup=new THREE.Group(); scene.add(labelGroup);
+const labelGroup=new THREE.Group(); labelGroup.name='legacyPlaceLabels'; scene.add(labelGroup);
 function makeLabel(text,x,y,z,big){
   const c=document.createElement('canvas'); c.width=512; c.height=112;
   const g=c.getContext('2d');
@@ -49,6 +49,7 @@ const REAL_LABEL_CLS={
 const REAL_LABEL_MAXD={1:14000,2:7000,3:3500};
 /* mode 0 = compass bar + single focus pill (default) · 1 = legacy full pill cloud · 2 = all off */
 const realLabels={group:new THREE.Group(),list:[],on:true,mode:0,cullT:0,ready:false,_first:false};
+realLabels.group.name='realPlaceLabels';
 scene.add(realLabels.group); realLabels.group.visible=false;
 const _lblV=new THREE.Vector3(), _lblSelX=new Float32Array(14), _lblSelY=new Float32Array(14);
 
