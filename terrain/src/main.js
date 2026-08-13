@@ -17,6 +17,13 @@ import {
   compareTerrainSubmissions,
   TERRAIN_INSTANCE_LAYOUT,
 } from './terrain-batch-contract.js';
+import {
+  applyVegetationFade,
+  buildVegetationBatchFrame,
+  compactVegetationRecord,
+  nextVegetationCapacity,
+  VEGETATION_SPECIES,
+} from './vegetation-batch-contract.js';
 
 const THREE = { ...ThreeModule, GLTFLoader };
 window.THREE = THREE;
@@ -48,6 +55,10 @@ window.GT_TERRAIN_COVERAGE = { summarizeVisibleTerrain };
 window.GT_TERRAIN_ARRAYS = { createTerrainTextureArrayPool, TerrainTextureArrayCapacityError };
 window.GT_TERRAIN_BATCH = {
   buildTerrainFrame, compareTerrainSubmissions, TERRAIN_INSTANCE_LAYOUT,
+};
+window.GT_VEGETATION_BATCH = {
+  applyVegetationFade, buildVegetationBatchFrame, compactVegetationRecord, nextVegetationCapacity,
+  VEGETATION_SPECIES,
 };
 
 const rendererWorker = await startRenderWorkerIfRequested(context);
