@@ -95,7 +95,7 @@ test('array textures preserve R32F and RGBA8 sampling contracts', () => {
   assert.equal(pool.imagery.texture.internalFormat, 'RGBA8');
   assert.equal(pool.imagery.texture.minFilter, LinearMipmapLinearFilter);
   assert.equal(pool.imagery.texture.magFilter, LinearFilter);
-  assert.equal(pool.imagery.texture.generateMipmaps, true);
+  assert.equal(pool.imagery.texture.generateMipmaps, false);
   assert.equal(pool.imagery.texture.anisotropy, 12);
   pool.dispose();
 
@@ -171,9 +171,9 @@ test('imagery upload edge-pads before publishing and closes the decoded source',
   let closed = 0;
   const bitmap = { width: 2, height: 2, close: () => closed++ };
   let observedDuringCopy = 'not-called';
-  renderer.copyTextureToTexture = (source, destination, region, position) => {
+  renderer.copyTextureToTexture = (source, destination, region, position, sourceLevel, destinationLevel) => {
     observedDuringCopy = pool.imagery.getReady('7/0/0', false);
-    renderer.copies.push({ source, destination, region, position });
+    renderer.copies.push({ source, destination, region, position, sourceLevel, destinationLevel });
   };
   const ready = pool.uploadImagery('7/0/0', bitmap, {
     validX: 1,
@@ -183,10 +183,12 @@ test('imagery upload edge-pads before publishing and closes the decoded source',
   assert.equal(observedDuringCopy, null);
   assert.equal(ready.layer, 0);
   assert.equal(closed, 1);
-  assert.equal(draws.length, 3);
+  assert.equal(draws.length, 5);
   assert.equal(renderer.copies[0].source.image, canvas);
-  assert.equal(renderer.copies[0].destination.generateMipmaps, true);
+  assert.equal(renderer.copies[0].destination.generateMipmaps, false);
   assert.deepEqual(renderer.copies[0].position, { x: 0, y: 0, z: 0 });
+  assert.deepEqual(renderer.copies.map(copy => [copy.sourceLevel, copy.destinationLevel]),
+    [[0, 0], [0, 1]]);
   pool.dispose();
 });
 
@@ -209,7 +211,10 @@ test('failed uploads free reservations and disposal releases both arrays', () =>
 
 test('rejected imagery is closed and allocation failures request legacy fallback', () => {
   const pool = makePool(fakeRenderer(), { imageryCapacity: 1 });
-  pool.uploadImagery('protected', { close() {} }, { prepared: true, persistent: true });
+  pool.uploadImagery('protected', { close() {} }, {
+    prepared: true, persistent: true,
+    canvasFactory: (width, height) => ({ width, height, getContext: () => ({ drawImage() {} }) }),
+  });
   let closed = 0;
   assert.throws(() => pool.uploadImagery('rejected', { close: () => closed++ }, {
     prepared: true,

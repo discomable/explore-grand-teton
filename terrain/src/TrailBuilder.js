@@ -935,6 +935,10 @@
           const e = tiles.get(tx * 4096 + ty);
           if (!e) continue;
           const g = e.decoded;
+          // Terrain residency may release a fine CPU tile while a drape pass is spanning
+          // multiple frames. Treat that tile as unavailable and fall through to a coarser
+          // decoded source (or the caller's coarse heightAt fallback) instead of indexing null.
+          if (!g) continue;
           let u = ((x + hx) / span - tx) * (S - 1), v = ((z + hz) / span - ty) * (S - 1);
           u = Math.max(0, Math.min(uMax, u)); v = Math.max(0, Math.min(uMax, v));
           const i = u | 0, j = v | 0, fu = u - i, fv = v - j;

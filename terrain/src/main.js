@@ -8,6 +8,15 @@ import { TransportSurface, transportFeatures } from './transport/TransportSurfac
 import { DrivingInput, activeGamepad } from './vehicle/DrivingInput.js';
 import { SUV_PROFILE, createVehicleState, stepVehicle } from './vehicle/ArcadeVehiclePhysics.js';
 import { summarizeVisibleTerrain } from './terrain-coverage.js';
+import {
+  createTerrainTextureArrayPool,
+  TerrainTextureArrayCapacityError,
+} from './TerrainTextureArrayPool.js';
+import {
+  buildTerrainFrame,
+  compareTerrainSubmissions,
+  TERRAIN_INSTANCE_LAYOUT,
+} from './terrain-batch-contract.js';
 
 const THREE = { ...ThreeModule, GLTFLoader };
 window.THREE = THREE;
@@ -36,6 +45,10 @@ window.DrivingInput = DrivingInput;
 window.GT_activeGamepad = activeGamepad;
 window.GT_VEHICLE_PHYSICS = { SUV_PROFILE, createVehicleState, stepVehicle };
 window.GT_TERRAIN_COVERAGE = { summarizeVisibleTerrain };
+window.GT_TERRAIN_ARRAYS = { createTerrainTextureArrayPool, TerrainTextureArrayCapacityError };
+window.GT_TERRAIN_BATCH = {
+  buildTerrainFrame, compareTerrainSubmissions, TERRAIN_INSTANCE_LAYOUT,
+};
 
 const rendererWorker = await startRenderWorkerIfRequested(context);
 if (!rendererWorker.active) {

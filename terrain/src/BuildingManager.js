@@ -1049,6 +1049,7 @@
           const e = tiles.get(tx * 4096 + ty);
           if (!e) continue;
           const g = e.decoded;
+          if (!g) continue;
           let u = ((x + hx) / span - tx) * (S - 1), vv = ((z + hz) / span - ty) * (S - 1);
           u = Math.max(0, Math.min(uMax, u)); vv = Math.max(0, Math.min(uMax, vv));
           const i = u | 0, j = vv | 0, fu = u - i, fv = vv - j;

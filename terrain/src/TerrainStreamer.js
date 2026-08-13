@@ -20,6 +20,17 @@
   const DEFAULTS = {
     heightCacheMax: 300,      // decoded float tiles (~1 MB each)
     imageryCacheMax: 250,     // RGB textures (~1 MB each)
+    // Count limits are useful for request churn; byte limits are the actual memory guard.
+    // These defaults preserve the current Ultra working set closely while preventing an
+    // accumulation of decoded bitmaps/textures from silently exceeding the tile count.
+    heightBytesMax: 320 * 1024 * 1024,
+    imageryBytesMax: 128 * 1024 * 1024,
+    // Visible leaves, the CPU-query corridor and persistent ancestors overlap but can briefly
+    // protect more than 128 height sources. Keep enough headroom to prevent continual layer
+    // eviction/re-upload while retaining a much smaller allocation than the original 192/160.
+    heightArrayLayers: 160,
+    imageryArrayLayers: 128,
+    queryRadius: 2500,
     meshIdleFrames: 240,      // prune node meshes unseen for this many frames
     uploadsPerFrame: 6,       // near-field imagery must land fast (was a visible beige lag)
     maxConcurrentFetch: 12,
@@ -53,10 +64,10 @@
   // 1 MiB Float32Array alongside their 1 MiB R32F upload. High used to permit 450/600 tiles,
   // making terrain residency alone capable of exceeding 2 GiB.
   const RESIDENCY_BY_QUALITY = Object.freeze({
-    ultra:    Object.freeze({ height: 300, imagery: 250 }),
-    high:     Object.freeze({ height: 240, imagery: 300 }),
-    balanced: Object.freeze({ height: 180, imagery: 200 }),
-    low:      Object.freeze({ height: 120, imagery: 120 }),
+    ultra:    Object.freeze({ height: 300, imagery: 250, heightBytes: 320, imageryBytes: 128 }),
+    high:     Object.freeze({ height: 240, imagery: 300, heightBytes: 256, imageryBytes: 160 }),
+    balanced: Object.freeze({ height: 180, imagery: 200, heightBytes: 192, imageryBytes: 112 }),
+    low:      Object.freeze({ height: 120, imagery: 120, heightBytes: 144, imageryBytes: 80 }),
   });
 
   function makeGrid(n) {
@@ -101,6 +112,8 @@
         if (opts.maxConcurrentFetch == null) this.o.maxConcurrentFetch = 20;
         if (opts.heightCacheMax == null) this.o.heightCacheMax = RESIDENCY_BY_QUALITY.high.height;
         if (opts.imageryCacheMax == null) this.o.imageryCacheMax = RESIDENCY_BY_QUALITY.high.imagery;
+        if (opts.heightBytesMax == null) this.o.heightBytesMax = RESIDENCY_BY_QUALITY.high.heightBytes * 1024 * 1024;
+        if (opts.imageryBytesMax == null) this.o.imageryBytesMax = RESIDENCY_BY_QUALITY.high.imageryBytes * 1024 * 1024;
       } else if (quality === 'balanced' || quality === 'low') {
         if (opts.pixelError == null) this.o.pixelError = quality === 'low' ? 3.5 : 2.75;
         if (opts.corePixelError == null) this.o.corePixelError = quality === 'low' ? 1.2 : 0.9;
@@ -114,6 +127,8 @@
         // tessellation or the approved near-field transport geometry.
         if (opts.heightCacheMax == null) this.o.heightCacheMax = RESIDENCY_BY_QUALITY[quality].height;
         if (opts.imageryCacheMax == null) this.o.imageryCacheMax = RESIDENCY_BY_QUALITY[quality].imagery;
+        if (opts.heightBytesMax == null) this.o.heightBytesMax = RESIDENCY_BY_QUALITY[quality].heightBytes * 1024 * 1024;
+        if (opts.imageryBytesMax == null) this.o.imageryBytesMax = RESIDENCY_BY_QUALITY[quality].imageryBytes * 1024 * 1024;
       }
       this._quality = quality;
       this._naturalColor = !/[?&]naturalcolor=0(?:&|$)/.test(global.location?.search || '');
@@ -122,6 +137,12 @@
       this.hCache = new Map();      // height tiles: decoded Float32 + DataTexture
       this.iCache = new Map();      // imagery tiles: THREE.Texture
       this.meshes = new Map();      // node key -> {mesh, lastShown}
+      this.batches = new Map();     // grid index -> active InstancedMesh record
+      this._batchMaterial = null;
+      this._batchCapacities = new Map();
+      this.arrayPool = null;
+      this._batchSupport = { supported: false, reason: 'not-initialized' };
+      this._batchCompare = /[?&]terrainBatchCompare=1(?:&|$)/.test(global.location?.search || '');
       this.fetchQueue = []; this.uploadQueue = []; this.inFlight = 0;
       this.workerPool = global.GT_APP && global.GT_APP.workerPool;
       this.worldIndex = global.GT_APP && global.GT_APP.worldIndex;
@@ -530,6 +551,30 @@
         else { this.img = im; this.maxDepth = Math.max(this.maxDepth, im.maxZoom); }
       } catch (e) { /* no imagery baked yet — procedural palette */ }
 
+      // The instanced path is a capability-gated storage/submission replacement only. Allocation
+      // happens before base loading, so a driver/limit failure cleanly retains the legacy per-tile
+      // texture path without partially converting cache entries.
+      const arrays = global.GT_TERRAIN_ARRAYS;
+      if (arrays?.createTerrainTextureArrayPool && this.img) {
+        this._batchSupport = arrays.createTerrainTextureArrayPool(this.renderer, {
+          heightTileSize: this.m.tileSize,
+          imageryTileSize: this.img.tileSize,
+          heightCapacity: this.o.heightArrayLayers,
+          imageryCapacity: this.o.imageryArrayLayers,
+          minHeightLayers: this.o.heightArrayLayers,
+          minImageryLayers: this.o.imageryArrayLayers,
+          onEvict: (kind, record) => this._arrayLayerEvicted(kind, record),
+        });
+        this.arrayPool = this._batchSupport.pool;
+      } else {
+        this._batchSupport = { supported: false, reason: this.img ? 'missing-array-module' : 'no-imagery' };
+      }
+      this._batched = !!(this.arrayPool && global.TerrainShaders?.batch && global.GT_TERRAIN_BATCH);
+      if (this.arrayPool && !this._batched) {
+        this.arrayPool.dispose(); this.arrayPool = null;
+        this._batchSupport = { supported: false, reason: 'missing-batch-shader' };
+      }
+
       // optional horizon-shadow maps
       try { await this._loadHorizon(); } catch (e) { /* no shadows baked yet */ }
 
@@ -548,6 +593,9 @@
       if (this.camera.far < 30000) { this.camera.far = 30000; this.camera.updateProjectionMatrix(); }
 
       await this._loadBaseCollision();
+      // Persistent collision sources are also the guaranteed GPU ancestor fallback. Make their
+      // layers ready before init resolves rather than waiting for the first animation frame.
+      if (this._batched) this._pumpUploads(this.uploadQueue.length);
       if (this.img) await this._loadBaseImagery();
       return this;
     }
@@ -822,7 +870,11 @@
     _reqHeight(z, x, y, priority) {
       const key = `${z}/${x}/${y}`;
       let e = this.hCache.get(key);
-      if (e) { e.lastUsed = this.frame; return e; }
+      if (e) {
+        e.lastUsed = this.frame;
+        if (e.state === 'decoded') this._queueUpload(e);
+        return e;
+      }
       e = {
         kind: 'h', key, z, x, y, state: 'queued', lastUsed: this.frame, priority,
         generation: this.generation,
@@ -871,7 +923,7 @@
               return;
             }
             e.state = 'decoded';
-            this.uploadQueue.push(e);
+            this._queueUpload(e);
           })
           .catch(error => {
             if (error && error.name === 'AbortError') this._streamStats.stale++;
@@ -882,27 +934,74 @@
       }
     }
 
-    _pumpUploads() {
+    _pumpUploads(limit = null) {
       const frameMs = global.GT_FRAME_MS || 16.7;
-      let n = frameMs > 28 ? 1 : frameMs > 20 ? Math.min(3, this.o.uploadsPerFrame)
-                                             : this.o.uploadsPerFrame;
+      let n = limit == null
+        ? (frameMs > 28 ? 1 : frameMs > 20 ? Math.min(3, this.o.uploadsPerFrame)
+                                            : this.o.uploadsPerFrame)
+        : limit;
       while (n-- > 0 && this.uploadQueue.length) {
         const e = this.uploadQueue.shift();
+        e._uploadQueued = false;
         if (e.state !== 'decoded' || e.generation !== this.generation) {
           e.bmp?.close?.();
           continue;
         }
+        try {
         if (e.kind === 'h') {
-          e.tex = this._heightTexture(e.decoded);
+          if (this._batched) {
+            const ready = this.arrayPool.uploadHeight(e.key, e.decoded, {
+              persistent: !!e.persistent,
+              protect: e.queryProtected ? 'query' : (e.prefetchProtected ? 'prefetch' : null),
+            });
+            e.tex = ready.texture; e.layer = ready.layer;
+          } else e.tex = this._heightTexture(e.decoded);
         } else {
           const source = e.bmp;
-          e.tex = this._imageryTexture(source, e.z, e.x, e.y, e.prepared, () => {
-            if (e.bmp === source) e.bmp = null;
-          });
+          if (this._batched) {
+            const valid = this._validTexels(e.z, e.x, e.y);
+            const ready = this.arrayPool.uploadImagery(e.key, source, {
+              prepared: e.prepared, validX: valid[0], validY: valid[1],
+              persistent: !!e.persistent,
+              protect: e.prefetchProtected ? 'prefetch' : null,
+            });
+            e.tex = ready.texture; e.layer = ready.layer; e.bmp = null;
+          } else {
+            e.tex = this._imageryTexture(source, e.z, e.x, e.y, e.prepared, () => {
+              if (e.bmp === source) e.bmp = null;
+            });
+          }
         }
         e.state = 'ready';
         this._streamStats.uploads++;
+        } catch (error) {
+          if (error instanceof global.GT_TERRAIN_ARRAYS.TerrainTextureArrayCapacityError) {
+            // Current and staged frame references are soft floors. Keep the decoded source queued
+            // and render its ready ancestor; the just-published frame normally frees a layer on
+            // the next tick. Never evict a protected visible/query/prefetch source for a number.
+            e.state = 'decoded'; this._queueUpload(e);
+            continue;
+          }
+          throw error;
+        }
       }
+    }
+
+    _queueUpload(e) {
+      if (!e || e._uploadQueued) return;
+      e._uploadQueued = true; this.uploadQueue.push(e);
+    }
+
+    _arrayLayerEvicted(kind, record) {
+      const cache = kind === 'height' ? this.hCache : this.iCache;
+      const e = cache.get(record.key);
+      if (!e || e.layer !== record.layer) return;
+      e.tex = null; e.layer = null;
+      // Decoded height data can be re-uploaded without a network round-trip. Imagery bitmaps are
+      // deliberately released after upload, so its cache record must be requested afresh.
+      if (kind === 'height' && e.decoded) {
+        e.state = 'decoded';
+      } else if (!e.persistent) cache.delete(e.key);
     }
 
     _publishTelemetry() {
@@ -929,6 +1028,13 @@
         worldIndex: this.worldIndex ? this.worldIndex.snapshot() : null,
         worldHeightMirrors: this._worldHeightMirrors.size,
         worldHeightMirrorMax: this._worldHeightMirrorMax,
+        terrainSubmission: this._batched ? {
+          mode: 'instanced-array', drawCalls: this._batchFrame?.drawCalls || 0,
+          triangles: this._batchFrame?.triangles || 0,
+          comparison: this._batchEquivalence,
+        } : { mode: 'legacy-mesh', drawCalls: this.meshes.size },
+        arrayPool: this.arrayPool?.snapshot?.() || null,
+        cpuQueryTiles: this._queryTileKeys?.size || 0,
       };
       this.worldIndex?.refreshMemory();
     }
@@ -938,11 +1044,16 @@
           imageryGpuBytes = 0;
       for (const e of this.hCache.values()) {
         heightCpuBytes += e.decoded?.byteLength || 0;
-        if (e.tex) heightGpuBytes += this.m.tileSize * this.m.tileSize * 4;
+        if (e.tex && !this._batched) heightGpuBytes += this.m.tileSize * this.m.tileSize * 4;
       }
       for (const e of this.iCache.values()) {
         if (e.bmp) imageryDecodedBytes += this.img.tileSize * this.img.tileSize * 4;
-        if (e.tex) imageryGpuBytes += Math.ceil(this.img.tileSize * this.img.tileSize * 4 * 4 / 3);
+        if (e.tex && !this._batched) imageryGpuBytes += Math.ceil(this.img.tileSize * this.img.tileSize * 4 * 4 / 3);
+      }
+      const arrays = this.arrayPool?.snapshot?.() || null;
+      if (arrays) {
+        heightGpuBytes = arrays.height.allocatedGpuBytes;
+        imageryGpuBytes = arrays.imagery.allocatedGpuBytes;
       }
       return {
         heightCpuBytes, heightGpuBytes, imageryDecodedBytes, imageryGpuBytes,
@@ -951,12 +1062,61 @@
       };
     }
 
+    _entryBytes(e) {
+      if (!e) return 0;
+      if (e.kind === 'h') {
+        return (e.decoded?.byteLength || 0) +
+          (e.tex && !this._batched ? this.m.tileSize * this.m.tileSize * 4 : 0);
+      }
+      return (e.bmp ? this.img.tileSize * this.img.tileSize * 4 : 0) +
+        (e.tex && !this._batched ? Math.ceil(this.img.tileSize * this.img.tileSize * 4 * 4 / 3) : 0);
+    }
+
+    _disposeCacheEntry(e) {
+      if (this._batched && e?.layer != null) {
+        const layers = e.kind === 'h' ? this.arrayPool?.height : this.arrayPool?.imagery;
+        layers?.release(e.key);
+      } else e?.tex?.dispose?.();
+      e?.bmp?.close?.();
+      if (e?.kind === 'h') {
+        this.worldIndex?.remove(e.key);
+        this._worldHeightMirrors.delete(e.key);
+      }
+    }
+
+    _cacheBreakdown(cache) {
+      let bytes = 0, persistentBytes = 0, workingTiles = 0, persistentTiles = 0;
+      for (const e of cache.values()) {
+        const size = this._entryBytes(e);
+        if (e.persistent) { persistentBytes += size; persistentTiles++; }
+        else { bytes += size; workingTiles++; }
+      }
+      return { bytes, persistentBytes, workingTiles, persistentTiles };
+    }
+
     memorySnapshot() {
+      const height = this._cacheBreakdown(this.hCache);
+      const imagery = this._cacheBreakdown(this.iCache);
       return {
         heightTiles: this.hCache.size,
         heightTileLimit: this.o.heightCacheMax,
         imageryTiles: this.iCache.size,
         imageryTileLimit: this.o.imageryCacheMax,
+        heightWorkingTiles: height.workingTiles,
+        heightPersistentTiles: height.persistentTiles,
+        imageryWorkingTiles: imagery.workingTiles,
+        imageryPersistentTiles: imagery.persistentTiles,
+        heightWorkingBytes: height.bytes,
+        heightPersistentBytes: height.persistentBytes,
+        imageryWorkingBytes: imagery.bytes,
+        imageryPersistentBytes: imagery.persistentBytes,
+        heightByteLimit: this.o.heightBytesMax,
+        imageryByteLimit: this.o.imageryBytesMax,
+        batched: !!this._batched,
+        batchSupport: this._batchSupport?.reason || 'enabled',
+        terrainBatches: this.batches.size,
+        arrayPool: this.arrayPool?.snapshot?.() || null,
+        cpuQueryTiles: this._queryTileKeys?.size || 0,
         ...this._memoryEstimate(),
       };
     }
@@ -967,32 +1127,49 @@
       this._quality = quality;
       this.o.heightCacheMax = residency.height;
       this.o.imageryCacheMax = residency.imagery;
+      this.o.heightBytesMax = residency.heightBytes * 1024 * 1024;
+      this.o.imageryBytesMax = residency.imageryBytes * 1024 * 1024;
       this._evict();
       this._publishTelemetry();
       return true;
     }
 
     _evict() {
-      const trim = (cache, max) => {
-        if (cache.size <= max) return;
+      // Fast travel can discover new leaves faster than the network/decoder can service them.
+      // Queued records have no decoded-byte cost yet, so the normal cache byte floor cannot see
+      // this backlog. Keep only a bounded, highest-priority request window; dropped records will
+      // be requested again if they become visible later.
+      const maxPending = Math.max(96, this.o.maxConcurrentFetch * 24);
+      if (this.fetchQueue.length > maxPending) {
+        this.fetchQueue.sort((a, b) => a.priority - b.priority || a.lastUsed - b.lastUsed);
+        const dropped = this.fetchQueue.splice(maxPending);
+        for (const e of dropped) {
+          if (e.state !== 'queued' || e.generation !== this.generation) continue;
+          e.state = 'stale';
+          const cache = e.kind === 'h' ? this.hCache : this.iCache;
+          if (cache.get(e.key) === e) cache.delete(e.key);
+        }
+      }
+      const trim = (cache, max, byteMax) => {
+        const initial = this._cacheBreakdown(cache);
+        let bytes = initial.bytes, workingTiles = initial.workingTiles;
+        if (workingTiles <= max && bytes <= byteMax) return;
         const live = [...cache.values()]
-          .filter(e => !e.persistent && (e.state === 'ready' || e.state === 'decoded'))
-          .sort((a, b) => a.lastUsed - b.lastUsed);
-        let over = cache.size - max;
+          .filter(e => !e.persistent && !e.queryProtected && !e.prefetchProtected &&
+                       (e.state === 'ready' || e.state === 'decoded'))
+          .sort((a, b) => a.lastUsed - b.lastUsed || this._entryBytes(b) - this._entryBytes(a));
         for (const e of live) {
-          if (over-- <= 0 || e.lastUsed === this.frame) break;
-          e.tex?.dispose(); e.bmp?.close?.();
-          if (e.kind === 'h') {
-            this.worldIndex?.remove(e.key);
-            this._worldHeightMirrors.delete(e.key);
-          }
+          if ((workingTiles <= max && bytes <= byteMax) || e.lastUsed === this.frame) break;
+          bytes -= this._entryBytes(e);
+          workingTiles--;
+          this._disposeCacheEntry(e);
           cache.delete(e.key);
         }
       };
-      trim(this.hCache, this.o.heightCacheMax);
-      trim(this.iCache, this.o.imageryCacheMax);
+      trim(this.hCache, this.o.heightCacheMax, this.o.heightBytesMax);
+      trim(this.iCache, this.o.imageryCacheMax, this.o.imageryBytesMax);
       // prune node meshes unseen for a while (materials only; geometry is shared)
-      for (const [k, n] of this.meshes) {
+      if (!this._batched) for (const [k, n] of this.meshes) {
         if (this.frame - n.lastShown > this.o.meshIdleFrames) {
           this.group.remove(n.mesh);
           n.mesh.material.dispose();
@@ -1013,6 +1190,7 @@
         for (const e of this.fetchQueue) if (e.state === 'queued') e.state = 'stale';
         this.fetchQueue.length = 0;
         for (const e of this.uploadQueue) {
+          e._uploadQueued = false;
           e.bmp?.close?.();
           const cache = e.kind === 'h' ? this.hCache : this.iCache;
           if (!e.persistent) cache.delete(e.key);
@@ -1091,19 +1269,30 @@
 
       // pass 1: resolve every visible node's height source FIRST, so the render pass can see
       // which neighbours are still drawing from a coarser ancestor (transient-aware skirts)
+      if (this._batched) this.arrayPool.beginNextFrame();
       for (const node of visible)
         node.hSrc = this._source(this.hCache, this._reqHeight, node,
                                  Math.min(node.z, this.m.maxZoom));
       for (const node of visible) node.nativeHeightMaxZoom = this.m.maxZoom;
-      for (const node of visible) this._renderNode(node);
-      for (const n of this.meshes.values())
-        if (n.lastShown !== this.frame) n.mesh.visible = false;
+      if (this._batched) {
+        const instances = [];
+        for (const node of visible) {
+          const instance = this._terrainInstance(node);
+          if (instance) instances.push(instance);
+        }
+        this._publishTerrainBatches(instances);
+      } else {
+        for (const node of visible) this._renderNode(node);
+        for (const n of this.meshes.values())
+          if (n.lastShown !== this.frame) n.mesh.visible = false;
+      }
       this.visibleTerrainCoverage = global.GT_TERRAIN_COVERAGE.summarizeVisibleTerrain(
         visible, this.meshes, this.frame);
 
       this._pumpFetches();
       this._pumpUploads();
       this._prefetch(visible);
+      this._updateQueryCorridor();
       this._evict();
       this._publishTelemetry();
       this._prevCam.copy(cam.position);
@@ -1279,6 +1468,167 @@
               (node.y - (node.y >> dz) * Math.pow(2, dz)) * scale,
               scale);
       return out;
+    }
+
+    _terrainInstance(node) {
+      const hSrc = node.hSrc;
+      if (!hSrc || hSrc.layer == null ||
+          !this.arrayPool.retainForNextFrame('height', hSrc.key)) return null;
+      const iSrc = this.img ? this._source(this.iCache, this._reqImagery, node,
+                                           Math.min(node.z, this.img.maxZoom)) : null;
+      let imagery = null;
+      if (iSrc && iSrc.layer != null && this.arrayPool.retainForNextFrame('imagery', iSrc.key)) {
+        const win = this._window(node, iSrc, new THREE.Vector3());
+        imagery = { key: iSrc.key, z: iSrc.z, x: iSrc.x, y: iSrc.y,
+                    layer: iSrc.layer, window: [win.x, win.y, win.z] };
+      }
+      const hWin = this._window(node, hSrc, new THREE.Vector3());
+      const gi = this._gridIndexForZ(node.z), fineN = this.o.gridByLOD[gi];
+      const cuv = [0, 0, 0, 0];
+      for (let k = 1; k <= 4 && node.z - k >= 0; k++)
+        cuv[k - 1] = Math.pow(2, k) /
+          this.o.gridByLOD[this._gridIndexForZ(node.z - k)];
+      const srcTexel = this.spanAt(hSrc.z) / this.m.tileSize;
+      const relief = this._windowRelief(hSrc, hWin);
+      let skirt = this.o.skirt + 3 * srcTexel + 0.08 * relief;
+      const nativeZ = Math.min(node.z, this.m.maxZoom);
+      const nbSrcZ = this._nbTransientSrcZ(node);
+      const worstZ = Math.min(hSrc.z < nativeZ ? hSrc.z : Infinity, nbSrcZ);
+      if (worstZ < nativeZ)
+        skirt += 4 * (this.spanAt(worstZ) / this.m.tileSize) + 0.17 * relief;
+      return {
+        key: `${node.z}/${node.x}/${node.y}`, node, gridN: fineN,
+        uvMax: [
+          Math.min(1, Math.max(1e-4, (this.spanX / 2 - node.bounds.minX) / node.bounds.size)),
+          Math.min(1, Math.max(1e-4, (this.spanZ / 2 - node.bounds.minZ) / node.bounds.size)),
+        ],
+        height: { key: hSrc.key, z: hSrc.z, x: hSrc.x, y: hSrc.y,
+                  layer: hSrc.layer, window: [hWin.x, hWin.y, hWin.z] },
+        imagery,
+        sourceTexelMeters: srcTexel,
+        skirt,
+        morphBase: (node.bounds.size / this.m.tileSize) * this._projScale /
+                   this._pixelErrorAt(node.bounds),
+        morphLattice: cuv,
+        edgeRatios: [
+          this._edgeR(node, -1, 0, fineN), this._edgeR(node, 1, 0, fineN),
+          this._edgeR(node, 0, -1, fineN), this._edgeR(node, 0, 1, fineN),
+        ],
+      };
+    }
+
+    _batchUniforms() {
+      return {
+        uHeightArray: { value: this.arrayPool.height.texture },
+        uImageryArray: { value: this.arrayPool.imagery.texture },
+        uSun: { value: this.o.sun }, uSunColor: { value: this.sunColor },
+        uSunAngles: { value: this.sunAngles }, uAmb: { value: this.ambient },
+        uEnvColor: (global.TERRAIN_ENV_UNIFORMS ||
+          {uEnvColor:{value:new THREE.Color(0.2,0.3,0.5)}}).uEnvColor,
+        uWet: (global.TERRAIN_ENV_UNIFORMS || {uWet:{value:0}}).uWet,
+        uHorizonA: { value: this.horizonTex[0] }, uHorizonB: { value: this.horizonTex[1] },
+        uHasHorizon: { value: this.horizonTex[0] ? 1 : 0 },
+        uHorizonMax: { value: this.horizonMaxAngle || 1 },
+        uAO: { value: this.aoTex }, uHasAO: { value: this.aoTex ? 1 : 0 },
+        uWorldMin: { value: new THREE.Vector2(-this.spanX / 2, -this.spanZ / 2) },
+        uWorldInv: { value: new THREE.Vector2(1 / this.spanX, 1 / this.spanZ) },
+        uFogColor: { value: this.scene.fog.color },
+        uFogNear: { value: this.scene.fog.near }, uFogFar: { value: this.scene.fog.far },
+        uSnowLine: { value: this.o.snowLine },
+        uNaturalColor: { value: this._naturalColor ? 1 : 0 },
+        uSeason: global.SEASON_UNIFORMS?.uSeason || { value: 0 },
+        uTime: { value: 0 }, uNoise: { value: this.noiseTex },
+        uDetailN: { value: this.detailNTex }, uHasDetailN: { value: this.detailNTex ? 1 : 0 },
+        uShadowMap: this.shadowU.uShadowMap, uShadowMtx: this.shadowU.uShadowMtx,
+        uShadowOn: this.shadowU.uShadowOn,
+        uHLPos: this.headlightU.uHLPos, uHLDir: this.headlightU.uHLDir,
+        uHLColor: this.headlightU.uHLColor, uHLParams: this.headlightU.uHLParams,
+        uDetailA: { value: this.detailATex }, uLandcover: { value: this.lcTex },
+        uLCMin: { value: this.lcMap ? this.lcMap.min.clone() : new THREE.Vector2() },
+        uLCInv: { value: this.lcMap ? this.lcMap.inv.clone() : new THREE.Vector2(1, 1) },
+        uHasLC: { value: this.lcTex ? 1 : 0 }, uRoads: { value: this.roadsTex },
+        uRoadsOrigin: { value: this.roadsMap ? this.roadsMap.origin.clone() : new THREE.Vector2() },
+        uRoadsInv: { value: this.roadsMap ? this.roadsMap.inv.clone() : new THREE.Vector2(1, 1) },
+        uHasRoads: { value: this.roadsTex ? 1 : 0 },
+      };
+    }
+
+    _newTerrainBatch(gridN, capacity, packed) {
+      if (!this._batchMaterial) {
+        const shader = global.TerrainShaders.batch;
+        this._batchMaterial = new THREE.ShaderMaterial({
+          uniforms: this._batchUniforms(), vertexShader: shader.vertex,
+          fragmentShader: shader.fragment, glslVersion: THREE.GLSL3, side: THREE.DoubleSide,
+        });
+      }
+      const gi = this.o.gridByLOD.indexOf(gridN);
+      const geometry = this.grids[gi].clone();
+      const buffer = new THREE.InstancedInterleavedBuffer(packed, 25, 1);
+      const attrs = global.TerrainShaders.batch.attributes;
+      let offset = 0;
+      for (const spec of [attrs.tile, attrs.uvMax, attrs.height, attrs.imagery,
+                          attrs.geom, attrs.ancestorLattice, attrs.edgeRatios]) {
+        geometry.setAttribute(spec.name,
+          new THREE.InterleavedBufferAttribute(buffer, spec.itemSize, offset, false));
+        offset += spec.itemSize;
+      }
+      const mesh = new THREE.InstancedMesh(geometry, this._batchMaterial, capacity);
+      mesh.name = `terrainBatch-${gridN}`;
+      mesh.frustumCulled = false;
+      mesh.matrixAutoUpdate = false; mesh.updateMatrix();
+      return { mesh, geometry, buffer, capacity, gridN };
+    }
+
+    _publishTerrainBatches(instances) {
+      const contract = global.GT_TERRAIN_BATCH;
+      const frame = contract.buildTerrainFrame(instances, {
+        frameId: this.frame, capacities: this._batchCapacities,
+      });
+      const occupied = new Set();
+      for (const [gridN, data] of frame.batches) {
+        occupied.add(gridN);
+        let record = this.batches.get(gridN);
+        if (!record || record.capacity < data.capacity) {
+          const replacement = this._newTerrainBatch(gridN, data.capacity, data.packed);
+          replacement.mesh.count = data.count;
+          this.group.add(replacement.mesh);
+          if (record) { this.group.remove(record.mesh); record.geometry.dispose(); }
+          record = replacement; this.batches.set(gridN, record);
+        } else {
+          record.buffer.array.set(data.packed.subarray(0, data.count * 25));
+          record.buffer.needsUpdate = true;
+          record.mesh.count = data.count; record.mesh.visible = true;
+        }
+        this._batchCapacities.set(gridN, record.capacity);
+      }
+      for (const [gridN, record] of [...this.batches]) if (!occupied.has(gridN)) {
+        this.group.remove(record.mesh); record.geometry.dispose(); this.batches.delete(gridN);
+      }
+      this.arrayPool.publishNextFrame();
+
+      // Preserve the public per-leaf map consumed by coverage, movement-pop, and season telemetry.
+      this.meshes.clear();
+      for (const descriptor of frame.descriptors) {
+        const record = this.batches.get(descriptor.gridN);
+        this.meshes.set(descriptor.key, { mesh: record.mesh, lastShown: this.frame });
+      }
+      const u = this._batchMaterial?.uniforms;
+      if (u) {
+        u.uFogNear.value = this.scene.fog.near; u.uFogFar.value = this.scene.fog.far;
+        u.uTime.value = this._timeSec;
+        if (this.horizonTex[0]) {
+          u.uHorizonA.value = this.horizonTex[0]; u.uHorizonB.value = this.horizonTex[1];
+          u.uHasHorizon.value = 1; u.uHorizonMax.value = this.horizonMaxAngle;
+        }
+        if (this.aoTex) { u.uAO.value = this.aoTex; u.uHasAO.value = 1; }
+        if (this.lcTex) {
+          u.uLandcover.value = this.lcTex; u.uLCMin.value.copy(this.lcMap.min);
+          u.uLCInv.value.copy(this.lcMap.inv); u.uHasLC.value = 1;
+        }
+      }
+      this._batchFrame = frame;
+      this._batchEquivalence = this._batchCompare
+        ? contract.compareTerrainSubmissions(instances, frame) : null;
     }
 
     _renderNode(node) {
@@ -1486,8 +1836,8 @@
 
     /* height range (m) of source tile e inside uv window win — from a lazy 8x8 min/max mip */
     _windowRelief(e, win) {
-      if (!e.decoded) return 0;
       if (!e.mip) {
+        if (!e.decoded) return 0;
         const S = this.m.tileSize, C = 8, cs = S / C;
         const mn = new Float32Array(C * C).fill(Infinity);
         const mx = new Float32Array(C * C).fill(-Infinity);
@@ -1515,6 +1865,20 @@
 
     _prefetch(visible) {
       const vel = new THREE.Vector3().subVectors(this.camera.position, this._prevCam);
+      for (const cache of [this.hCache, this.iCache]) for (const e of cache.values()) {
+        if (e.prefetchProtected && e.prefetchUntil < this.frame) {
+          e.prefetchProtected = false;
+          if (e.layer != null) (e.kind === 'h' ? this.arrayPool?.height : this.arrayPool?.imagery)
+            ?.unprotect(e.key, 'prefetch');
+        }
+      }
+      const protect = e => {
+        if (!e) return e;
+        e.prefetchProtected = true; e.prefetchUntil = this.frame + 2;
+        if (e.layer != null) (e.kind === 'h' ? this.arrayPool?.height : this.arrayPool?.imagery)
+          ?.protect(e.key, 'prefetch');
+        return e;
+      };
       // Keep a coarse panoramic imagery ring resident. Frustum-only requests made a fast 180°
       // turn expose undecoded tiles even though the camera had not moved; the normal fine requests
       // still replace this fallback as soon as the new view becomes active.
@@ -1530,22 +1894,99 @@
           for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
             const x = cx + dx, y = cy + dy;
             if (x >= 0 && y >= 0 && x < nx && y < ny)
-              this._reqImagery(z, x, y, 9000 + dx * dx + dy * dy);
+              protect(this._reqImagery(z, x, y, 9000 + dx * dx + dy * dy));
           }
         }
       }
+      const moving = vel.x * vel.x + vel.z * vel.z > 1;
       for (const node of visible) {
         const hz = Math.min(node.z, this.m.maxZoom);
-        if (hz > 0) this._reqHeight(hz - 1, node.x >> (node.z - hz + 1), node.y >> (node.z - hz + 1), node.dist + 5000);
+        if (hz > 0) this._reqHeight(hz - 1, node.x >> (node.z - hz + 1),
+          node.y >> (node.z - hz + 1), node.dist + 5000);
+        if (!moving) continue;
         const [gx, gy] = this.tilesAtZoom(node.z);
         const nx = node.x + (vel.x > 0 ? 1 : -1), ny = node.y + (vel.z > 0 ? 1 : -1);
         if (nx >= 0 && nx < gx) {
-          this._reqHeight(Math.min(node.z, this.m.maxZoom), nx >> (node.z - hz), node.y >> (node.z - hz), node.dist + 2000);
-          if (this.img) this._reqImagery(Math.min(node.z, this.img.maxZoom), nx, node.y, node.dist + 2500);
+          protect(this._reqHeight(Math.min(node.z, this.m.maxZoom), nx >> (node.z - hz), node.y >> (node.z - hz), node.dist + 2000));
+          if (this.img) protect(this._reqImagery(Math.min(node.z, this.img.maxZoom), nx, node.y, node.dist + 2500));
         }
         if (ny >= 0 && ny < gy && this.img)
-          this._reqImagery(Math.min(node.z, this.img.maxZoom), node.x, ny, node.dist + 2500);
+          protect(this._reqImagery(Math.min(node.z, this.img.maxZoom), node.x, ny, node.dist + 2500));
       }
+    }
+
+    _rehydrateHeight(e) {
+      if (!e || e.decoded || e.cpuLoading || e.state !== 'ready') return;
+      e.cpuLoading = true; this.inFlight++;
+      const generation = this.generation;
+      fetch(this._urlH(e.z, e.x, e.y))
+        .then(r => r.ok ? r.blob() : Promise.reject(new Error(`height HTTP ${r.status}`)))
+        .then(createImageBitmap)
+        .then(bmp => this._decodeHeightAsync(bmp, e.z, e.x, e.y, -9000))
+        .then(decoded => {
+          if (generation !== this.generation || this.hCache.get(e.key) !== e) return;
+          e.decoded = decoded; this._mirrorHeightTile(e);
+        })
+        .catch(() => {})
+        .finally(() => { e.cpuLoading = false; this.inFlight--; });
+    }
+
+    _updateQueryCorridor() {
+      if (!this._batched || !this.m) return;
+      const radius = this.o.queryRadius, z = this.m.maxZoom, span = this.spanAt(z);
+      const cx = this.camera.position.x, cz = this.camera.position.z;
+      const desired = new Set();
+      const [countX, countY] = this.tilesAtZoom(z);
+      const minX = Math.max(0, Math.floor((cx - radius + this.spanX / 2) / span));
+      const maxX = Math.min(countX - 1, Math.floor((cx + radius + this.spanX / 2) / span));
+      const minY = Math.max(0, Math.floor((cz - radius + this.spanZ / 2) / span));
+      const maxY = Math.min(countY - 1, Math.floor((cz + radius + this.spanZ / 2) / span));
+      for (let y = minY; y <= maxY; y++) for (let x = minX; x <= maxX; x++) {
+        const b = this.tileWorldBounds(z, x, y);
+        const dx = Math.max(b.minX - cx, 0, cx - (b.minX + b.wpt));
+        const dz = Math.max(b.minZ - cz, 0, cz - (b.minZ + b.hpt));
+        if (dx * dx + dz * dz <= radius * radius) desired.add(`${z}/${x}/${y}`);
+      }
+      let fx = this.camera.position.x - this._prevCam.x;
+      let fz = this.camera.position.z - this._prevCam.z;
+      if (fx * fx + fz * fz < 1e-4) {
+        const direction = this._queryForward || (this._queryForward = new THREE.Vector3());
+        this.camera.getWorldDirection(direction); fx = direction.x; fz = direction.z;
+      }
+      const fl = Math.hypot(fx, fz) || 1;
+      const aheadX = cx + fx / fl * (radius + span * 0.5);
+      const aheadZ = cz + fz / fl * (radius + span * 0.5);
+      const ax = Math.floor((aheadX + this.spanX / 2) / span);
+      const ay = Math.floor((aheadZ + this.spanZ / 2) / span);
+      if (ax >= 0 && ay >= 0 && ax < countX && ay < countY) desired.add(`${z}/${ax}/${ay}`);
+
+      for (const e of this.hCache.values()) {
+        const wanted = e.persistent || desired.has(e.key);
+        e.queryProtected = wanted && !e.persistent;
+        if (e.layer != null) {
+          if (wanted) this.arrayPool.height.protect(e.key, 'query');
+          else this.arrayPool.height.unprotect(e.key, 'query');
+        }
+        if (wanted && !e.decoded) this._rehydrateHeight(e);
+        if (!wanted && !e.persistent && e.decoded && e.state === 'ready') {
+          e.cpuReleaseAt ||= performance.now() + 10000;
+          if (performance.now() < e.cpuReleaseAt) continue;
+          // The 8x8 relief mip is enough for future skirt calculations; GPU rendering no longer
+          // needs the full 1 MiB Float32Array once the tile is outside CPU consumers' corridor.
+          this._windowRelief(e, { x: 0, y: 0, z: 1 });
+          e.decoded = null;
+          this.worldIndex?.remove(e.key); this._worldHeightMirrors.delete(e.key);
+        }
+        if (wanted) e.cpuReleaseAt = 0;
+      }
+      for (const key of desired) {
+        const parts = key.split('/').map(Number);
+        const e = this._reqHeight(parts[0], parts[1], parts[2], -9000);
+        e.queryProtected = true;
+        if (e.layer != null) this.arrayPool.height.protect(e.key, 'query');
+        if (!e.decoded) this._rehydrateHeight(e);
+      }
+      this._queryTileKeys = desired;
     }
 
     /* ================= collision / heightAt ================= */
@@ -1568,7 +2009,7 @@
           .then(async bmp => {
             e.decoded = await this._decodeHeightAsync(bmp, e.z, e.x, e.y, -10000);
             this._mirrorHeightTile(e);
-            e.state = 'decoded'; this.uploadQueue.push(e);
+            e.state = 'decoded'; this._queueUpload(e);
           }));
       }
       await Promise.all(jobs);
@@ -1592,7 +2033,13 @@
         jobs.push(this._prepareImageryAsync(this._urlI(z, x, y), z, x, y, -10000)
           .then(result => {
             e.prepared = result.prepared;
-            e.tex = this._imageryTexture(result.bitmap, z, x, y, result.prepared);
+            if (this._batched) {
+              const valid = this._validTexels(z, x, y);
+              const ready = this.arrayPool.uploadImagery(key, result.bitmap, {
+                prepared: result.prepared, validX: valid[0], validY: valid[1], persistent: true,
+              });
+              e.tex = ready.texture; e.layer = ready.layer;
+            } else e.tex = this._imageryTexture(result.bitmap, z, x, y, result.prepared);
             e.state = 'ready';
             this._streamStats.imageryPrepared++;
             this._streamStats.uploads++;

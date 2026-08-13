@@ -315,6 +315,10 @@ function makeHeightTexture(size, capacity, floatLinear) {
   texture.generateMipmaps = false;
   texture.flipY = false;
   texture.unpackAlignment = 1;
+  // renderer.initTexture() only allocates user textures whose source version is non-zero.
+  // The backing data intentionally stays null (immutable texStorage3D allocation); needsUpdate
+  // advances the version without asking Three to upload a full CPU-sized array.
+  texture.needsUpdate = true;
   return texture;
 }
 
@@ -331,6 +335,7 @@ function makeImageryTexture(size, capacity, anisotropy) {
   texture.flipY = false;
   texture.unpackAlignment = 1;
   texture.anisotropy = anisotropy;
+  texture.needsUpdate = true;
   return texture;
 }
 
@@ -394,6 +399,10 @@ export class TerrainTextureArrayPool {
     try {
       renderer.initTexture(heightTexture);
       renderer.initTexture(imageryTexture);
+      // texStorage3D was allocated with the full mip count because generateMipmaps was true.
+      // Subsequent layer uploads copy a completed temporary 2D mip chain level-by-level; leaving
+      // this true would regenerate every layer after every level-0 copy.
+      imageryTexture.generateMipmaps = false;
     } catch (error) {
       heightTexture.dispose();
       imageryTexture.dispose();
@@ -476,19 +485,38 @@ export class TerrainTextureArrayPool {
     try {
       image = options.prepared ? bitmap : edgePadImagery(
         bitmap, this.imageryTileSize, validX, validY, options.canvasFactory);
-      const source = new Texture(image);
-      source.flipY = false;
-      source.unpackAlignment = 1;
       try {
         const bytes = this.imageryTileSize * this.imageryTileSize * IMAGERY_BYTES_PER_TEXEL;
         this._withTemporaryUpload(bytes, () => {
-          // Three r184 generates dstTexture's complete mip chain before returning from this call.
-          this.renderer.copyTextureToTexture(
-            source, this.imagery.texture, null, { x: 0, y: 0, z: record.layer });
+          // Build this layer's mip chain on small temporary canvases, then upload each level
+          // directly. WebGL's generateMipmap(TEXTURE_2D_ARRAY) regenerates ALL resident layers,
+          // which turns streamed uploads into an O(capacity*uploads) startup stall.
+          const levels = Math.floor(Math.log2(this.imageryTileSize)) + 1;
+          const makeCanvas = options.canvasFactory || ((width, height) =>
+            new OffscreenCanvas(width, height));
+          const base = makeCanvas(this.imageryTileSize, this.imageryTileSize);
+          const baseContext = base.getContext('2d');
+          if (!baseContext) throw new Error('Unable to create imagery mip context');
+          baseContext.drawImage(image, 0, 0, this.imageryTileSize, this.imageryTileSize);
+          for (let level = 0; level < levels; level++) {
+            const mipSize = Math.max(1, this.imageryTileSize >> level);
+            let mipImage = base;
+            if (level > 0) {
+              mipImage = makeCanvas(mipSize, mipSize);
+              const context = mipImage.getContext('2d');
+              if (!context) throw new Error('Unable to create imagery mip context');
+              context.drawImage(base, 0, 0, mipSize, mipSize);
+            }
+            const source = new Texture(mipImage);
+            source.flipY = false; source.unpackAlignment = 1;
+            try {
+              this.renderer.copyTextureToTexture(
+                source, this.imagery.texture, null, { x: 0, y: 0, z: record.layer },
+                0, level);
+            } finally { source.dispose(); }
+          }
         });
-      } finally {
-        source.dispose();
-      }
+      } finally {}
       this.imagery.markReady(key);
       return this.imagery.getReady(key, false);
     } catch (error) {

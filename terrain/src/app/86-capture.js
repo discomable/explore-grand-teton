@@ -27,6 +27,41 @@ function captureRequestFailure(url, detail){
     }
   };
 }
+// Development telemetry: count actual WebGL submissions after Three.js frustum culling and
+// geometry-group selection. The static scene breakdown below is useful for inventory, but it
+// cannot tell whether a visible object was outside the camera frustum. renderBufferDirect is
+// the last Three.js call before the driver submission; wrapping it here leaves rendering and
+// object lifetimes unchanged. The latest main-camera pass is retained for captureMeta().
+try {
+  if(typeof renderer!=='undefined' && renderer && !renderer.__gtRenderBreakdownInstalled &&
+     typeof renderer.renderBufferDirect==='function') {
+    const originalRenderBufferDirect=renderer.renderBufferDirect.bind(renderer);
+    const stats={main:null,other:null,lastKey:null};
+    const rootName=object=>{
+      let root=object;
+      while(root&&root.parent&&root.parent.type!=='Scene') root=root.parent;
+      return root?.name||root?.type||'unknown';
+    };
+    renderer.renderBufferDirect=function(renderCamera,renderScene,geometry,material,object,group){
+      const main=typeof camera!=='undefined'&&renderCamera===camera;
+      const pass=main?'main':'other';
+      const frame=renderer.info?.render?.frame??0;
+      const key=frame+':'+pass;
+      if(stats.lastKey!==key){ stats[pass]={frame,pass,calls:0,triangles:0,roots:{}}; stats.lastKey=key; }
+      const out=stats[pass]||{frame,pass,calls:0,triangles:0,roots:{}};
+      const index=geometry?.index, position=geometry?.attributes?.position;
+      const count=group?.count ?? index?.count ?? position?.count ?? 0;
+      const instances=object?.isInstancedMesh?object.count||0:1;
+      const bucket=rootName(object), root=out.roots[bucket]||(out.roots[bucket]={calls:0,triangles:0});
+      out.calls++; out.triangles+=(count/3)*instances;
+      root.calls++; root.triangles+=(count/3)*instances;
+      stats[pass]=out;
+      window.GT_RENDER_BREAKDOWN=stats;
+      return originalRenderBufferDirect(renderCamera,renderScene,geometry,material,object,group);
+    };
+    renderer.__gtRenderBreakdownInstalled=true;
+  }
+} catch(error) { console.info('[capture] draw accounting unavailable',error&&error.message||error); }
 function captureMeta(name){
   const params=new URLSearchParams(location.search);
   const applicationReady=typeof ready!=='undefined' && ready===true;
@@ -34,18 +69,27 @@ function captureMeta(name){
   const gl=typeof renderer!=='undefined' ? renderer.getContext() : null;
   const debug=gl && gl.getExtension('WEBGL_debug_renderer_info');
   const sceneBreakdown=[];
+  const geometryCost=(geometry, instances)=>{
+    const index=geometry.index, position=geometry.attributes?.position;
+    const full=index?index.count:(position?position.count:0);
+    const groups=geometry.groups&&geometry.groups.length?geometry.groups:null;
+    if(!groups) return {draws:1, triangles:(full/3)*instances, groups:0};
+    let triangles=0;
+    for(const group of groups) triangles+=(group.count/3)*instances;
+    return {draws:groups.length, triangles, groups:groups.length};
+  };
   if(typeof scene!=='undefined'&&scene) for(const root of scene.children){
-    let draws=0,triangles=0,objects=0;
+    let draws=0,triangles=0,objects=0,groups=0,instanced=0;
     root.traverse?.(object=>{
       if(!object.visible||!object.geometry||!object.material) return;
-      const index=object.geometry.index,position=object.geometry.attributes?.position;
-      const base=index?index.count/3:(position?position.count/3:0);
       const instances=object.isInstancedMesh?object.count||0:1;
-      draws+=Array.isArray(object.material)?object.material.length:1;
-      triangles+=base*instances; objects++;
+      const cost=geometryCost(object.geometry, instances);
+      draws+=cost.draws; triangles+=cost.triangles; groups+=cost.groups;
+      instanced+=object.isInstancedMesh?1:0; objects++;
     });
     if(draws||triangles) sceneBreakdown.push({
-      name:root.name||root.type,draws,objects,triangles:Math.round(triangles)
+      name:root.name||root.type,draws,objects,groups,instanced,
+      triangles:Math.round(triangles)
     });
   }
   sceneBreakdown.sort((a,b)=>b.triangles-a.triangles);
@@ -86,7 +130,11 @@ function captureMeta(name){
             start:[a.x,a.z],end:[b.x,b.z],deckY:span.deckY};
         }) : [],
     },
+    // Group-aware estimate: backing index buffers are not counted when only a subset of
+    // geometry.groups is submitted. renderer.info remains the authoritative whole-frame total.
+    sceneBreakdownMode:'visible-object-group-estimate',
     sceneBreakdown:sceneBreakdown.slice(0,24),
+    renderBreakdown:window.GT_RENDER_BREAKDOWN||null,
     webgl:gl ? {
       version:gl.getParameter(gl.VERSION),
       shadingLanguageVersion:gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
