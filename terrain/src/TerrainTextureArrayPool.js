@@ -14,7 +14,6 @@ import {
 
 const HEIGHT_BYTES_PER_TEXEL = 4;
 const IMAGERY_BYTES_PER_TEXEL = 4;
-const MIP_FACTOR = 4 / 3;
 
 export class TerrainTextureArrayCapacityError extends Error {
   constructor(kind, capacity) {
@@ -34,6 +33,16 @@ function protectionReasons(options) {
     (options.protect ? [options.protect] : []);
   if (options.persistent && !reasons.includes('persistent')) reasons.push('persistent');
   return reasons;
+}
+
+function mipChainBytes(width, height, bytesPerTexel) {
+  let bytes = 0;
+  while (true) {
+    bytes += width * height * bytesPerTexel;
+    if (width === 1 && height === 1) return bytes;
+    width = Math.max(1, width >> 1);
+    height = Math.max(1, height >> 1);
+  }
 }
 
 /**
@@ -222,6 +231,11 @@ export class TerrainTextureLayerPool {
     return this.records.get(key)?.protection.delete(reason) || false;
   }
 
+  isProtected(key) {
+    const record = this.records.get(key);
+    return !!record && this._isProtected(record);
+  }
+
   beginNextFrame() {
     this._assertLive();
     this.nextRefs.clear();
@@ -350,6 +364,8 @@ export class TerrainTextureArrayPool {
     this.temporaryUploads = 0;
     this.temporaryUploadBytes = 0;
     this.peakTemporaryUploadBytes = 0;
+    this.totalUploads = 0;
+    this.totalUploadBytes = 0;
     this.disposed = false;
 
     const maxAnisotropy = renderer.capabilities?.getMaxAnisotropy?.() || 1;
@@ -368,8 +384,8 @@ export class TerrainTextureArrayPool {
       kind: 'imagery',
       texture: imageryTexture,
       capacity: options.imageryCapacity,
-      bytesPerLayer: Math.ceil(
-        this.imageryTileSize * this.imageryTileSize * IMAGERY_BYTES_PER_TEXEL * MIP_FACTOR),
+      bytesPerLayer: mipChainBytes(
+        this.imageryTileSize, this.imageryTileSize, IMAGERY_BYTES_PER_TEXEL),
       onEvict: record => options.onEvict?.('imagery', record),
     });
 
@@ -386,6 +402,8 @@ export class TerrainTextureArrayPool {
   }
 
   _withTemporaryUpload(bytes, upload) {
+    this.totalUploads++;
+    this.totalUploadBytes += bytes;
     this.temporaryUploads++;
     this.temporaryUploadBytes += bytes;
     this.peakTemporaryUploadBytes = Math.max(
@@ -403,7 +421,13 @@ export class TerrainTextureArrayPool {
       throw new TypeError('Height layer must be one tile-sized Float32Array');
     }
     const existing = this.height.getReady(key, false);
-    if (existing && !options.replace) return existing;
+    if (existing && !options.replace) {
+      this.height.reserve(key, options); // merge persistent/prefetch protection on stable hits
+      return existing;
+    }
+    if (existing && this.height.isProtected(key)) {
+      throw new Error(`Cannot replace protected height layer ${key}`);
+    }
     const record = this.height.reserve(key, options);
     this.height.markUploading(key);
     const source = new DataTexture(
@@ -428,8 +452,13 @@ export class TerrainTextureArrayPool {
   uploadImagery(key, bitmap, options = {}) {
     const existing = this.imagery.getReady(key, false);
     if (existing && !options.replace) {
+      this.imagery.reserve(key, options); // merge persistent/prefetch protection on stable hits
       if (options.closeSource !== false) bitmap?.close?.();
       return existing;
+    }
+    if (existing && this.imagery.isProtected(key)) {
+      if (options.closeSource !== false) bitmap?.close?.();
+      throw new Error(`Cannot replace protected imagery layer ${key}`);
     }
     let record;
     try {
@@ -501,6 +530,8 @@ export class TerrainTextureArrayPool {
       temporaryUploads: this.temporaryUploads,
       temporaryUploadBytes: this.temporaryUploadBytes,
       peakTemporaryUploadBytes: this.peakTemporaryUploadBytes,
+      totalUploads: this.totalUploads,
+      totalUploadBytes: this.totalUploadBytes,
       residentGpuBytes: height.residentGpuBytes + imagery.residentGpuBytes,
       allocatedGpuBytes: height.allocatedGpuBytes + imagery.allocatedGpuBytes,
       cpuBytes: 0,

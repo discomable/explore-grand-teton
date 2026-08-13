@@ -116,7 +116,8 @@ test('height assignments stay stable and are exposed only after upload completes
   assert.equal(observedDuringCopy, null);
   assert.equal(first.layer, 0);
   assert.equal(first.texture, pool.height.texture);
-  assert.equal(pool.uploadHeight('4/2/1', heights(20)).layer, 0);
+  assert.equal(pool.uploadHeight('4/2/1', heights(20), { protect: 'prefetch' }).layer, 0);
+  assert.equal(pool.height.isProtected('4/2/1'), true);
   assert.equal(renderer.copies.length, 1);
   assert.deepEqual(renderer.copies[0].position, { x: 0, y: 0, z: 0 });
   pool.dispose();
@@ -240,8 +241,10 @@ test('metrics report layer protection, reference counts, and allocated bytes', (
   assert.equal(metrics.temporaryUploads, 0);
   assert.equal(metrics.temporaryUploadBytes, 0);
   assert.equal(metrics.peakTemporaryUploadBytes, 16);
+  assert.equal(metrics.totalUploads, 2);
+  assert.equal(metrics.totalUploadBytes, 32);
   assert.equal(metrics.cpuBytes, 0);
-  assert.equal(metrics.allocatedGpuBytes, (2 * 16) + (2 * Math.ceil(16 * 4 / 3)));
+  assert.equal(metrics.allocatedGpuBytes, (2 * 16) + (2 * (16 + 4)));
   pool.cancelNextFrame();
   pool.dispose();
 });
