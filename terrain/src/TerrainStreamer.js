@@ -35,6 +35,9 @@
     uploadsPerFrame: 6,       // near-field imagery must land fast (was a visible beige lag)
     maxConcurrentFetch: 12,
     pixelError: 1.8,          // screen-space error (px) before subdividing
+    geometricErrorFloor: 0.5, // retain half the authored texel-error envelope even on flat nodes;
+                              // avoids an over-aggressive collapse while measured error removes
+                              // the genuinely sub-pixel half of the legacy tessellation.
     // CORE-RANGE fidelity: nodes whose xz-box overlaps this world-space box (the Cathedral Group —
     // Grand/Owen/Teewinot/Middle Teton) subdivide with corePixelError instead of pixelError, so the
     // range keeps ~1 m relief in its silhouette at valley distance where the global SSE would round
@@ -155,6 +158,16 @@
       this.arrayPool = null;
       this._batchSupport = { supported: false, reason: 'not-initialized' };
       this._batchCompare = /[?&]terrainBatchCompare=1(?:&|$)/.test(global.location?.search || '');
+      this._visibilityEnabled = !/[?&]terrainVisibility=0(?:&|$)/.test(
+        global.location?.search || '');
+      this._visibilityCompare = /[?&]terrainVisibilityCompare=1(?:&|$)/.test(
+        global.location?.search || '');
+      this._terrainErrors = null;
+      this._terrainErrorStatus = this._visibilityEnabled ? 'pending' : 'disabled';
+      this._predictionState = null;
+      this._visibilityStats = { geometricDecisions: 0, legacyDecisions: 0,
+        changedDecisions: 0, predictedLeaves: 0, warmHeightSources: 0,
+        warmImagerySources: 0, warmCancelled: 0, fallbackHits: 0 };
       this.fetchQueue = []; this.uploadQueue = []; this.inFlight = 0;
       this.workerPool = global.GT_APP && global.GT_APP.workerPool;
       this.worldIndex = global.GT_APP && global.GT_APP.worldIndex;
@@ -553,6 +566,28 @@
       this.enc = this.m.encoding;
       this.rootSpan = this.m.tileSize * Math.pow(2, this.m.maxZoom) * this.px;
       this.maxDepth = this.m.maxZoom;
+
+      if (this._visibilityEnabled && this.m.geometricError?.url) {
+        try {
+          const response = await fetch(this.baseUrl + this.m.geometricError.url);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const parser = global.GT_TERRAIN_VISIBILITY?.parseTerrainErrorPyramid;
+          if (!parser) throw new Error('visibility contract unavailable');
+          const errors = parser(await response.arrayBuffer());
+          if (errors.levels.length <= this.m.maxZoom)
+            throw new Error('missing terrain zoom levels');
+          for (let z = 0; z <= this.m.maxZoom; z++) {
+            const [nx, ny] = this.tilesAtZoom(z), level = errors.levels[z];
+            if (level.nx !== nx || level.ny !== ny)
+              throw new Error(`z${z} dimensions ${level.nx}x${level.ny} != ${nx}x${ny}`);
+          }
+          this._terrainErrors = errors;
+          this._terrainErrorStatus = 'ready';
+        } catch (error) {
+          this._terrainErrorStatus = `fallback: ${error?.message || error}`;
+          console.warn('[terrain] geometric-error metadata unavailable; using legacy SSE.', error);
+        }
+      } else if (this._visibilityEnabled) this._terrainErrorStatus = 'fallback: not declared';
 
       // optional imagery pyramid (same grid family)
       this.img = null;
@@ -965,7 +1000,8 @@
           if (this._batched) {
             const ready = this.arrayPool.uploadHeight(e.key, e.decoded, {
               persistent: !!e.persistent,
-              protect: e.queryProtected ? 'query' : (e.prefetchProtected ? 'prefetch' : null),
+              protect: e.queryProtected ? 'query' : (e.predictionProtected ? 'prediction' :
+                (e.prefetchProtected ? 'prefetch' : null)),
             });
             e.tex = ready.texture; e.layer = ready.layer;
           } else e.tex = this._heightTexture(e.decoded);
@@ -976,7 +1012,8 @@
             const ready = this.arrayPool.uploadImagery(e.key, source, {
               prepared: e.prepared, validX: valid[0], validY: valid[1],
               persistent: !!e.persistent,
-              protect: e.prefetchProtected ? 'prefetch' : null,
+              protect: e.predictionProtected ? 'prediction' :
+                (e.prefetchProtected ? 'prefetch' : null),
             });
             e.tex = ready.texture; e.layer = ready.layer; e.bmp = null;
           } else {
@@ -1049,6 +1086,17 @@
         } : { mode: 'legacy-mesh', drawCalls: this.meshes.size },
         arrayPool: this.arrayPool?.snapshot?.() || null,
         cpuQueryTiles: this._queryTileKeys?.size || 0,
+        visibilityEnvelope: {
+          enabled: this._visibilityEnabled,
+          compare: this._visibilityCompare,
+          errorMetadata: this._terrainErrorStatus,
+          mode: this._predictionState?.mode || 'walk',
+          horizonSeconds: this._predictionState?.mode === 'fly' ? 1.2 :
+            this._predictionState?.mode === 'drive' ? 0.8 : 0.5,
+          currentLeaves: this._visible?.length || 0,
+          currentTriangles: this._batchFrame?.triangles || 0,
+          ...this._visibilityStats,
+        },
       };
       this.worldIndex?.refreshMemory();
     }
@@ -1132,6 +1180,18 @@
         reflectionTerrainBatches: this._reflectionBatches.size,
         reflectionBatchBytes: this._reflectionStats?.capacityBytes || 0,
         reflectionTerrain: this._reflectionStats,
+        visibilityEnvelope: {
+          enabled: this._visibilityEnabled,
+          errorMetadata: this._terrainErrorStatus,
+          mode: this._predictionState?.mode || 'walk',
+          currentLeaves: this._visible?.length || 0,
+          currentTriangles: this._batchFrame?.triangles || 0,
+          predictedLeaves: this._visibilityStats.predictedLeaves,
+          warmHeightSources: this._visibilityStats.warmHeightSources,
+          warmImagerySources: this._visibilityStats.warmImagerySources,
+          warmCancelled: this._visibilityStats.warmCancelled,
+          fallbackHits: this._visibilityStats.fallbackHits,
+        },
         arrayPool: this.arrayPool?.snapshot?.() || null,
         cpuQueryTiles: this._queryTileKeys?.size || 0,
         ...this._memoryEstimate(),
@@ -1149,6 +1209,19 @@
       this._evict();
       this._publishTelemetry();
       return true;
+    }
+
+    setPredictionState(state) {
+      if (!state) { this._predictionState = null; return; }
+      const v = state.velocity;
+      this._predictionState = {
+        mode: state.mode === 'fly' || state.mode === 'drive' ? state.mode : 'walk',
+        velocity: [Number(v?.x ?? v?.[0]) || 0, Number(v?.y ?? v?.[1]) || 0,
+                   Number(v?.z ?? v?.[2]) || 0],
+        yawRate: Number(state.yawRate) || 0,
+        pitchRate: Number(state.pitchRate) || 0,
+        teleported: !!state.teleported,
+      };
     }
 
     _evict() {
@@ -1173,6 +1246,7 @@
         if (workingTiles <= max && bytes <= byteMax) return;
         const live = [...cache.values()]
           .filter(e => !e.persistent && !e.queryProtected && !e.prefetchProtected &&
+                       !e.predictionProtected &&
                        (e.state === 'ready' || e.state === 'decoded'))
           .sort((a, b) => a.lastUsed - b.lastUsed || this._entryBytes(b) - this._entryBytes(a));
         for (const e of live) {
@@ -1200,6 +1274,10 @@
       this._gpuTimerTick();   // opt-in true-GPU frame-time readout; no-op (and free) when disabled
       this.frame++;
       this._timeSec = (performance.now() - this._clock0) / 1000;
+      this._visibilityStats.geometricDecisions = 0;
+      this._visibilityStats.legacyDecisions = 0;
+      this._visibilityStats.changedDecisions = 0;
+      this._visibilityStats.fallbackHits = 0;
       const cam = this.camera;
       if (this.frame > 1 && cam.position.distanceToSquared(this._prevCam) > 1500 * 1500) {
         this.generation++;
@@ -1345,6 +1423,19 @@
       return Math.max(1, Math.hypot(ddx, ddz));
     }
 
+    _nodeGeometricError(z, x, y, gridN, bounds) {
+      if (!this._visibilityEnabled) return null;
+      const measured = this._terrainErrors?.errorMeters(z, x, y, gridN);
+      if (measured == null) return null;
+      // This project already has an approved visual LOD policy based on source texel size.
+      // Measured relief may be much larger on cliffs; allowing it to exceed that authored ceiling
+      // would refine almost the whole range (and regress 3.4m -> 23m triangles). Error metadata is
+      // therefore a one-way simplifier: it proves when a node may stay coarse, never demands more
+      // detail than the legacy selector that the captures approved.
+      const authored = bounds.size / this.m.tileSize;
+      return Math.min(authored, Math.max(measured, authored * this.o.geometricErrorFloor));
+    }
+
     // Descend the quadtree, recording EVERY visited node (internal + leaf) in the level maps so
     // the balance pass below can see the whole rendered set. Frustum-culled subtrees are simply
     // never recorded — they aren't rendered, so no seam can show against them.
@@ -1354,10 +1445,31 @@
       const dist = this._nodeDist(b);
       const texel = b.size / this.m.tileSize;            // meters per rendered texel at this z
       const sse = (texel * projScale) / dist;
-      // core floor: force the Cathedral Group box to subdivide to coreFloorZ even when the SSE would
-      // stop earlier (distant valley view), so the hero peaks stay razor-sharp from anywhere.
-      const forceCore = this.o.coreFloorZ && z < this.o.coreFloorZ && this._overlapsCore(b);
-      if (z < this.maxDepth && (sse > this._pixelErrorAt(b) || forceCore)) {
+      const threshold = this._pixelErrorAt(b);
+      const gridN = this.o.gridByLOD[this._gridIndexForZ(z)];
+      const errorMeters = this._nodeGeometricError(z, x, y, gridN, b);
+      if (errorMeters == null) this._visibilityStats.fallbackHits++;
+      // The core floor belongs only to the visual-safe legacy selector. Measured error retains
+      // genuine Cathedral silhouette relief without forcing every smooth node in its rectangle.
+      // Keep the Cathedral's steep connected face on one minimum depth. Mixed geometric-error
+      // leaves inside this cliff complex exposed transient sheets even with 2:1 edge stitching.
+      // z6 retains its silhouette at ~20 m vertices while avoiding the old z7/4 m blanket cost.
+      const coreFloor = errorMeters == null ? this.o.coreFloorZ : Math.min(6, this.o.coreFloorZ);
+      const forceCore = coreFloor && z < coreFloor && this._overlapsCore(b);
+      const decision = global.GT_TERRAIN_VISIBILITY?.terrainShouldSubdivide({
+        errorMeters, projectionScale: projScale, nearestDistance: dist,
+        pixelThreshold: threshold, legacySse: sse, forceLegacy: !this._visibilityEnabled,
+      }) || { subdivide: sse > threshold, mode: 'legacy', projectedError: sse };
+      if (forceCore) decision.subdivide = true;
+      // Do not mix z6 and z7 across the connected Cathedral cliff face. The skirts are intended
+      // for streaming transients, not persistent alpine relief between differently detailed
+      // leaves; a uniform z6 surface removes those bright triangular sheets.
+      if (errorMeters != null && z >= 6 && this._overlapsCore(b)) decision.subdivide = false;
+      if (decision.mode === 'geometric') this._visibilityStats.geometricDecisions++;
+      else this._visibilityStats.legacyDecisions++;
+      if (this._visibilityCompare && decision.subdivide !== (sse > threshold || forceCore))
+        this._visibilityStats.changedDecisions++;
+      if (z < this.maxDepth && decision.subdivide) {
         this._putNode(z, x, y, dist, b, true, false);
         const cn = this.tilesAtZoom(z + 1), cnx = cn[0], cny = cn[1];
         for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) {
@@ -1526,6 +1638,8 @@
         imagery,
         sourceTexelMeters: srcTexel,
         skirt,
+        // Keep the authored uniform morph cascade. Geometric error changes leaf selection only;
+        // per-node morph bands would differ across neighbours and break the seam invariant.
         morphBase: (node.bounds.size / this.m.tileSize) * this._projScale /
                    this._pixelErrorAt(node.bounds),
         morphLattice: cuv,
@@ -1914,7 +2028,8 @@
       // the ring start and 1 by 2*handoff (where a coarser neighbour's base surface begins);
       // later bands (see surfaceH) keep far vertices consistent with neighbours that are
       // already morphing toward THEIR parents.
-      const handoff = (node.bounds.size / this.m.tileSize) * this._projScale / this._pixelErrorAt(node.bounds);
+      const handoff = (node.bounds.size / this.m.tileSize) * this._projScale /
+        this._pixelErrorAt(node.bounds);
       u.uMorphBase.value = handoff;
       u.uFogNear.value = this.scene.fog.near; u.uFogFar.value = this.scene.fog.far;
       u.uTime.value = this._timeSec;
@@ -2067,11 +2182,11 @@
           ?.protect(e.key, 'prefetch');
         return e;
       };
-      // Keep a coarse panoramic imagery ring resident. Frustum-only requests made a fast 180°
-      // turn expose undecoded tiles even though the camera had not moved; the normal fine requests
-      // still replace this fallback as soon as the new view becomes active.
-      if (this.img) {
-        const z = Math.min(this.img.maxZoom, Math.max(0, this.maxDepth - 2));
+      // Keep a coarse panoramic height + imagery ring resident. Frustum-only requests made a fast
+      // 180° turn expose undecoded tiles even though the camera had not moved; the normal fine
+      // requests still replace this fallback as soon as the new view becomes active.
+      {
+        const z = Math.max(0, this.maxDepth - 2);
         const span = this.rootSpan / (1 << z);
         const cx = Math.floor((this.camera.position.x + this.spanX / 2) / span);
         const cy = Math.floor((this.camera.position.z + this.spanZ / 2) / span);
@@ -2081,8 +2196,14 @@
           const [nx, ny] = this.tilesAtZoom(z);
           for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
             const x = cx + dx, y = cy + dy;
-            if (x >= 0 && y >= 0 && x < nx && y < ny)
-              protect(this._reqImagery(z, x, y, 9000 + dx * dx + dy * dy));
+            if (x >= 0 && y >= 0 && x < nx && y < ny) {
+              const hz = Math.min(z, this.m.maxZoom), hs = z - hz;
+              protect(this._reqHeight(hz, x >> hs, y >> hs, 9200 + dx * dx + dy * dy));
+              if (this.img) {
+                const iz = Math.min(z, this.img.maxZoom), is = z - iz;
+                protect(this._reqImagery(iz, x >> is, y >> is, 9000 + dx * dx + dy * dy));
+              }
+            }
           }
         }
       }
@@ -2101,6 +2222,149 @@
         if (ny >= 0 && ny < gy && this.img)
           protect(this._reqImagery(Math.min(node.z, this.img.maxZoom), node.x, ny, node.dist + 2500));
       }
+      this._prefetchPredicted();
+    }
+
+    _predictedFrustum(pose) {
+      const camera = this._predictionCamera || (this._predictionCamera = this.camera.clone());
+      camera.fov = this.camera.fov; camera.aspect = this.camera.aspect;
+      camera.near = this.camera.near; camera.far = this.camera.far;
+      camera.updateProjectionMatrix();
+      camera.position.set(pose.position[0], pose.position[1], pose.position[2]);
+      camera.rotation.order = 'YXZ'; camera.rotation.set(pose.pitch, pose.yaw, 0);
+      camera.updateMatrixWorld(true);
+      const matrix = this._predictionMatrix || (this._predictionMatrix = new THREE.Matrix4());
+      const frustum = this._predictionFrustumScratch ||
+        (this._predictionFrustumScratch = new THREE.Frustum());
+      frustum.setFromProjectionMatrix(matrix.multiplyMatrices(
+        camera.projectionMatrix, camera.matrixWorldInverse));
+      return frustum;
+    }
+
+    _nodeDistFrom(b, position) {
+      const dx = Math.max(b.minX - position[0], 0, position[0] - (b.minX + b.wpt));
+      const dz = Math.max(b.minZ - position[2], 0, position[2] - (b.minZ + b.hpt));
+      return Math.max(1, Math.hypot(dx, dz));
+    }
+
+    _collectPredictedCandidates(pose, height, imagery) {
+      const frustum = this._predictedFrustum(pose), projScale = this._projScale;
+      const forward = [-Math.sin(pose.yaw) * Math.cos(pose.pitch), Math.sin(pose.pitch),
+                       -Math.cos(pose.yaw) * Math.cos(pose.pitch)];
+      const visit = (z, x, y) => {
+        const b = this.tileWorldBounds(z, x, y);
+        if (!frustum.intersectsBox(this._nodeBox(b))) return;
+        const dist = this._nodeDistFrom(b, pose.position);
+        const texel = b.size / this.m.tileSize;
+        const threshold = this._pixelErrorAt(b);
+        const gridN = this.o.gridByLOD[this._gridIndexForZ(z)];
+        const errorMeters = this._nodeGeometricError(z, x, y, gridN, b);
+        const legacySse = texel * projScale / dist;
+        const decision = global.GT_TERRAIN_VISIBILITY?.terrainShouldSubdivide({
+          errorMeters, projectionScale: projScale, nearestDistance: dist,
+          pixelThreshold: threshold, legacySse, forceLegacy: !this._visibilityEnabled,
+        }) || { subdivide: legacySse > threshold };
+        const coreFloor = errorMeters == null ? this.o.coreFloorZ : Math.min(6, this.o.coreFloorZ);
+        if (coreFloor && z < coreFloor && this._overlapsCore(b)) decision.subdivide = true;
+        if (errorMeters != null && z >= 6 && this._overlapsCore(b)) decision.subdivide = false;
+        if (z < this.maxDepth && decision.subdivide) {
+          const [nx, ny] = this.tilesAtZoom(z + 1);
+          for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) {
+            const cx = x * 2 + dx, cy = y * 2 + dy;
+            if (cx < nx && cy < ny) visit(z + 1, cx, cy);
+          }
+          return;
+        }
+        this._visibilityStats.predictedLeaves++;
+        const cx = b.minX + b.wpt * 0.5, cy = (this.m.elevation.min +
+          this.m.elevation.max) * 0.5 - this.datum, cz = b.minZ + b.hpt * 0.5;
+        const vx = cx - pose.position[0], vy = cy - pose.position[1], vz = cz - pose.position[2];
+        const inv = 1 / Math.max(1, Math.hypot(vx, vy, vz));
+        const centrality = 1 - Math.max(-1, Math.min(1,
+          (vx * forward[0] + vy * forward[1] + vz * forward[2]) * inv));
+        const hz = Math.min(z, this.m.maxZoom), hs = z - hz;
+        height.push({ key: `${hz}/${x >> hs}/${y >> hs}`, z: hz, x: x >> hs, y: y >> hs,
+                      time: pose.t, centrality, distance: dist });
+        if (this.img) {
+          const iz = Math.min(z, this.img.maxZoom), shift = z - iz;
+          imagery.push({ key: `${iz}/${x >> shift}/${y >> shift}`, z: iz,
+            x: x >> shift, y: y >> shift, time: pose.t, centrality, distance: dist });
+        }
+      };
+      const [nx, ny] = this.tilesAtZoom(0);
+      for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) visit(0, x, y);
+    }
+
+    _prefetchPredicted() {
+      const state = this._predictionState;
+      // Prediction is visibility planning, not animation. Rebuild at 15 Hz; current-frustum
+      // traversal still runs every frame. Teleports bypass the cadence and clear immediately.
+      if (state && !state.teleported && this._lastPredictionFrame != null &&
+          this.frame - this._lastPredictionFrame < 4) return;
+      this._lastPredictionFrame = this.frame;
+      this._visibilityStats.predictedLeaves = 0;
+      this._visibilityStats.warmHeightSources = 0;
+      this._visibilityStats.warmImagerySources = 0;
+      for (const cache of [this.hCache, this.iCache]) for (const e of cache.values()) {
+        if (!e.predictionProtected) continue;
+        e.predictionProtected = false;
+        (e.kind === 'h' ? this.arrayPool?.height : this.arrayPool?.imagery)
+          ?.unprotect(e.key, 'prediction');
+      }
+      if (!state || state.teleported || !this._visibilityEnabled) {
+        const old = this._lastWarmKeys?.size || 0;
+        this._visibilityStats.warmCancelled += old;
+        this._lastWarmKeys = new Set();
+        return;
+      }
+      const predictor = global.GT_TERRAIN_VISIBILITY;
+      if (!predictor?.predictTerrainPoses || !predictor?.selectTerrainWarmSources) return;
+      const camera = this.camera;
+      const euler = this._predictionEuler || (this._predictionEuler = new THREE.Euler(0, 0, 0, 'YXZ'));
+      euler.setFromQuaternion(camera.quaternion, 'YXZ');
+      const poses = predictor.predictTerrainPoses({ ...state,
+        position: [camera.position.x, camera.position.y, camera.position.z],
+        yaw: euler.y, pitch: euler.x,
+      });
+      const heights = [], imagery = [];
+      for (const pose of poses) this._collectPredictedCandidates(pose, heights, imagery);
+      const hCapacity = Math.min(32, Math.floor((this.arrayPool?.height?.capacity ||
+        this.o.heightArrayLayers) * 0.25));
+      const iCapacity = Math.min(32, Math.floor((this.arrayPool?.imagery?.capacity ||
+        this.o.imageryArrayLayers) * 0.25));
+      const selectedH = predictor.selectTerrainWarmSources(heights, hCapacity);
+      const selectedI = predictor.selectTerrainWarmSources(imagery, iCapacity);
+      const nextKeys = new Set();
+      const protect = (kind, candidate) => {
+        const e = kind === 'h'
+          ? this._reqHeight(candidate.z, candidate.x, candidate.y, candidate.distance + 1000)
+          : this._reqImagery(candidate.z, candidate.x, candidate.y, candidate.distance + 1200);
+        if (!e) return;
+        e.predictionProtected = true; nextKeys.add(`${kind}:${e.key}`);
+        (kind === 'h' ? this.arrayPool?.height : this.arrayPool?.imagery)
+          ?.protect(e.key, 'prediction');
+      };
+      for (const candidate of selectedH) protect('h', candidate);
+      for (const candidate of selectedI) protect('i', candidate);
+      if (this._lastWarmKeys) for (const taggedKey of this._lastWarmKeys) {
+        if (nextKeys.has(taggedKey)) continue;
+        this._visibilityStats.warmCancelled++;
+        const split = taggedKey.indexOf(':'), kind = taggedKey.slice(0, split);
+        const key = taggedKey.slice(split + 1), cache = kind === 'h' ? this.hCache : this.iCache;
+        const e = cache.get(key);
+        // Cancel only work that remained prediction-only this frame. A source independently
+        // touched by the current view/query corridor has lastUsed===frame and must finish.
+        if (!e || e.lastUsed === this.frame || e.persistent || e.queryProtected ||
+            e.prefetchProtected) continue;
+        if (e.state === 'queued') {
+          e.state = 'stale'; cache.delete(key);
+        } else if (e.state === 'loading') {
+          e.abort?.abort(); cache.delete(key);
+        }
+      }
+      this._lastWarmKeys = nextKeys;
+      this._visibilityStats.warmHeightSources = selectedH.length;
+      this._visibilityStats.warmImagerySources = selectedI.length;
     }
 
     _rehydrateHeight(e) {

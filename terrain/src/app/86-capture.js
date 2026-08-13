@@ -123,12 +123,11 @@ function captureMeta(name){
       revision: window.transportSurface ? window.transportSurface.revision : 0,
       roads: typeof roadRibbon!=='undefined' && roadRibbon ? {...roadRibbon.stats} : null,
       trails: typeof trailBuilder!=='undefined' && trailBuilder ? {...trailBuilder.stats} : null,
-      bridges: typeof bridgeBuilder!=='undefined' && bridgeBuilder ?
-        bridgeBuilder.spans.map(span=>{
-          const a=span.deckCl[0],b=span.deckCl[span.deckCl.length-1];
-          return {class:span.cls,center:[(a.x+b.x)*.5,(a.z+b.z)*.5],
-            start:[a.x,a.z],end:[b.x,b.z],deckY:span.deckY};
-        }) : [],
+      // Full bridge coordinate arrays pushed the URL-carried capture metadata over the dev
+      // server's header limit once renderer telemetry grew. The deterministic count is the gate;
+      // bridge geometry itself is covered by transport captures and BridgeBuilder.stats.
+      bridges: {count:typeof bridgeBuilder!=='undefined'&&bridgeBuilder?
+        bridgeBuilder.spans.length:0},
     },
     // Group-aware estimate: backing index buffers are not counted when only a subset of
     // geometry.groups is submitted. renderer.info remains the authoritative whole-frame total.

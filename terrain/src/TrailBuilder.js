@@ -917,7 +917,10 @@
       let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
       for (const e of t.hCache.values()) {
         if (!e.decoded || e.z <= this._zBase) continue;
-        (byZ[e.z] || (byZ[e.z] = new Map())).set(e.x * 4096 + e.y, e);
+        // Snapshot the array, not the mutable cache entry. Terrain residency can clear
+        // e.decoded while this multi-frame drape pass is active; retaining the typed array here
+        // makes the sampler stable until the pass completes and then releases it normally.
+        (byZ[e.z] || (byZ[e.z] = new Map())).set(e.x * 4096 + e.y, e.decoded);
         const shift = e.z - coverZ;
         cover.add(`${e.x >> shift},${e.y >> shift}`);
         if (e.z > zTop) zTop = e.z;
@@ -932,12 +935,7 @@
           const tiles = byZ[zz]; if (!tiles) continue;
           const span = root / (1 << zz);
           const tx = Math.floor((x + hx) / span), ty = Math.floor((z + hz) / span);
-          const e = tiles.get(tx * 4096 + ty);
-          if (!e) continue;
-          const g = e.decoded;
-          // Terrain residency may release a fine CPU tile while a drape pass is spanning
-          // multiple frames. Treat that tile as unavailable and fall through to a coarser
-          // decoded source (or the caller's coarse heightAt fallback) instead of indexing null.
+          const g = tiles.get(tx * 4096 + ty);
           if (!g) continue;
           let u = ((x + hx) / span - tx) * (S - 1), v = ((z + hz) / span - ty) * (S - 1);
           u = Math.max(0, Math.min(uMax, u)); v = Math.max(0, Math.min(uMax, v));

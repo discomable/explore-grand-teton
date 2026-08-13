@@ -26,6 +26,10 @@ import {
   nextVegetationCapacity,
   VEGETATION_SPECIES,
 } from './vegetation-batch-contract.js';
+import {
+  parseTerrainErrorPyramid, predictTerrainPoses, projectedTerrainError,
+  selectTerrainWarmSources, terrainShouldSubdivide,
+} from './terrain-visibility-contract.js';
 
 const THREE = { ...ThreeModule, GLTFLoader, mergeGeometries };
 window.THREE = THREE;
@@ -63,6 +67,10 @@ window.GT_TERRAIN_BATCH = {
 window.GT_VEGETATION_BATCH = {
   applyVegetationFade, buildVegetationBatchFrame, compactVegetationRecord, nextVegetationCapacity,
   VEGETATION_SPECIES,
+};
+window.GT_TERRAIN_VISIBILITY = {
+  parseTerrainErrorPyramid, predictTerrainPoses, projectedTerrainError,
+  selectTerrainWarmSources, terrainShouldSubdivide,
 };
 
 const rendererWorker = await startRenderWorkerIfRequested(context);

@@ -1174,7 +1174,7 @@
       const byZ = []; let zTop = -1;
       for (const e of t.hCache.values()) {
         if (!e.decoded) continue;
-        (byZ[e.z] || (byZ[e.z] = new Map())).set(e.x * 4096 + e.y, e);
+        (byZ[e.z] || (byZ[e.z] = new Map())).set(e.x * 4096 + e.y, e.decoded);
         if (e.z > zTop) zTop = e.z;
       }
       const hx = t.spanX / 2, hz = t.spanZ / 2, root = t.rootSpan;
@@ -1191,9 +1191,7 @@
           const cx = Math.min(Math.max(x, -hx + pad), hx - pad);
           const cz = Math.min(Math.max(z, -hz + pad), hz - pad);
           const tx = Math.floor((cx + hx) / span), ty = Math.floor((cz + hz) / span);
-          const e = tiles.get(tx * 4096 + ty);
-          if (!e) continue;
-          const g = e.decoded;
+          const g = tiles.get(tx * 4096 + ty);
           if (!g) continue;
           let u = ((cx + hx) / span - tx) * (S - 1), v = ((cz + hz) / span - ty) * (S - 1);
           u = Math.max(0, Math.min(uMax, u)); v = Math.max(0, Math.min(uMax, v));
