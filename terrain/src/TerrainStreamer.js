@@ -134,12 +134,24 @@
       this._naturalColor = !/[?&]naturalcolor=0(?:&|$)/.test(global.location?.search || '');
       this.scene = opts.scene; this.camera = opts.camera; this.renderer = opts.renderer;
       this.group = new THREE.Group(); this.group.name = 'terrainTiles'; this.scene.add(this.group);
+      this.reflectionGroup = new THREE.Group();
+      this.reflectionGroup.name = 'terrainReflectionTiles';
+      this.reflectionGroup.visible = false; this.scene.add(this.reflectionGroup);
       this.hCache = new Map();      // height tiles: decoded Float32 + DataTexture
       this.iCache = new Map();      // imagery tiles: THREE.Texture
       this.meshes = new Map();      // node key -> {mesh, lastShown}
       this.batches = new Map();     // grid index -> active InstancedMesh record
       this._batchMaterial = null;
       this._batchCapacities = new Map();
+      this._reflectionBatches = new Map();
+      this._reflectionBatchCapacities = new Map();
+      this._reflectionEnabled = !/[?&]reflectionTerrainLod=0(?:&|$)/.test(
+        global.location?.search || '');
+      this._reflectionCompare = /[?&]reflectionTerrainCompare=1(?:&|$)/.test(
+        global.location?.search || '');
+      this._reflectionFrame = null;
+      this._reflectionStats = null;
+      this._reflectionPassToken = null;
       this.arrayPool = null;
       this._batchSupport = { supported: false, reason: 'not-initialized' };
       this._batchCompare = /[?&]terrainBatchCompare=1(?:&|$)/.test(global.location?.search || '');
@@ -159,6 +171,7 @@
         nativeHeightLeaves: 0, nativeHeightRatio: 0, complete: false,
       };
       this.grids = this.o.gridByLOD.map(n => makeGrid(n));
+      this._gridGeometryByN = new Map(this.o.gridByLOD.map((n, i) => [n, this.grids[i]]));
       this.noiseTex = this._buildNoiseAtlas();   // seamless tiling noise for the fragment shader
       this.detailNTex = this._buildDetailNormal(); // tiling rocky detail-normal (steep faces only)
       this.detailATex = this._buildDetailAlbedo(); // tiling class-material fields (near ground)
@@ -1032,6 +1045,7 @@
           mode: 'instanced-array', drawCalls: this._batchFrame?.drawCalls || 0,
           triangles: this._batchFrame?.triangles || 0,
           comparison: this._batchEquivalence,
+          reflection: this._reflectionStats,
         } : { mode: 'legacy-mesh', drawCalls: this.meshes.size },
         arrayPool: this.arrayPool?.snapshot?.() || null,
         cpuQueryTiles: this._queryTileKeys?.size || 0,
@@ -1115,6 +1129,9 @@
         batched: !!this._batched,
         batchSupport: this._batchSupport?.reason || 'enabled',
         terrainBatches: this.batches.size,
+        reflectionTerrainBatches: this._reflectionBatches.size,
+        reflectionBatchBytes: this._reflectionStats?.capacityBytes || 0,
+        reflectionTerrain: this._reflectionStats,
         arrayPool: this.arrayPool?.snapshot?.() || null,
         cpuQueryTiles: this._queryTileKeys?.size || 0,
         ...this._memoryEstimate(),
@@ -1435,14 +1452,15 @@
 
     // stitch ratio for one edge: 0 unless the neighbour across it is exactly one level coarser,
     // in which case r = 2*fineN/coarseN = this tile's boundary vertices per coarse edge segment.
-    _edgeR(node, dx, dy, fineN) {
+    _edgeR(node, dx, dy, fineN, gridNForZoom = null) {
       const z = node.z, nx = node.x + dx, ny = node.y + dy;
       const g = this.tilesAtZoom(z), gx = g[0], gy = g[1];
       if (nx < 0 || ny < 0 || nx >= gx || ny >= gy) return 0;    // park boundary — skirt covers
       if (this._hasNode(z, nx, ny)) return 0;                    // same level, or finer subtree
       const p = this._getNode(z - 1, nx >> 1, ny >> 1);
       if (!p || p.internal) return 0;                            // unrendered region
-      const coarseN = this.o.gridByLOD[this._gridIndexForZ(z - 1)];
+      const coarseN = gridNForZoom ? gridNForZoom(z - 1) :
+        this.o.gridByLOD[this._gridIndexForZ(z - 1)];
       return 2 * fineN / coarseN;
     }
 
@@ -1504,6 +1522,7 @@
         ],
         height: { key: hSrc.key, z: hSrc.z, x: hSrc.x, y: hSrc.y,
                   layer: hSrc.layer, window: [hWin.x, hWin.y, hWin.z] },
+        _heightEntry: hSrc,
         imagery,
         sourceTexelMeters: srcTexel,
         skirt,
@@ -1553,7 +1572,7 @@
       };
     }
 
-    _newTerrainBatch(gridN, capacity, packed) {
+    _newTerrainBatch(gridN, capacity, packed, namePrefix = 'terrainBatch') {
       if (!this._batchMaterial) {
         const shader = global.TerrainShaders.batch;
         this._batchMaterial = new THREE.ShaderMaterial({
@@ -1561,8 +1580,11 @@
           fragmentShader: shader.fragment, glslVersion: THREE.GLSL3, side: THREE.DoubleSide,
         });
       }
-      const gi = this.o.gridByLOD.indexOf(gridN);
-      const geometry = this.grids[gi].clone();
+      let baseGeometry = this._gridGeometryByN.get(gridN);
+      if (!baseGeometry) {
+        baseGeometry = makeGrid(gridN); this._gridGeometryByN.set(gridN, baseGeometry);
+      }
+      const geometry = baseGeometry.clone();
       const buffer = new THREE.InstancedInterleavedBuffer(packed, 25, 1);
       const attrs = global.TerrainShaders.batch.attributes;
       let offset = 0;
@@ -1573,7 +1595,7 @@
         offset += spec.itemSize;
       }
       const mesh = new THREE.InstancedMesh(geometry, this._batchMaterial, capacity);
-      mesh.name = `terrainBatch-${gridN}`;
+      mesh.name = `${namePrefix}-${gridN}`;
       mesh.frustumCulled = false;
       mesh.matrixAutoUpdate = false; mesh.updateMatrix();
       return { mesh, geometry, buffer, capacity, gridN };
@@ -1627,8 +1649,139 @@
         }
       }
       this._batchFrame = frame;
+      this._batchInstances = instances;
       this._batchEquivalence = this._batchCompare
         ? contract.compareTerrainSubmissions(instances, frame) : null;
+    }
+
+    _publishReflectionBatches(frame) {
+      const occupied = new Set();
+      for (const [gridN, data] of frame.batches) {
+        occupied.add(gridN);
+        let record = this._reflectionBatches.get(gridN);
+        if (!record || record.capacity < data.capacity) {
+          const replacement = this._newTerrainBatch(
+            gridN, data.capacity, data.packed, 'terrainReflectionBatch');
+          replacement.mesh.count = data.count;
+          this.reflectionGroup.add(replacement.mesh);
+          if (record) {
+            this.reflectionGroup.remove(record.mesh); record.geometry.dispose();
+          }
+          record = replacement; this._reflectionBatches.set(gridN, record);
+        } else {
+          record.buffer.array.set(data.packed.subarray(0, data.count * 25));
+          record.buffer.needsUpdate = true;
+          record.mesh.count = data.count; record.mesh.visible = true;
+        }
+        this._reflectionBatchCapacities.set(gridN, record.capacity);
+      }
+      for (const [gridN, record] of [...this._reflectionBatches]) if (!occupied.has(gridN)) {
+        this.reflectionGroup.remove(record.mesh); record.geometry.dispose();
+        this._reflectionBatches.delete(gridN);
+      }
+      this._reflectionFrame = frame;
+    }
+
+    _prepareReflectionFrame(camera, planeY) {
+      const contract = global.GT_TERRAIN_BATCH;
+      if (!this._batched || !contract || !this._batchInstances) return null;
+      const matrix = this._reflectionFrustumMatrix ||
+        (this._reflectionFrustumMatrix = new THREE.Matrix4());
+      const frustum = this._reflectionFrustum || (this._reflectionFrustum = new THREE.Frustum());
+      const box = this._reflectionBox || (this._reflectionBox = new THREE.Box3());
+      camera.updateMatrixWorld(true);
+      frustum.setFromProjectionMatrix(matrix.multiplyMatrices(
+        camera.projectionMatrix, camera.matrixWorldInverse));
+      const mainGridForZoom = zoom =>
+        this.o.gridByLOD[this._gridIndexForZ(zoom)];
+      const reflectionGridForZoom = zoom =>
+        contract.reflectionTerrainGridN(mainGridForZoom(zoom));
+      let frustumCulled = 0, planeCulled = 0;
+      const include = instance => {
+        const bounds = instance.node.bounds;
+        const heightBounds = this._windowHeightBounds(
+          instance._heightEntry, instance.height.window);
+        const minY = heightBounds ? heightBounds[0] - instance.skirt :
+          this.m.elevation.min - this.datum - instance.skirt;
+        const maxY = heightBounds ? heightBounds[1] + 6 * instance.sourceTexelMeters :
+          this.m.elevation.max - this.datum + 10;
+        if (Number.isFinite(planeY) && maxY < planeY - 0.5) {
+          planeCulled++; return false;
+        }
+        box.min.set(bounds.minX, minY, bounds.minZ);
+        box.max.set(bounds.minX + (bounds.wpt || bounds.size), maxY,
+                    bounds.minZ + (bounds.hpt || bounds.size));
+        if (!frustum.intersectsBox(box)) { frustumCulled++; return false; }
+        return true;
+      };
+      const derived = contract.buildReflectionTerrainInstances(this._batchInstances, {
+        include,
+        gridNForZoom: reflectionGridForZoom,
+        edgeRatiosForNode: (node, fineN) => [
+          this._edgeR(node, -1, 0, fineN, reflectionGridForZoom),
+          this._edgeR(node, 1, 0, fineN, reflectionGridForZoom),
+          this._edgeR(node, 0, -1, fineN, reflectionGridForZoom),
+          this._edgeR(node, 0, 1, fineN, reflectionGridForZoom),
+        ],
+      });
+      const frame = contract.buildTerrainFrame(derived.instances, {
+        frameId: this.frame, capacities: this._reflectionBatchCapacities,
+      });
+      this._publishReflectionBatches(frame);
+      const gridCounts = {};
+      for (const [gridN, batch] of frame.batches) gridCounts[gridN] = batch.count;
+      const sourceEquivalent = !this._reflectionCompare || derived.instances.every(instance => {
+        const source = this._batchInstances.find(item => item.key === instance.key);
+        return source && source.height.key === instance.height.key &&
+          source.imagery?.key === instance.imagery?.key &&
+          JSON.stringify(source.height.window) === JSON.stringify(instance.height.window) &&
+          JSON.stringify(source.imagery?.window || null) ===
+            JSON.stringify(instance.imagery?.window || null);
+      });
+      const capacityBytes = [...this._reflectionBatches.values()]
+        .reduce((sum, record) => sum + record.capacity * 25 * 4, 0);
+      this._reflectionStats = {
+        enabled: true, mode: 'coarse-instanced-array', frameId: this.frame,
+        inputLeaves: this._batchInstances.length, submittedLeaves: derived.instances.length,
+        culledLeaves: derived.culled, frustumCulled, planeCulled,
+        drawCalls: frame.drawCalls, triangles: frame.triangles, gridCounts, capacityBytes,
+        mainTriangles: this._batchFrame?.triangles || 0,
+        reductionRatio: this._batchFrame?.triangles ?
+          1 - frame.triangles / this._batchFrame.triangles : 0,
+        comparison: this._reflectionCompare ? { sourceEquivalent } : null,
+      };
+      return frame;
+    }
+
+    beginReflectionPass(camera, planeY) {
+      if (this._reflectionPassToken) throw new Error('terrain reflection pass already active');
+      const token = {
+        active: false, group: this.group,
+        mainVisible: this.group.visible, reflectionVisible: this.reflectionGroup.visible,
+      };
+      if (!this._reflectionEnabled || !this._batched || !this._batchInstances) {
+        this._reflectionStats = {
+          enabled: false,
+          mode: this._reflectionEnabled ? 'main-reuse-fallback' : 'main-reuse-disabled',
+          drawCalls: this._batchFrame?.drawCalls || this.meshes.size,
+          triangles: this._batchFrame?.triangles || 0,
+        };
+        return token;
+      }
+      this._prepareReflectionFrame(camera, planeY);
+      this.group.visible = false; this.reflectionGroup.visible = true;
+      token.active = true; token.group = this.reflectionGroup;
+      this._reflectionPassToken = token;
+      return token;
+    }
+
+    endReflectionPass(token) {
+      if (!token?.active) return;
+      if (this._reflectionPassToken !== token)
+        throw new Error('terrain reflection pass token mismatch');
+      this.group.visible = token.mainVisible;
+      this.reflectionGroup.visible = token.reflectionVisible;
+      this._reflectionPassToken = null;
     }
 
     _renderNode(node) {
@@ -1861,6 +2014,41 @@
         if (e.mip.mx[c] > hi) hi = e.mip.mx[c];
       }
       return hi > lo ? hi - lo : 0;
+    }
+
+    /* Exact compact min/max cells used only for conservative reflection-pass culling. Unlike the
+       relief estimate above, this scans every decoded sample once; the 512-byte result survives
+       release of the 1 MiB CPU height tile. Intersecting whole cells can only overestimate a
+       node's range, so uncertain terrain remains rendered. */
+    _windowHeightBounds(e, win) {
+      if (!e) return null;
+      if (!e.rangeMip) {
+        if (!e.decoded) return null;
+        const S = this.m.tileSize, C = 8, cs = S / C;
+        const mn = new Float32Array(C * C).fill(Infinity);
+        const mx = new Float32Array(C * C).fill(-Infinity);
+        for (let j = 0; j < S; j++) {
+          const row = Math.min(C - 1, (j / cs) | 0) * C;
+          for (let i = 0; i < S; i++) {
+            const value = e.decoded[j * S + i], cell = row + Math.min(C - 1, (i / cs) | 0);
+            if (value < mn[cell]) mn[cell] = value;
+            if (value > mx[cell]) mx[cell] = value;
+          }
+        }
+        e.rangeMip = { mn, mx, C };
+      }
+      const mip = e.rangeMip, C = mip.C;
+      const x0 = Math.max(0, Math.floor(win[0] * C));
+      const x1 = Math.min(C - 1, Math.ceil((win[0] + win[2]) * C) - 1);
+      const y0 = Math.max(0, Math.floor(win[1] * C));
+      const y1 = Math.min(C - 1, Math.ceil((win[1] + win[2]) * C) - 1);
+      let lo = Infinity, hi = -Infinity;
+      for (let j = y0; j <= y1; j++) for (let i = x0; i <= x1; i++) {
+        const cell = j * C + i;
+        if (mip.mn[cell] < lo) lo = mip.mn[cell];
+        if (mip.mx[cell] > hi) hi = mip.mx[cell];
+      }
+      return Number.isFinite(lo) && Number.isFinite(hi) ? [lo, hi] : null;
     }
 
     _prefetch(visible) {
