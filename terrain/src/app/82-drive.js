@@ -190,9 +190,9 @@ function addCarShadowProxy(){
   const lower=new THREE.BoxGeometry(1.82,0.62,4.72); lower.translate(0,0.55,0);
   const cabin=new THREE.BoxGeometry(1.62,0.70,2.18); cabin.translate(0,1.18,0.18);
   const geometry=THREE.mergeGeometries([lower,cabin],false); lower.dispose(); cabin.dispose();
-  const material=new THREE.MeshBasicMaterial({color:0x000000,colorWrite:false});
+  const material=new THREE.MeshBasicMaterial({color:0x000000,colorWrite:false,depthWrite:false});
   const proxy=new THREE.Mesh(geometry,material);
-  proxy.name='playerVehicleShadowProxy'; proxy.layers.set(1);
+  proxy.name='playerVehicleShadowProxy'; proxy.layers.set(2);
   proxy.castShadow=true; proxy.receiveShadow=false; proxy.frustumCulled=true;
   car.add(proxy); car.userData.shadowProxy=proxy;
 }
