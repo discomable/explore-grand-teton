@@ -1129,9 +1129,12 @@
       // enough", which corrupted the RT and made the whole reflection blank out (persisting at
       // rest). Reflecting the terrain/mountains is what matters; forested banks reflect their
       // terrain, not individual trees — a fine trade for a reflection that never glitches out.
+      const terrainPass = this.terrain.beginReflectionPass ?
+        this.terrain.beginReflectionPass(rc, py) :
+        { active: false, group: this.terrain.group };
       const keep = this._keepSet || (this._keepSet = new Set());
       keep.clear();
-      keep.add(this.terrain.group);
+      keep.add(terrainPass.group);
       try { if (typeof sky !== 'undefined' && sky && sky.isMesh) keep.add(sky); } catch (e) {}
       const shown = [];
       for (const c of this.scene.children) {
@@ -1145,13 +1148,17 @@
       renderer.info.autoReset = false;      // keep the frame's call/tri stats accumulating
       renderer.shadowMap.autoUpdate = false; // skip a pointless depth pass (casters are hidden)
       renderer.toneMapping = THREE.NoToneMapping; // reflection target is always linear
-      renderer.setRenderTarget(R.rt);
-      renderer.render(this.scene, rc);
-      renderer.setRenderTarget(prevRT);
-      renderer.toneMapping = prevTone;
-      renderer.info.autoReset = prevAuto;
-      renderer.shadowMap.autoUpdate = prevShadow;
-      for (const c of shown) c.visible = true;
+      try {
+        renderer.setRenderTarget(R.rt);
+        renderer.render(this.scene, rc);
+      } finally {
+        renderer.setRenderTarget(prevRT);
+        renderer.toneMapping = prevTone;
+        renderer.info.autoReset = prevAuto;
+        renderer.shadowMap.autoUpdate = prevShadow;
+        for (const c of shown) c.visible = true;
+        this.terrain.endReflectionPass?.(terrainPass);
+      }
       U.uReflTex.value = R.rt.texture;
       U.uReflAmt.value = 1;
       U.uReflPlaneY.value = py;
