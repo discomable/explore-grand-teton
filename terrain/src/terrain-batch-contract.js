@@ -45,6 +45,48 @@ export function gridTriangleCount(gridN) {
   return 2 * (gridN + 1) * (gridN + 1);
 }
 
+export const REFLECTION_TERRAIN_GRIDS = Object.freeze([8, 16, 32]);
+
+/* Reflection pixels are rendered into a smaller, distorted target. Preserve the authored leaf
+ * set and sources, but use a deterministic lower-density grid for each existing main family. */
+export function reflectionTerrainGridN(mainGridN) {
+  if (!Number.isFinite(mainGridN) || mainGridN < 1)
+    throw new RangeError('mainGridN must be positive');
+  if (mainGridN >= 96) return 32;
+  if (mainGridN >= 32) return 16;
+  return 8;
+}
+
+export function deriveReflectionTerrainInstance(instance, {
+  gridNForZoom, edgeRatiosForNode,
+} = {}) {
+  if (!instance?.node || typeof gridNForZoom !== 'function' ||
+      typeof edgeRatiosForNode !== 'function')
+    throw new TypeError('instance, gridNForZoom, and edgeRatiosForNode are required');
+  const node = instance.node;
+  const gridN = gridNForZoom(node.z);
+  const morphLattice = [0, 0, 0, 0];
+  for (let k = 1; k <= 4 && node.z - k >= 0; k++)
+    morphLattice[k - 1] = 2 ** k / gridNForZoom(node.z - k);
+  return {
+    ...instance,
+    gridN,
+    morphLattice,
+    edgeRatios: Array.from(edgeRatiosForNode(node, gridN)),
+  };
+}
+
+export function buildReflectionTerrainInstances(instances, options = {}) {
+  const include = options.include || (() => true);
+  const output = [];
+  let culled = 0;
+  for (const instance of instances || []) {
+    if (!include(instance)) { culled++; continue; }
+    output.push(deriveReflectionTerrainInstance(instance, options));
+  }
+  return Object.freeze({ instances: Object.freeze(output), culled });
+}
+
 export function edgeStitchRatio({
   node, dx, dy, fineGridN, tileCountsAtZoom, getNode, gridNForZoom,
 }) {

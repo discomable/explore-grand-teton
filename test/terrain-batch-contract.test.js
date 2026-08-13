@@ -2,12 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   AtomicTerrainFramePublisher,
+  buildReflectionTerrainInstances,
   TERRAIN_INSTANCE_LAYOUT,
   buildTerrainFrame,
   compareTerrainSubmissions,
   gridTriangleCount,
   nextPowerOfTwoCapacity,
   packTerrainInstance,
+  reflectionTerrainGridN,
   terrainEdgeRatios,
   terrainSourceWindow,
 } from '../terrain/src/terrain-batch-contract.js';
@@ -117,4 +119,36 @@ test('frame publication is atomic and capacity only grows by powers of two', () 
   assert.equal(publisher.active, staged);
   assert.equal(publisher.active.batches.get(64).count, 3);
   assert.equal(publisher.staging, null);
+});
+
+test('reflection terrain preserves sources and derives coarse morph and stitch contracts', () => {
+  assert.deepEqual([16, 32, 48, 64, 96, 160].map(reflectionTerrainGridN),
+    [8, 16, 16, 16, 32, 32]);
+  const source = instance();
+  const grids = new Map([[4, 16], [3, 8], [2, 8], [1, 8], [0, 8]]);
+  const result = buildReflectionTerrainInstances([source], {
+    gridNForZoom: zoom => grids.get(zoom),
+    edgeRatiosForNode: (_node, fineN) => [0, 2 * fineN / 8, 0, 0],
+  });
+  assert.equal(result.culled, 0);
+  assert.equal(result.instances.length, 1);
+  const reflected = result.instances[0];
+  assert.equal(reflected.gridN, 16);
+  assert.equal(reflected.height, source.height);
+  assert.equal(reflected.imagery, source.imagery);
+  assert.deepEqual(reflected.morphLattice, [0.25, 0.5, 1, 2]);
+  assert.deepEqual(reflected.edgeRatios, [0, 4, 0, 0]);
+});
+
+test('reflection terrain inclusion is conservative and reports omitted leaves', () => {
+  const items = [instance(), instance({
+    node: { z: 4, x: 10, y: 6, bounds: { minX: 960, minZ: 640, size: 1280 } },
+  })];
+  const result = buildReflectionTerrainInstances(items, {
+    include: item => item.node.x === 9,
+    gridNForZoom: () => 16,
+    edgeRatiosForNode: () => [0, 0, 0, 0],
+  });
+  assert.equal(result.culled, 1);
+  assert.deepEqual(result.instances.map(item => item.node.x), [9]);
 });
