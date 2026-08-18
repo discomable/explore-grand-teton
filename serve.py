@@ -54,9 +54,14 @@ class Handler(SimpleHTTPRequestHandler):
                 return
             output_dir = os.path.join(ROOT, "benchmark-results")
             os.makedirs(output_dir, exist_ok=True)
-            with open(os.path.join(output_dir, "terrain-endurance-error.json"), "w") as output:
+            # Atomic like /terrain-endurance below: benchmark.py polls this path on mtime, so a
+            # direct write can hand it a half-written document exactly when the diagnostic matters.
+            output_path = os.path.join(output_dir, "terrain-endurance-error.json")
+            temporary_path = output_path + ".tmp"
+            with open(temporary_path, "w") as output:
                 json.dump(document, output, indent=2)
                 output.write("\n")
+            os.replace(temporary_path, output_path)
             body = b'{"ok":true}'
             self.send_response(200)
             self.send_header("Content-Type", "application/json")

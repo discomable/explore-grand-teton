@@ -92,7 +92,9 @@
           const elapsed=now-started;
           applyPose(route,Math.min(1,elapsed/durationMs));
           const delta=now-previous;previous=now;
-          if(delta>0&&delta<5000){
+          // No upper cutoff: the frameHang hard gate exists precisely for pathological stalls,
+          // so a 6 s hang must land in the histogram and spike list rather than being discarded.
+          if(delta>0){
             frames.add(delta);
             keepWorstLazy(spikes,delta,24,()=>({atMs:round(elapsed),durationMs:round(delta),
               streaming:cheapStreamingSnapshot()}));

@@ -27,13 +27,16 @@ def decode_tile(path, manifest, z, x, y):
     encoded = rgb[:, :, 0] * 65536 + rgb[:, :, 1] * 256 + rgb[:, :, 2]
     height = (manifest["encoding"]["baseval"] +
               encoded.astype(np.float32) * manifest["encoding"]["interval"])
-    # Match TerrainStreamer._decodeHeight: edge tiles replicate their last real texel.
+    # Match TerrainStreamer._validTexels exactly: the runtime rounds the FRACTIONAL level
+    # extent (Math.round), so ceil here would keep one extra real texel row/column on
+    # non-divisible raster edges and measure error against a surface richer than what renders.
+    # math.floor(v + 0.5) reproduces Math.round; Python's round() half-to-even does not.
     size = manifest["tileSize"]
     scale = 1 << (manifest["maxZoom"] - z)
-    level_w = math.ceil(manifest["width"] / scale)
-    level_h = math.ceil(manifest["height"] / scale)
-    valid_x = max(1, min(size, level_w - x * size))
-    valid_y = max(1, min(size, level_h - y * size))
+    level_w = manifest["width"] / scale
+    level_h = manifest["height"] / scale
+    valid_x = max(1, min(size, math.floor(level_w - x * size + 0.5)))
+    valid_y = max(1, min(size, math.floor(level_h - y * size + 0.5)))
     if valid_x < size:
         height[:, valid_x:] = height[:, valid_x - 1:valid_x]
     if valid_y < size:
