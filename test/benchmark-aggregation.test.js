@@ -8,6 +8,11 @@ import {
   percentile,
   summarizeDurations,
   summarizeTelemetry,
+  buildTerrainEnduranceReport,
+  evaluateTerrainEndurance,
+  monotonicallyGrowing,
+  retainWorst,
+  summarizeEnduranceFrames,
 } from '../terrain/src/benchmark/aggregation.js';
 
 test('duration summaries use nearest-rank percentiles and ignore non-finite values', () => {
@@ -82,4 +87,39 @@ test('report includes route, frame thresholds, long tasks, and telemetry', () =>
   assert.equal(report.longTasks.count,1);
   assert.equal(report.telemetry.GT_STREAMING.pending.final,3);
   assert.deepEqual(report.route[0],{name:'forward',startedMs:0,endedMs:100,durationMs:100});
+});
+
+test('endurance aggregation reports percentiles, thresholds, and bounded spikes', () => {
+  assert.deepEqual(summarizeEnduranceFrames([10, 20, 30, 45, 60, 120]), {
+    count:6,totalMs:285,meanMs:47.5,minMs:10,maxMs:120,p50Ms:30,p95Ms:120,p99Ms:120,
+    over16_7:5,over25:4,over40:3,over50:2,over100:1,
+  });
+  const worst = retainWorst([
+    { durationMs: 20 }, { durationMs: 80 }, { durationMs: 40 }, { durationMs: 10 },
+  ], 2);
+  assert.deepEqual(worst.map(item => item.durationMs), [80, 40]);
+  assert.equal(monotonicallyGrowing([10, 12, 14, 16], {minimumStep:2,streak:3}), true);
+  assert.equal(monotonicallyGrowing([10, 12, 11, 14], {minimumStep:2,streak:3}), false);
+});
+
+test('terrain endurance gates ownership, coverage, counters, hangs, and retained memory', () => {
+  const MiB = 1024 * 1024;
+  const scenario = (bytes, overrides = {}) => ({
+    frames:{maxMs:100},coverageFailures:[],counterDelta:{capacityRetries:0},
+    settle:{settled:true},settled:{totalTerrainOwnedBytes:bytes,warmOnlyBytes:10*MiB},...overrides,
+  });
+  const passing = [scenario(300*MiB),scenario(305*MiB),scenario(304*MiB),scenario(308*MiB)];
+  assert.equal(evaluateTerrainEndurance({scenarios:passing}).passed, true);
+  const failed = evaluateTerrainEndurance({scenarios:[
+    scenario(300*MiB), scenario(340*MiB,{frames:{maxMs:1001},coverageFailures:[{atMs:2}],
+      counterDelta:{capacityRetries:1,failures:1},settle:{settled:false},prewarm:{settled:false},
+      settled:{totalTerrainOwnedBytes:460*MiB,warmOnlyBytes:80*MiB}}),
+  ],browserErrors:['boom'],failedRequests:[{url:'x'}],contextLosses:1});
+  assert.equal(failed.passed,false);
+  for (const name of ['browserErrors','failedRequests','requestCounters','contextLoss','terrainCoverage',
+    'settledResidency','warmOnlyResidency','finalGrowth','settled','capacityRetries','frameHang'])
+    assert.equal(failed.checks[name],false,name);
+  const report=buildTerrainEnduranceReport({scenarios:passing,manifestVersion:1});
+  assert.equal(report.schema,'grand-teton-terrain-endurance/v1');
+  assert.equal(report.gate.passed,true);
 });

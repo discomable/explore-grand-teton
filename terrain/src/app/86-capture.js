@@ -93,6 +93,13 @@ function captureMeta(name){
     });
   }
   sceneBreakdown.sort((a,b)=>b.triangles-a.triangles);
+  const genericMeshRoots=sceneBreakdown.filter(item=>item.name==='Mesh').map(item=>({...item}));
+  const pickTelemetry=(source,keys)=>source?Object.fromEntries(keys
+    .filter(key=>source[key]!==undefined)
+    .map(key=>[key,source[key]])):null;
+  const vegetationStreaming=window.GT_VEGETATION_STREAMING;
+  const groundCoverStreaming=window.GT_GROUND_COVER_STREAMING;
+  const waterTelemetry=window.GT_WATER_TELEMETRY;
   const meta={
     browserVersion:params.get('captureBrowser')||navigator.userAgent,
     commitSha:params.get('captureCommit')||'unknown',
@@ -119,6 +126,17 @@ function captureMeta(name){
     groundCoverLod:!/[?&]grasslod=0(?:&|$)/.test(location.search),
     groundCoverCount:window.__GROUND_COVER_COUNT==null?0:window.__GROUND_COVER_COUNT,
     groundCoverCap:window.__GROUND_COVER_CAP==null?0:window.__GROUND_COVER_CAP,
+    naturalWorldStreaming:{
+      vegetation:vegetationStreaming?{
+        ...pickTelemetry(vegetationStreaming,['residentCells','queuedCells','fadingCells']),
+        submission:pickTelemetry(vegetationStreaming.submission,
+          ['mode','batches','capacity','instances','drawCalls','uploadBytes','totalUploadBytes']),
+      }:null,
+      groundCover:pickTelemetry(groundCoverStreaming,
+        ['submittedInstances','liveInstances','residentCells','queuedCells','perCell','generation']),
+      water:pickTelemetry(waterTelemetry,
+        ['backend','surfaces','batches','calls','triangles','rebuilds','reflectionPasses','fallbackReason']),
+    },
     transport: {
       revision: window.transportSurface ? window.transportSurface.revision : 0,
       roads: typeof roadRibbon!=='undefined' && roadRibbon ? {...roadRibbon.stats} : null,
@@ -133,6 +151,7 @@ function captureMeta(name){
     // geometry.groups is submitted. renderer.info remains the authoritative whole-frame total.
     sceneBreakdownMode:'visible-object-group-estimate',
     sceneBreakdown:sceneBreakdown.slice(0,24),
+    genericMeshRoots,
     renderBreakdown:window.GT_RENDER_BREAKDOWN||null,
     vehicleRender:window.GT_VEHICLE_RENDER||null,
     webgl:gl ? {

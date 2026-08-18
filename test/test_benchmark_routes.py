@@ -9,6 +9,32 @@ import benchmark
 
 
 class RouteCertificationTests(unittest.TestCase):
+    def test_endurance_manifest_covers_and_materializes_all_pathologies(self):
+        manifest = benchmark.load_endurance_routes()
+        self.assertEqual(manifest["repetitions"], 2)
+        self.assertEqual(manifest["telemetryHz"], 4)
+        self.assertEqual({route["kind"] for route in manifest["routes"]},
+                         benchmark.ENDURANCE_KINDS)
+        self.assertEqual(len(manifest["routes"]), 7)
+        boundary = next(route for route in manifest["routes"]
+                        if route["kind"] == "tile-boundary")["boundary"]
+        self.assertEqual(boundary["zoom"], 7)
+        self.assertAlmostEqual(boundary["coordinate"], -80.0)
+        self.assertAlmostEqual(boundary["tileSpan"], 640.0)
+        by_kind = {route["kind"]: route for route in manifest["routes"]}
+        self.assertEqual(by_kind["linear"]["speedMps"], 350)
+        self.assertEqual(by_kind["turns"]["speedMps"], 300)
+        self.assertEqual(by_kind["altitude-cycle"]["maximumAglMeters"], 3000)
+        self.assertEqual(by_kind["rotation"]["origin"][1], 1500)
+        self.assertEqual(by_kind["target"]["speedMps"], 220)
+
+    def test_tile_boundary_derivation_rejects_outer_or_invalid_edges(self):
+        tiles = json.loads((benchmark.ROOT / "terrain/public/tiles.json").read_text())
+        with self.assertRaisesRegex(ValueError, "interior edge"):
+            benchmark.derive_tile_boundary(tiles, 7, "x", 0)
+        with self.assertRaisesRegex(ValueError, "x/z"):
+            benchmark.derive_tile_boundary(tiles, 7, "y", 2)
+
     def test_manifest_covers_every_required_transport_scenario(self):
         routes = benchmark.load_routes()
         covered = set().union(*(route["certificationTargets"] for route in routes.values()))

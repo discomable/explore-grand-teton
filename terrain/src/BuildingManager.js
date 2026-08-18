@@ -896,6 +896,7 @@
         mat = new THREE.MeshLambertMaterial({ vertexColors: true });
       }
       this.mesh = new THREE.Mesh(geo, mat);
+      this.mesh.name = 'buildings';
       this.mesh.frustumCulled = true; // one merged mesh, computed bounds
       // re-basing rewrites vertex Y in place, never the object transform
       this.mesh.matrixAutoUpdate = false; this.mesh.updateMatrix();

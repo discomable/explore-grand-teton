@@ -40,6 +40,57 @@ class Handler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     def do_POST(self):
+        if self.path.startswith("/terrain-endurance-error"):
+            length = int(self.headers.get("Content-Length", 0))
+            if not (0 < length < 256 * 1024):
+                self.send_error(400, "bad terrain endurance error length")
+                return
+            try:
+                document = json.loads(self.rfile.read(length))
+                if document.get("schema") != "grand-teton-terrain-endurance-error/v1":
+                    raise ValueError("invalid terrain endurance error schema")
+            except (ValueError, TypeError) as error:
+                self.send_error(400, str(error))
+                return
+            output_dir = os.path.join(ROOT, "benchmark-results")
+            os.makedirs(output_dir, exist_ok=True)
+            with open(os.path.join(output_dir, "terrain-endurance-error.json"), "w") as output:
+                json.dump(document, output, indent=2)
+                output.write("\n")
+            body = b'{"ok":true}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if self.path.startswith("/terrain-endurance"):
+            length = int(self.headers.get("Content-Length", 0))
+            if not (0 < length < 8 * 1024 * 1024):
+                self.send_error(400, "bad terrain endurance length")
+                return
+            try:
+                document = json.loads(self.rfile.read(length))
+                if document.get("schema") != "grand-teton-terrain-endurance/v1":
+                    raise ValueError("invalid terrain endurance schema")
+            except (ValueError, TypeError) as error:
+                self.send_error(400, str(error))
+                return
+            output_dir = os.path.join(ROOT, "benchmark-results")
+            os.makedirs(output_dir, exist_ok=True)
+            output_path = os.path.join(output_dir, "terrain-endurance.json")
+            temporary_path = output_path + ".tmp"
+            with open(temporary_path, "w") as output:
+                json.dump(document, output, indent=2)
+                output.write("\n")
+            os.replace(temporary_path, output_path)
+            body = b'{"ok":true}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if self.path.startswith("/route-batch"):
             length = int(self.headers.get("Content-Length", 0))
             if not (0 < length < 8 * 1024 * 1024):
@@ -104,7 +155,8 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(out)
 
     def log_message(self, fmt, *args):     # quiet tile spam; keep shots visible
-        if "/shot" in (str(args[0]) if args else ""):
+        if any(path in (str(args[0]) if args else "")
+               for path in ("/shot", "/terrain-endurance")):
             super().log_message(fmt, *args)
 
 

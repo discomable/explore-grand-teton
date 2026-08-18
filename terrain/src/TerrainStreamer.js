@@ -25,6 +25,10 @@
     // accumulation of decoded bitmaps/textures from silently exceeding the tile count.
     heightBytesMax: 320 * 1024 * 1024,
     imageryBytesMax: 128 * 1024 * 1024,
+    // Inclusive decoded-source + resident-array budget. Keep a little headroom below the
+    // endurance gate so telemetry cadence and a newly protected tile cannot make a nominally
+    // settled working set oscillate around 450 MiB.
+    residentBytesMax: 440 * 1024 * 1024,
     // Visible leaves, the CPU-query corridor and persistent ancestors overlap but can briefly
     // protect more than 128 height sources. Keep enough headroom to prevent continual layer
     // eviction/re-upload while retaining a much smaller allocation than the original 192/160.
@@ -178,6 +182,14 @@
       });
       this.generation = 1;
       this._streamStats = { heightDecoded: 0, imageryPrepared: 0, uploads: 0, stale: 0 };
+      const requestCounters = () => ({ hits: 0, misses: 0, completions: 0, failures: 0,
+        cancellations: 0, downloadedBytes: 0, uploads: 0, reuploads: 0, evictions: 0,
+        capacityRetries: 0 });
+      this._requestCounters = { height: requestCounters(), imagery: requestCounters() };
+      this._lodStats = { currentSwaps: 0, cumulativeSwaps: 0, coverageFailures: 0,
+        fallbackFrames: 0 };
+      this._previousLeafKeys = new Set();
+      this._nextLeafKeys = new Set();
       this._telemetryAt = 0;
       this.visibleTerrainCoverage = {
         visibleLeaves: 0, drawableLeaves: 0, missingLeaves: [], ratio: 0,
@@ -239,6 +251,9 @@
       this._gpu = null;                // lazily-built { gl, ext, open, pending[], free[] }
       this._gpuHud = null;             // lazily-built HUD DOM node
       this._gpuFrameT0 = 0;            // CPU-fallback frame-interval clock
+      this._timerSampleId = 0;
+      this.timerSample = null;          // raw, explicitly-labelled sample for endurance tooling
+      this.gpuTimerSample = null;       // genuine GPU samples only; never populated by fallback
     }
 
     /* Public runtime toggle so the HUD can be flipped from the console (terrain.showGpuMs(true)). */
@@ -274,8 +289,12 @@
       const frameMs = this._gpuFrameT0 ? now - this._gpuFrameT0 : 0;
       this._gpuFrameT0 = now;
       if (!this._gpuInit()) {                       // no GPU timer → show frame interval (CPU)
-        if (frameMs > 0 && frameMs < 1000)
+        if (frameMs > 0 && frameMs < 1000) {
           this.gpuMs = this.gpuMs == null ? frameMs : this.gpuMs + (frameMs - this.gpuMs) * 0.15;
+          const labeled = global.GT_TERRAIN_TELEMETRY.labelTimerSample(
+            ++this._timerSampleId, 'cpu-fallback', frameMs);
+          this.timerSample = labeled.sample; this.gpuTimerSample = labeled.gpuSample;
+        }
         this._gpuUpdateHud();
         return;
       }
@@ -290,6 +309,9 @@
           if (!disjoint) {
             const ms = gl.getQueryParameter(q, gl.QUERY_RESULT) / 1e6;   // ns → ms
             this.gpuMs = this.gpuMs == null ? ms : this.gpuMs + (ms - this.gpuMs) * 0.15;
+            const labeled = global.GT_TERRAIN_TELEMETRY.labelTimerSample(
+              ++this._timerSampleId, 'gpu-timer', ms);
+            this.timerSample = labeled.sample; this.gpuTimerSample = labeled.gpuSample;
           }
           g.free.push(q);
         }
@@ -573,7 +595,9 @@
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const parser = global.GT_TERRAIN_VISIBILITY?.parseTerrainErrorPyramid;
           if (!parser) throw new Error('visibility contract unavailable');
-          const errors = parser(await response.arrayBuffer());
+          const errorBuffer = await response.arrayBuffer();
+          const errors = parser(errorBuffer);
+          this._terrainErrorBytes = errorBuffer.byteLength;
           if (errors.levels.length <= this.m.maxZoom)
             throw new Error('missing terrain zoom levels');
           for (let z = 0; z <= this.m.maxZoom; z++) {
@@ -857,7 +881,9 @@
       if (!this.workerPool) {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`imagery HTTP ${response.status}`);
-        return { bitmap: await createImageBitmap(await response.blob()), prepared: false };
+        const blob = await response.blob();
+        return { bitmap: await createImageBitmap(blob), prepared: false,
+          downloadedBytes: blob.size };
       }
       const [validX, validY] = this._validTexels(z, x, y);
       const reply = await this.workerPool.run('fetchImagery', {
@@ -868,7 +894,8 @@
         generation: this.generation, priority: -priority, scope: 'terrain',
       });
       this._streamStats.imageryPrepared++;
-      return { bitmap: reply.buffers[0], prepared: true };
+      return { bitmap: reply.buffers[0], prepared: true,
+        downloadedBytes: Number(reply.meta?.downloadedBytes) || 0 };
     }
 
     _imageryTexture(bmp, z, x, y, prepared, onUploaded) {
@@ -919,13 +946,15 @@
       const key = `${z}/${x}/${y}`;
       let e = this.hCache.get(key);
       if (e) {
+        this._requestCounters.height.hits++;
         e.lastUsed = this.frame;
         if (e.state === 'decoded') this._queueUpload(e);
         return e;
       }
+      this._requestCounters.height.misses++;
       e = {
         kind: 'h', key, z, x, y, state: 'queued', lastUsed: this.frame, priority,
-        generation: this.generation,
+        generation: this.generation, persistent: z <= (this._persistentHeightMaxZ ?? -1),
       };
       this.hCache.set(key, e);
       this.fetchQueue.push(e);
@@ -935,7 +964,8 @@
       if (!this.img) return null;
       const key = `${z}/${x}/${y}`;
       let e = this.iCache.get(key);
-      if (e) { e.lastUsed = this.frame; return e; }
+      if (e) { this._requestCounters.imagery.hits++; e.lastUsed = this.frame; return e; }
+      this._requestCounters.imagery.misses++;
       e = { kind: 'i', key, z, x, y, state: 'queued', lastUsed: this.frame,
             priority: priority * 0.9, generation: this.generation }; // imagery slightly outranks heights
       this.iCache.set(key, e);
@@ -954,12 +984,15 @@
           ? this._prepareImageryAsync(url, e.z, e.x, e.y, e.priority)
           : fetch(url, { signal: e.abort.signal })
               .then(r => r.ok ? r.blob() : Promise.reject(r.status))
-              .then(b => createImageBitmap(b))
-              .then(bitmap => ({ bitmap, prepared: false }));
+              .then(blob => createImageBitmap(blob)
+                .then(bitmap => ({ bitmap, prepared: false, downloadedBytes: blob.size })));
         load
           .then(async result => {
             const bmp = result.bitmap;
             e.prepared = result.prepared;
+            const counters = e.kind === 'h' ? this._requestCounters.height :
+              this._requestCounters.imagery;
+            counters.downloadedBytes += Number(result.downloadedBytes) || 0;
             if (e.kind === 'h') {
               e.decoded = await this._decodeHeightAsync(bmp, e.z, e.x, e.y, e.priority);
               this._mirrorHeightTile(e);
@@ -971,10 +1004,16 @@
               return;
             }
             e.state = 'decoded';
+            counters.completions++;
             this._queueUpload(e);
           })
           .catch(error => {
-            if (error && error.name === 'AbortError') this._streamStats.stale++;
+            const counters = e.kind === 'h' ? this._requestCounters.height :
+              this._requestCounters.imagery;
+            if (error && error.name === 'AbortError') {
+              this._streamStats.stale++;
+              if (!e._cancellationCounted) counters.cancellations++;
+            } else counters.failures++;
             const c = e.kind === 'h' ? this.hCache : this.iCache;
             if (c.get(e.key) === e) c.delete(e.key);
           })
@@ -996,6 +1035,9 @@
           continue;
         }
         try {
+        const counters = e.kind === 'h' ? this._requestCounters.height :
+          this._requestCounters.imagery;
+        const wasUploaded = (e._uploadCount || 0) > 0;
         if (e.kind === 'h') {
           if (this._batched) {
             const ready = this.arrayPool.uploadHeight(e.key, e.decoded, {
@@ -1012,6 +1054,7 @@
             const ready = this.arrayPool.uploadImagery(e.key, source, {
               prepared: e.prepared, validX: valid[0], validY: valid[1],
               persistent: !!e.persistent,
+              retainOnCapacity: true,
               protect: e.predictionProtected ? 'prediction' :
                 (e.prefetchProtected ? 'prefetch' : null),
             });
@@ -1023,6 +1066,9 @@
           }
         }
         e.state = 'ready';
+        e._uploadCount = (e._uploadCount || 0) + 1;
+        counters.uploads++;
+        if (wasUploaded) counters.reuploads++;
         this._streamStats.uploads++;
         } catch (error) {
           if (error instanceof global.GT_TERRAIN_ARRAYS.TerrainTextureArrayCapacityError) {
@@ -1030,6 +1076,7 @@
             // and render its ready ancestor; the just-published frame normally frees a layer on
             // the next tick. Never evict a protected visible/query/prefetch source for a number.
             e.state = 'decoded'; this._queueUpload(e);
+            counters.capacityRetries++;
             continue;
           }
           throw error;
@@ -1043,6 +1090,7 @@
     }
 
     _arrayLayerEvicted(kind, record) {
+      this._requestCounters[kind === 'height' ? 'height' : 'imagery'].evictions++;
       const cache = kind === 'height' ? this.hCache : this.iCache;
       const e = cache.get(record.key);
       if (!e || e.layer !== record.layer) return;
@@ -1059,6 +1107,11 @@
       if (now - this._telemetryAt < 500) return;
       this._telemetryAt = now;
       const memory = this._memoryEstimate();
+      const requests = {
+        height: { ...this._requestCounters.height },
+        imagery: { ...this._requestCounters.imagery },
+      };
+      requests.total = global.GT_TERRAIN_TELEMETRY?.mergeCounterKinds?.(requests) || {};
       global.GT_STREAMING = {
         quality: this._quality,
         pixelError: this._pixelError,
@@ -1073,6 +1126,17 @@
         heightCache: this.hCache.size,
         imageryCache: this.iCache.size,
         memory,
+        ownership: memory.ownership,
+        requests,
+        timer: {
+          backend: this.gpuBackend || 'uninitialized',
+          sample: this.timerSample ? { ...this.timerSample } : null,
+          gpuSample: this.gpuTimerSample ? { ...this.gpuTimerSample } : null,
+        },
+        lod: { ...this._lodStats,
+          terrainTriangles: this._batchFrame?.triangles || 0,
+          leafCount: this._visible?.length || 0,
+        },
         ...this._streamStats,
         workers: this.workerPool ? this.workerPool.snapshot() : null,
         worldIndex: this.worldIndex ? this.worldIndex.snapshot() : null,
@@ -1103,25 +1167,136 @@
 
     _memoryEstimate() {
       let heightCpuBytes = 0, heightGpuBytes = 0, imageryDecodedBytes = 0,
-          imageryGpuBytes = 0;
+          imageryGpuBytes = 0, reliefMipBytes = 0, rangeMipBytes = 0;
+      const ownershipEntries = [];
+      const arrayHeightBytes = this.arrayPool?.height?.bytesPerLayer ||
+        (this.m?.tileSize || 0) ** 2 * 4;
+      const arrayImageryBytes = this.arrayPool?.imagery?.bytesPerLayer ||
+        Math.ceil((this.img?.tileSize || 0) ** 2 * 4 * 4 / 3);
+      const activeHeight = this.arrayPool?.height?.currentRefs || new Map();
+      const activeImagery = this.arrayPool?.imagery?.currentRefs || new Map();
       for (const e of this.hCache.values()) {
-        heightCpuBytes += e.decoded?.byteLength || 0;
-        if (e.tex && !this._batched) heightGpuBytes += this.m.tileSize * this.m.tileSize * 4;
+        const sourceBytes = e.decoded?.byteLength || 0;
+        const reliefBytes = this._typedBytes(e.mip);
+        const rangeBytes = this._typedBytes(e.rangeMip);
+        const gpuBytes = e.layer != null ? arrayHeightBytes :
+          (e.tex && !this._batched ? this.m.tileSize * this.m.tileSize * 4 : 0);
+        heightCpuBytes += sourceBytes; reliefMipBytes += reliefBytes; rangeMipBytes += rangeBytes;
+        heightGpuBytes += gpuBytes;
+        ownershipEntries.push(this._ownershipEntry(e, sourceBytes + reliefBytes + rangeBytes,
+          gpuBytes, activeHeight));
       }
       for (const e of this.iCache.values()) {
-        if (e.bmp) imageryDecodedBytes += this.img.tileSize * this.img.tileSize * 4;
-        if (e.tex && !this._batched) imageryGpuBytes += Math.ceil(this.img.tileSize * this.img.tileSize * 4 * 4 / 3);
+        const cpuBytes = e.bmp ? this.img.tileSize * this.img.tileSize * 4 : 0;
+        const gpuBytes = e.layer != null ? arrayImageryBytes :
+          (e.tex && !this._batched ? Math.ceil(this.img.tileSize * this.img.tileSize * 4 * 4 / 3) : 0);
+        imageryDecodedBytes += cpuBytes; imageryGpuBytes += gpuBytes;
+        ownershipEntries.push(this._ownershipEntry(e, cpuBytes, gpuBytes, activeImagery));
       }
       const arrays = this.arrayPool?.snapshot?.() || null;
+      let arrayAllocatedBytes = heightGpuBytes + imageryGpuBytes;
+      let arrayResidentBytes = heightGpuBytes + imageryGpuBytes;
       if (arrays) {
-        heightGpuBytes = arrays.height.allocatedGpuBytes;
-        imageryGpuBytes = arrays.imagery.allocatedGpuBytes;
+        arrayAllocatedBytes = arrays.allocatedGpuBytes;
+        arrayResidentBytes = arrays.residentGpuBytes;
       }
-      return {
-        heightCpuBytes, heightGpuBytes, imageryDecodedBytes, imageryGpuBytes,
-        estimatedTerrainBytes:
-          heightCpuBytes + heightGpuBytes + imageryDecodedBytes + imageryGpuBytes,
+      const queryMirrorBytes = [...this._worldHeightMirrors.keys()].reduce((sum, key) =>
+        sum + (this.hCache.get(key)?.decoded?.byteLength || 0), 0);
+      const errorMetadataBytes = this._terrainErrorBytes || this._typedBytes(this._terrainErrors);
+      const otherCpuCacheBytes = this._textureCpuBytes([
+        this.noiseTex, this.detailNTex, this.detailATex, this.lcTex,
+      ]);
+      const sharedGridGeometryBytes = this.grids.reduce((sum, geometry) =>
+        sum + this._geometryBytes(geometry), 0);
+      const activeInstanceBufferBytes = [...this.batches.values()].reduce((sum, record) =>
+        sum + (record.buffer?.array?.byteLength || 0), 0);
+      const reflectionInstanceBufferBytes = [...this._reflectionBatches.values()].reduce(
+        (sum, record) => sum + (record.buffer?.array?.byteLength || 0), 0);
+      const temporaryUploadBytes = arrays?.temporaryUploadBytes || 0;
+      const otherTerrainTextureBytes = this._textureGpuBytes([
+        this.noiseTex, this.detailNTex, this.detailATex, this.lcTex, this.roadsTex,
+        this.horizonTex?.[0], this.horizonTex?.[1], this.aoTex,
+      ]);
+      const cpuBytes = {
+        heightSources: heightCpuBytes, imagerySources: imageryDecodedBytes,
+        reliefMips: reliefMipBytes, rangeMips: rangeMipBytes,
+        queryMirrors: queryMirrorBytes, errorMetadata: errorMetadataBytes,
+        otherCaches: otherCpuCacheBytes,
       };
+      cpuBytes.total = Object.values(cpuBytes).reduce((sum, value) => sum + value, 0);
+      const gpuBytes = {
+        heightArraysAllocated: arrays?.height?.allocatedGpuBytes || heightGpuBytes,
+        heightArraysResident: arrays?.height?.residentGpuBytes || heightGpuBytes,
+        imageryArraysAllocated: arrays?.imagery?.allocatedGpuBytes || imageryGpuBytes,
+        imageryArraysResident: arrays?.imagery?.residentGpuBytes || imageryGpuBytes,
+        unusedArrayLayers: Math.max(0, arrayAllocatedBytes - arrayResidentBytes),
+        sharedGridGeometry: sharedGridGeometryBytes,
+        activeInstanceBuffers: activeInstanceBufferBytes,
+        reflectionInstanceBuffers: reflectionInstanceBufferBytes,
+        temporaryUploads: temporaryUploadBytes,
+        otherTerrainTextures: otherTerrainTextureBytes,
+      };
+      // Allocation totals include unused layers; resident figures are diagnostic subsets.
+      gpuBytes.totalAllocated = arrayAllocatedBytes + sharedGridGeometryBytes +
+        activeInstanceBufferBytes + reflectionInstanceBufferBytes + temporaryUploadBytes +
+        otherTerrainTextureBytes;
+      const ownership = global.GT_TERRAIN_TELEMETRY?.accountTerrainOwnership?.(ownershipEntries) ||
+        { inclusive: {}, exclusive: {} };
+      const residentTerrainBytes = Object.values(ownership.exclusive)
+        .reduce((sum, bucket) => sum + (bucket.totalBytes || 0), 0);
+      return {
+        heightCpuBytes, heightGpuBytes: arrays?.height?.allocatedGpuBytes || heightGpuBytes,
+        imageryDecodedBytes,
+        imageryGpuBytes: arrays?.imagery?.allocatedGpuBytes || imageryGpuBytes,
+        cpuBytes, gpuBytes, ownership,
+        residentTerrainBytes,
+        estimatedTerrainBytes: cpuBytes.total + gpuBytes.totalAllocated,
+        totalTerrainOwnedBytes: cpuBytes.total + gpuBytes.totalAllocated,
+      };
+    }
+
+    _ownershipEntry(e, cpuBytes, gpuBytes, activeRefs) {
+      return {
+        cpuBytes, gpuBytes,
+        active: !!activeRefs.get(e.key) || e.lastUsed === this.frame,
+        warm: !!e.predictionProtected,
+        safety: !!e.prefetchProtected,
+        query: !!e.queryProtected,
+        persistent: !!e.persistent,
+      };
+    }
+
+    _typedBytes(value, seen = new Set()) {
+      if (!value || typeof value !== 'object' || seen.has(value)) return 0;
+      seen.add(value);
+      if (ArrayBuffer.isView(value)) return value.byteLength;
+      if (value instanceof ArrayBuffer) return value.byteLength;
+      let bytes = 0;
+      for (const child of Object.values(value)) bytes += this._typedBytes(child, seen);
+      return bytes;
+    }
+
+    _geometryBytes(geometry) {
+      let bytes = geometry?.index?.array?.byteLength || 0;
+      for (const attribute of Object.values(geometry?.attributes || {}))
+        bytes += attribute?.array?.byteLength || 0;
+      return bytes;
+    }
+
+    _textureCpuBytes(textures) {
+      return textures.reduce((sum, texture) =>
+        sum + (texture?.image?.data?.byteLength || 0), 0);
+    }
+
+    _textureGpuBytes(textures) {
+      return textures.reduce((sum, texture) => {
+        const image = texture?.image;
+        if (!image?.width || !image?.height) return sum;
+        const channels = texture.format === THREE.RedFormat ? 1 : 4;
+        const component = texture.type === THREE.FloatType ? 4 : 1;
+        const mip = texture.generateMipmaps ? 4 / 3 : 1;
+        return sum + Math.ceil(image.width * image.height * channels * component * mip);
+      }, 0);
     }
 
     _entryBytes(e) {
@@ -1174,6 +1349,7 @@
         imageryPersistentBytes: imagery.persistentBytes,
         heightByteLimit: this.o.heightBytesMax,
         imageryByteLimit: this.o.imageryBytesMax,
+        residentByteLimit: this.o.residentBytesMax,
         batched: !!this._batched,
         batchSupport: this._batchSupport?.reason || 'enabled',
         terrainBatches: this.batches.size,
@@ -1253,12 +1429,44 @@
           if ((workingTiles <= max && bytes <= byteMax) || e.lastUsed === this.frame) break;
           bytes -= this._entryBytes(e);
           workingTiles--;
+          this._requestCounters[e.kind === 'h' ? 'height' : 'imagery'].evictions++;
           this._disposeCacheEntry(e);
           cache.delete(e.key);
         }
       };
       trim(this.hCache, this.o.heightCacheMax, this.o.heightBytesMax);
       trim(this.iCache, this.o.imageryCacheMax, this.o.imageryBytesMax);
+      // The independent cache limits predate texture arrays and cannot bound combined CPU+GPU
+      // residency: a teleport can leave both a full decoded-height cache and full height/imagery
+      // arrays behind. Apply one ownership budget across both caches, evicting only genuinely
+      // unprotected LRU sources. Current-frame, prediction, safety, query, and persistent sources
+      // remain hard floors, so this changes retention rather than visible terrain quality.
+      const residentEntryBytes = e => this._entryBytes(e) +
+        (e.layer == null ? 0 : (e.kind === 'h'
+          ? this.arrayPool?.height?.bytesPerLayer || 0
+          : this.arrayPool?.imagery?.bytesPerLayer || 0));
+      let residentBytes = 0;
+      for (const cache of [this.hCache, this.iCache])
+        for (const e of cache.values()) residentBytes += residentEntryBytes(e);
+      if (residentBytes > this.o.residentBytesMax) {
+        const candidates = [];
+        for (const cache of [this.hCache, this.iCache]) for (const e of cache.values()) {
+          const pool = e.kind === 'h' ? this.arrayPool?.height : this.arrayPool?.imagery;
+          if (e.persistent || e.queryProtected || e.prefetchProtected || e.predictionProtected ||
+              e.lastUsed === this.frame || pool?.isProtected(e.key) ||
+              (e.state !== 'ready' && e.state !== 'decoded')) continue;
+          candidates.push(e);
+        }
+        candidates.sort((a, b) => a.lastUsed - b.lastUsed ||
+          residentEntryBytes(b) - residentEntryBytes(a));
+        for (const e of candidates) {
+          if (residentBytes <= this.o.residentBytesMax) break;
+          residentBytes -= residentEntryBytes(e);
+          this._requestCounters[e.kind === 'h' ? 'height' : 'imagery'].evictions++;
+          this._disposeCacheEntry(e);
+          (e.kind === 'h' ? this.hCache : this.iCache).delete(e.key);
+        }
+      }
       // prune node meshes unseen for a while (materials only; geometry is shared)
       if (!this._batched) for (const [k, n] of this.meshes) {
         if (this.frame - n.lastShown > this.o.meshIdleFrames) {
@@ -1282,8 +1490,16 @@
       if (this.frame > 1 && cam.position.distanceToSquared(this._prevCam) > 1500 * 1500) {
         this.generation++;
         this.workerPool?.supersede('terrain', this.generation);
-        for (const e of this.fetchQueue) if (e.state === 'queued') e.state = 'stale';
+        const retainedFetches = [];
+        for (const e of this.fetchQueue) if (e.state === 'queued') {
+          if (e.persistent) retainedFetches.push(e);
+          else {
+            e.state = 'stale';
+            this._requestCounters[e.kind === 'h' ? 'height' : 'imagery'].cancellations++;
+          }
+        }
         this.fetchQueue.length = 0;
+        this.fetchQueue.push(...retainedFetches);
         for (const e of this.uploadQueue) {
           e._uploadQueued = false;
           e.bmp?.close?.();
@@ -1294,6 +1510,8 @@
         for (const cache of [this.hCache, this.iCache]) {
           for (const [key, e] of cache) {
             if (!e.persistent && e.state === 'loading') {
+              this._requestCounters[e.kind === 'h' ? 'height' : 'imagery'].cancellations++;
+              e._cancellationCounted = true;
               e.abort?.abort();
               cache.delete(key);
             }
@@ -1383,6 +1601,20 @@
       }
       this.visibleTerrainCoverage = global.GT_TERRAIN_COVERAGE.summarizeVisibleTerrain(
         visible, this.meshes, this.frame);
+      // Leaf-key comparison is the only per-frame endurance accounting beyond scalar counters.
+      // Detailed ownership remains on the 500 ms telemetry cadence below.
+      const leafKeys = this._nextLeafKeys;
+      leafKeys.clear();
+      for (const node of visible) leafKeys.add(node.z * 0x1000000 + node.x * 0x1000 + node.y);
+      let swaps = 0;
+      for (const key of leafKeys) if (!this._previousLeafKeys.has(key)) swaps++;
+      for (const key of this._previousLeafKeys) if (!leafKeys.has(key)) swaps++;
+      this._lodStats.currentSwaps = swaps;
+      this._lodStats.cumulativeSwaps += swaps;
+      this._nextLeafKeys = this._previousLeafKeys;
+      this._previousLeafKeys = leafKeys;
+      if (!this.visibleTerrainCoverage.complete) this._lodStats.coverageFailures++;
+      if (this.visibleTerrainCoverage.nativeHeightRatio < 1) this._lodStats.fallbackFrames++;
 
       this._pumpFetches();
       this._pumpUploads();
@@ -2357,8 +2589,12 @@
         if (!e || e.lastUsed === this.frame || e.persistent || e.queryProtected ||
             e.prefetchProtected) continue;
         if (e.state === 'queued') {
+          this._requestCounters[e.kind === 'h' ? 'height' : 'imagery'].cancellations++;
+          e._cancellationCounted = true;
           e.state = 'stale'; cache.delete(key);
         } else if (e.state === 'loading') {
+          this._requestCounters[e.kind === 'h' ? 'height' : 'imagery'].cancellations++;
+          e._cancellationCounted = true;
           e.abort?.abort(); cache.delete(key);
         }
       }
@@ -2369,17 +2605,25 @@
 
     _rehydrateHeight(e) {
       if (!e || e.decoded || e.cpuLoading || e.state !== 'ready') return;
+      this._requestCounters.height.misses++;
       e.cpuLoading = true; this.inFlight++;
       const generation = this.generation;
       fetch(this._urlH(e.z, e.x, e.y))
         .then(r => r.ok ? r.blob() : Promise.reject(new Error(`height HTTP ${r.status}`)))
-        .then(createImageBitmap)
+        .then(blob => {
+          this._requestCounters.height.downloadedBytes += blob.size;
+          return createImageBitmap(blob);
+        })
         .then(bmp => this._decodeHeightAsync(bmp, e.z, e.x, e.y, -9000))
         .then(decoded => {
           if (generation !== this.generation || this.hCache.get(e.key) !== e) return;
           e.decoded = decoded; this._mirrorHeightTile(e);
+          this._requestCounters.height.completions++;
         })
-        .catch(() => {})
+        .catch(error => {
+          if (error?.name === 'AbortError') this._requestCounters.height.cancellations++;
+          else this._requestCounters.height.failures++;
+        })
         .finally(() => { e.cpuLoading = false; this.inFlight--; });
     }
 
@@ -2443,26 +2687,40 @@
 
     /* ================= collision / heightAt ================= */
     async _loadBaseCollision() {
-      // z3 = ~20 m/px, 15 tiles (~15 MB decoded): water surfaces are BUILT from these heights at
-      // boot, and 80 m base data draped the Snake/creeks visibly wrong on sloping ground
+      // z3 = ~20 m/px; its 15 tiles plus nine coarser ancestors are ~24 MB decoded. Water surfaces
+      // are BUILT from z3 heights, and 80 m base data draped the Snake/creeks visibly wrong.
       const z = Math.min(this.m.minZoom + 3, this.m.maxZoom);
-      const [nx, ny] = this.tilesAtZoom(z);
+      // Every coarser tile is a render ancestor of these collision tiles. Once requested, retain
+      // it as a GPU safety fallback too; otherwise a panoramic turn can evict the only drawable
+      // z0-z2 source even though the deeper persistent collision level remains resident.
+      this._persistentHeightMaxZ = z;
       const jobs = [];
-      for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
-        const key = `${z}/${x}/${y}`;
+      // Load every ancestor through the collision level. A z3 tile cannot render a z0-z2 leaf;
+      // retaining only the deepest collision level left panoramic/turning views without a legal
+      // fallback until those coarse requests happened to arrive.
+      for (let level = 0; level <= z; level++) {
+        const [nx, ny] = this.tilesAtZoom(level);
+        for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
+        const key = `${level}/${x}/${y}`;
         const e = {
-          kind: 'h', key, z, x, y, state: 'loading', lastUsed: 0, persistent: true,
+          kind: 'h', key, z: level, x, y, state: 'loading', lastUsed: 0, persistent: true,
           generation: this.generation,
         };
         this.hCache.set(key, e);
+        this._requestCounters.height.misses++;
         jobs.push(fetch(this._urlH(z, x, y))
           .then(r => { if (!r.ok) throw new Error(`base tile ${key}: HTTP ${r.status}`); return r.blob(); })
-          .then(createImageBitmap)
+          .then(blob => {
+            this._requestCounters.height.downloadedBytes += blob.size;
+            return createImageBitmap(blob);
+          })
           .then(async bmp => {
             e.decoded = await this._decodeHeightAsync(bmp, e.z, e.x, e.y, -10000);
             this._mirrorHeightTile(e);
+            this._requestCounters.height.completions++;
             e.state = 'decoded'; this._queueUpload(e);
-          }));
+          }).catch(error => { this._requestCounters.height.failures++; throw error; }));
+        }
       }
       await Promise.all(jobs);
     }
@@ -2482,8 +2740,11 @@
           generation: this.generation,
         };
         this.iCache.set(key, e);
+        this._requestCounters.imagery.misses++;
         jobs.push(this._prepareImageryAsync(this._urlI(z, x, y), z, x, y, -10000)
           .then(result => {
+            this._requestCounters.imagery.downloadedBytes += Number(result.downloadedBytes) || 0;
+            this._requestCounters.imagery.completions++;
             e.prepared = result.prepared;
             if (this._batched) {
               const valid = this._validTexels(z, x, y);
@@ -2493,10 +2754,13 @@
               e.tex = ready.texture; e.layer = ready.layer;
             } else e.tex = this._imageryTexture(result.bitmap, z, x, y, result.prepared);
             e.state = 'ready';
+            e._uploadCount = 1;
+            this._requestCounters.imagery.uploads++;
             this._streamStats.imageryPrepared++;
             this._streamStats.uploads++;
           })
           .catch(error => {
+            this._requestCounters.imagery.failures++;
             this.iCache.delete(key);
             throw new Error(`base imagery tile ${key}: ${error && error.message || error}`);
           }));

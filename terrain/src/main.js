@@ -10,6 +10,9 @@ import { DrivingInput, activeGamepad } from './vehicle/DrivingInput.js';
 import { SUV_PROFILE, createVehicleState, stepVehicle } from './vehicle/ArcadeVehiclePhysics.js';
 import { summarizeVisibleTerrain } from './terrain-coverage.js';
 import {
+  accountTerrainOwnership, counterDelta, labelTimerSample, mergeCounterKinds, requestRates,
+} from './terrain-telemetry.js';
+import {
   createTerrainTextureArrayPool,
   TerrainTextureArrayCapacityError,
 } from './TerrainTextureArrayPool.js';
@@ -58,6 +61,9 @@ window.DrivingInput = DrivingInput;
 window.GT_activeGamepad = activeGamepad;
 window.GT_VEHICLE_PHYSICS = { SUV_PROFILE, createVehicleState, stepVehicle };
 window.GT_TERRAIN_COVERAGE = { summarizeVisibleTerrain };
+window.GT_TERRAIN_TELEMETRY = {
+  accountTerrainOwnership, counterDelta, labelTimerSample, mergeCounterKinds, requestRates,
+};
 window.GT_TERRAIN_ARRAYS = { createTerrainTextureArrayPool, TerrainTextureArrayCapacityError };
 window.GT_TERRAIN_BATCH = {
   buildReflectionTerrainInstances, buildTerrainFrame, compareTerrainSubmissions,
@@ -90,6 +96,9 @@ if (!rendererWorker.active) {
   for (const path of scripts) await loadClassic(new URL(`terrain/src/${path}`, document.baseURI));
   if (params.get('benchmark') === '1') {
     await loadClassic(new URL('terrain/src/benchmark/runner-classic.js', document.baseURI));
+  }
+  if (params.get('terrainEndurance') === '1') {
+    await loadClassic(new URL('terrain/src/benchmark/terrain-endurance-classic.js', document.baseURI));
   }
   document.getElementById('gear').addEventListener('click', () => window.GT_toggleSettings?.());
   registerServiceWorker();

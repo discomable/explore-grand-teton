@@ -220,6 +220,12 @@ test('rejected imagery is closed and allocation failures request legacy fallback
     prepared: true,
   }), TerrainTextureArrayCapacityError);
   assert.equal(closed, 1);
+
+  let retainedClosed = 0;
+  assert.throws(() => pool.uploadImagery('retryable', { close: () => retainedClosed++ }, {
+    prepared: true, retainOnCapacity: true,
+  }), TerrainTextureArrayCapacityError);
+  assert.equal(retainedClosed, 0);
   pool.dispose();
 
   const renderer = fakeRenderer();

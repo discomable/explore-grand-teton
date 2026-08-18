@@ -296,6 +296,7 @@ const sky = new THREE.Mesh(
       }`
   })
 );
+sky.name='skyDome';
 scene.add(sky);
 // Sky-only image based lighting.  The dome is on a private layer, so the cubemap never captures
 // terrain, water (which keeps its planar-reflection pass), vehicles, or the capture camera itself.

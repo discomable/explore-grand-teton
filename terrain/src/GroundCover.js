@@ -490,6 +490,7 @@
       };
 
       this.mesh = new THREE.InstancedMesh(geo, mat, cap);
+      this.mesh.name = 'groundCoverScatter';
       this.mesh.count = cap;                     // zero-scaled slots rasterize nothing
       this.mesh.frustumCulled = false;           // ring is around the camera by construction
       this.mesh.visible = !this.disabled;

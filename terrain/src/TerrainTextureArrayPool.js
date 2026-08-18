@@ -474,7 +474,11 @@ export class TerrainTextureArrayPool {
       record = this.imagery.reserve(key, options);
       this.imagery.markUploading(key);
     } catch (error) {
-      if (options.closeSource !== false) bitmap?.close?.();
+      // A streaming caller may retry on the next frame when current/next references rotate.
+      // Preserve its bitmap only for that explicit capacity-retry contract; all other rejected
+      // sources retain the default close-on-return ownership rule.
+      if (!(options.retainOnCapacity && error instanceof TerrainTextureArrayCapacityError) &&
+          options.closeSource !== false) bitmap?.close?.();
       throw error;
     }
     const validX = Math.max(1, Math.min(this.imageryTileSize,

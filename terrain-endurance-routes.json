@@ -1,0 +1,68 @@
+{
+  "schema": "grand-teton-terrain-endurance-routes/v1",
+  "version": 1,
+  "repetitions": 2,
+  "telemetryHz": 4,
+  "routes": [
+    {
+      "id": "straight-350",
+      "kind": "linear",
+      "durationSeconds": 60,
+      "speedMps": 350,
+      "origin": [0, 1500, -10000],
+      "heading": [0, 1]
+    },
+    {
+      "id": "repeated-180-turns",
+      "kind": "turns",
+      "durationSeconds": 30,
+      "speedMps": 300,
+      "origin": [1000, 1200, -3000],
+      "heading": [0, 1],
+      "turnPeriodSeconds": 5
+    },
+    {
+      "id": "ground-to-3km",
+      "kind": "altitude-cycle",
+      "durationSeconds": 30,
+      "origin": [3500, 0, 2500],
+      "minimumAglMeters": 3,
+      "maximumAglMeters": 3000,
+      "cycles": 3
+    },
+    {
+      "id": "teleport-25km",
+      "kind": "teleports",
+      "durationSeconds": 30,
+      "altitudeAglMeters": 1200,
+      "periodSeconds": 5,
+      "points": [[-12000, -12000], [12000, -6000], [12000, 18000], [-12000, 12000]]
+    },
+    {
+      "id": "stationary-rotation",
+      "kind": "rotation",
+      "durationSeconds": 30,
+      "origin": [2500, 1500, 0],
+      "rotationPeriodSeconds": 4
+    },
+    {
+      "id": "cathedral-max-speed",
+      "kind": "target",
+      "durationSeconds": 30,
+      "speedMps": 220,
+      "origin": [600, 1000, -1000],
+      "target": [-6000, 1300, 0]
+    },
+    {
+      "id": "z7-boundary-300",
+      "kind": "tile-boundary",
+      "durationSeconds": 60,
+      "speedMps": 300,
+      "zoom": 7,
+      "axis": "x",
+      "boundaryIndex": 22,
+      "startAlong": -9000,
+      "altitudeAglMeters": 1200
+    }
+  ]
+}

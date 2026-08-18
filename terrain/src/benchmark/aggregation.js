@@ -1,3 +1,5 @@
+import { counterDelta, requestRates } from '../terrain-telemetry.js';
+
 const DEFAULT_PERCENTILES = [0.5, 0.95, 0.99];
 
 export function percentile(values, fraction) {
@@ -22,6 +24,94 @@ export function summarizeDurations(values, percentiles = DEFAULT_PERCENTILES) {
   }
   return result;
 }
+
+export function retainWorst(entries, limit = 24, value = entry => entry.durationMs) {
+  if (!Number.isInteger(limit) || limit < 0) throw new TypeError('limit must be non-negative');
+  return entries.filter(entry => Number.isFinite(value(entry)))
+    .sort((a, b) => value(b) - value(a)).slice(0, limit);
+}
+
+export function monotonicallyGrowing(values, { minimumStep = 1024 * 1024, streak = 3 } = {}) {
+  let growing = 0;
+  for (let index = 1; index < values.length; index++) {
+    if (values[index] - values[index - 1] >= minimumStep) growing++;
+    else growing = 0;
+    if (growing >= streak) return true;
+  }
+  return false;
+}
+
+export function summarizeEnduranceFrames(values) {
+  const summary = summarizeDurations(values);
+  return {
+    ...summary,
+    over16_7: values.filter(value => value > 16.7).length,
+    over25: values.filter(value => value > 25).length,
+    over40: values.filter(value => value > 40).length,
+    over50: values.filter(value => value > 50).length,
+    over100: values.filter(value => value > 100).length,
+  };
+}
+
+export function evaluateTerrainEndurance({
+  scenarios = [], browserErrors = [], failedRequests = [], contextLosses = 0,
+} = {}) {
+  const MIB = 1024 * 1024;
+  const settled = scenarios.map(item => item.settled || {});
+  const settledBytes = settled.map(item => item.residentTerrainBytes ||
+    item.totalTerrainOwnedBytes || 0);
+  const warmOnlyBytes = settled.map(item => item.warmOnlyBytes || 0);
+  const first = settledBytes[0] || 0;
+  const final = settledBytes.at(-1) || 0;
+  const repetitions = scenarios.map(item => item.repetition).filter(Number.isFinite);
+  const finalRepetition = repetitions.length ? Math.max(...repetitions) : null;
+  const trendBytes = finalRepetition == null ? settledBytes : scenarios
+    .filter(item => item.repetition === finalRepetition)
+    .map(item => item.settled?.residentTerrainBytes ||
+      item.settled?.totalTerrainOwnedBytes || 0);
+  const checks = {
+    browserErrors: browserErrors.length === 0,
+    failedRequests: failedRequests.length === 0,
+    requestCounters: scenarios.every(item => (item.counterDelta?.failures || 0) === 0),
+    contextLoss: contextLosses === 0,
+    terrainCoverage: scenarios.every(item => (item.coverageFailures || []).length === 0),
+    settledResidency: settledBytes.every(bytes => bytes <= 450 * MIB),
+    warmOnlyResidency: warmOnlyBytes.every(bytes => bytes <= 75 * MIB),
+    finalGrowth: final <= first + 32 * MIB,
+    settled: scenarios.every(item => item.settle?.settled === true &&
+      (item.prewarm == null || item.prewarm.settled === true)),
+    capacityRetries: scenarios.every(item => (item.counterDelta?.capacityRetries || 0) === 0),
+    residencyTrend: !monotonicallyGrowing(trendBytes),
+    frameHang: scenarios.every(item => (item.frames?.maxMs || 0) <= 1000),
+  };
+  return {
+    passed: Object.values(checks).every(Boolean), checks,
+    limits: {
+      settledTerrainBytes: 450 * MIB, warmOnlyBytes: 75 * MIB,
+      finalGrowthBytes: 32 * MIB, hangFrameMs: 1000,
+    },
+    observed: {
+      peakSettledTerrainBytes: Math.max(0, ...settledBytes),
+      peakWarmOnlyBytes: Math.max(0, ...warmOnlyBytes),
+      firstSettledTerrainBytes: first, finalSettledTerrainBytes: final,
+      finalGrowthBytes: final - first,
+    },
+  };
+}
+
+export function buildTerrainEnduranceReport({
+  scenarios = [], environment = {}, browserErrors = [], failedRequests = [], contextLosses = 0,
+  manifestVersion = 1,
+} = {}) {
+  const gate = evaluateTerrainEndurance({ scenarios, browserErrors, failedRequests, contextLosses });
+  return {
+    schema: 'grand-teton-terrain-endurance/v1',
+    createdAt: new Date().toISOString(), manifestVersion, environment,
+    scenarios, browserErrors, failedRequests, contextLosses, gate,
+  };
+}
+
+export { counterDelta, requestRates };
 
 export function flattenNumeric(value, prefix = '', output = {}) {
   if (Number.isFinite(value)) {
