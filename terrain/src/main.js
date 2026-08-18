@@ -29,6 +29,7 @@ import {
   nextVegetationCapacity,
   VEGETATION_SPECIES,
 } from './vegetation-batch-contract.js';
+import { DenseGroundCoverSubmission } from './ground-cover-submission.js';
 import {
   parseTerrainErrorPyramid, predictTerrainPoses, projectedTerrainError,
   selectTerrainWarmSources, terrainShouldSubdivide,
@@ -74,6 +75,7 @@ window.GT_VEGETATION_BATCH = {
   applyVegetationFade, buildVegetationBatchFrame, compactVegetationRecord, nextVegetationCapacity,
   VEGETATION_SPECIES,
 };
+window.GT_GROUND_COVER_SUBMISSION = { DenseGroundCoverSubmission };
 window.GT_TERRAIN_VISIBILITY = {
   parseTerrainErrorPyramid, predictTerrainPoses, projectedTerrainError,
   selectTerrainWarmSources, terrainShouldSubdivide,
