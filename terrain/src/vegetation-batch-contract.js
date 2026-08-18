@@ -89,3 +89,148 @@ export function buildVegetationBatchFrame(cells, intersects) {
   }
   return { batches, visibleCells: visible.length, visible, instances };
 }
+
+function cellIdentity(cell) {
+  const hasCoordinates = Number.isInteger(cell?.cellX) && Number.isInteger(cell?.cellZ);
+  const key = cell?.key ?? (hasCoordinates ? `${cell.cellX},${cell.cellZ}` : null);
+  if (key == null || key === '') throw new RangeError('vegetation cells require a stable key');
+  return String(key);
+}
+
+function speciesState(state, species) {
+  let batch = state.species.get(species);
+  if (!batch) {
+    batch = { slots: [], cellSlots: new Map() };
+    state.species.set(species, batch);
+  }
+  return batch;
+}
+
+function dirtySpecies(changes, species) {
+  let dirty = changes.get(species);
+  if (!dirty) changes.set(species, dirty = new Set());
+  return dirty;
+}
+
+function removeCell(state, key, changes) {
+  const cell = state.cells.get(key);
+  if (!cell) return 0;
+  let compactions = 0;
+  for (const record of cell.records) {
+    const batch = state.species.get(record.species);
+    const owned = batch?.cellSlots.get(key);
+    if (!batch || !owned) continue;
+    while (owned.size) {
+      const slot = owned.values().next().value;
+      const lastIndex = batch.slots.length - 1;
+      const last = batch.slots[lastIndex];
+      owned.delete(slot);
+      if (slot !== lastIndex) {
+        batch.slots[slot] = last;
+        const lastOwned = batch.cellSlots.get(last.cellKey);
+        lastOwned.delete(lastIndex);
+        lastOwned.add(slot);
+        dirtySpecies(changes, record.species).add(slot);
+        compactions++;
+      }
+      batch.slots.pop();
+    }
+    batch.cellSlots.delete(key);
+  }
+  state.cells.delete(key);
+  return compactions;
+}
+
+function addCell(state, cell, changes) {
+  const key = cellIdentity(cell);
+  state.cells.set(key, cell);
+  for (const record of cell.records) {
+    const batch = speciesState(state, record.species);
+    const owned = new Set();
+    batch.cellSlots.set(key, owned);
+    const dirty = dirtySpecies(changes, record.species);
+    for (let ordinal = 0; ordinal < record.count; ordinal++) {
+      const slot = batch.slots.length;
+      batch.slots.push({ cellKey: key, record, ordinal });
+      owned.add(slot);
+      dirty.add(slot);
+    }
+  }
+}
+
+function coalesceSlots(slots) {
+  const sorted = [...slots].sort((a, b) => a - b);
+  const ranges = [];
+  for (const slot of sorted) {
+    const last = ranges[ranges.length - 1];
+    if (last && last.start + last.count === slot) last.count++;
+    else ranges.push({ start: slot, count: 1 });
+  }
+  return ranges;
+}
+
+/**
+ * Mutable CPU-side dense vegetation layout. A slot retains its authored record + ordinal, so
+ * packing never changes the instance data or needs an identity-dependent RNG draw.
+ */
+export function createVegetationSubmissionState() {
+  return { cells: new Map(), species: new Map() };
+}
+
+/** Reconcile the visible cell set using individual-slot swap removal and append-only insertion. */
+export function reconcileVegetationSubmission(state, visibleCells) {
+  if (!state?.cells || !state?.species) throw new TypeError('invalid vegetation submission state');
+  const desired = new Map();
+  for (const cell of visibleCells) desired.set(cellIdentity(cell), cell);
+  const dirty = new Map();
+  let compactions = 0, membershipChanges = 0;
+
+  for (const [key, cell] of [...state.cells]) {
+    const replacement = desired.get(key);
+    if (!replacement || replacement !== cell) {
+      compactions += removeCell(state, key, dirty);
+      membershipChanges++;
+    }
+  }
+  for (const [key, cell] of desired) {
+    if (!state.cells.has(key)) {
+      addCell(state, cell, dirty);
+      membershipChanges++;
+    }
+    else if (cell.batchDirty) {
+      for (const record of cell.records) {
+        const slots = state.species.get(record.species)?.cellSlots.get(key);
+        if (!slots) continue;
+        const speciesDirty = dirtySpecies(dirty, record.species);
+        for (const slot of slots) speciesDirty.add(slot);
+      }
+    }
+  }
+
+  const species = new Map();
+  let instances = 0, dirtyRanges = 0, dirtyInstances = 0, uploadBytes = 0;
+  for (const [name, batch] of state.species) {
+    // A later removal in the same reconciliation can retire a slot dirtied by an earlier swap.
+    // Discard those now-out-of-range indices before materializing upload ranges.
+    const ranges = coalesceSlots([...(dirty.get(name) || [])]
+      .filter(slot => slot < batch.slots.length));
+    const stride = name === 'bb' || !['snag', 'sage'].includes(name) ? 20 : 19;
+    const changed = ranges.reduce((sum, range) => sum + range.count, 0);
+    species.set(name, { slots: batch.slots, count: batch.slots.length, ranges, stride });
+    instances += batch.slots.length;
+    dirtyRanges += ranges.length;
+    dirtyInstances += changed;
+    uploadBytes += changed * stride * 4;
+  }
+  for (const cell of desired.values()) cell.batchDirty = false;
+  return {
+    species, visibleCells: desired.size, instances, dirtyRanges, dirtyInstances,
+    uploadBytes, fullUploadBytes: [...species.values()]
+      .reduce((sum, batch) => sum + batch.count * batch.stride * 4, 0),
+    compactions, membershipChanges,
+  };
+}
+
+export function vegetationSlotIdentity(slot, species) {
+  return `${slot.cellKey}/${species}/${slot.ordinal}`;
+}

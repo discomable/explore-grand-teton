@@ -26,7 +26,9 @@ import {
   applyVegetationFade,
   buildVegetationBatchFrame,
   compactVegetationRecord,
+  createVegetationSubmissionState,
   nextVegetationCapacity,
+  reconcileVegetationSubmission,
   VEGETATION_SPECIES,
 } from './vegetation-batch-contract.js';
 import {
@@ -71,7 +73,8 @@ window.GT_TERRAIN_BATCH = {
   TERRAIN_INSTANCE_LAYOUT,
 };
 window.GT_VEGETATION_BATCH = {
-  applyVegetationFade, buildVegetationBatchFrame, compactVegetationRecord, nextVegetationCapacity,
+  applyVegetationFade, buildVegetationBatchFrame, compactVegetationRecord,
+  createVegetationSubmissionState, nextVegetationCapacity, reconcileVegetationSubmission,
   VEGETATION_SPECIES,
 };
 window.GT_TERRAIN_VISIBILITY = {

@@ -1117,18 +1117,14 @@
       this._vegetationBatchContract = global.GT_VEGETATION_BATCH || null;
       this._vegetationBatched = !!this._vegetationBatchContract && !vegetationBatchDisabled;
       this._vegetationBatches = new Map();
+      this._vegetationSubmission = this._vegetationBatched
+        ? this._vegetationBatchContract.createVegetationSubmissionState() : null;
       this._vegetationRevision = 0;
       this._vegetationBatchStats = {
         passes: 0, growths: 0, visibleCells: 0, instances: 0, drawCalls: 0,
+        liveInstances: 0, submittedInstances: 0, dirtyRanges: 0, compactions: 0,
         uploadBytes: 0, totalUploadBytes: 0, skippedPublications: 0, lodOmitted: 0,
       };
-      if (this._vegetationBatched) {
-        const previousSceneBeforeRender = this.scene.onBeforeRender;
-        this.scene.onBeforeRender = (renderer, renderScene, renderCamera, renderTarget) => {
-          previousSceneBeforeRender?.call(this.scene, renderer, renderScene, renderCamera, renderTarget);
-          this._publishVegetationBatches(renderCamera);
-        };
-      }
       let detailOverride = null;
       try {
         const qp = new URLSearchParams(global.location.search);
@@ -1325,13 +1321,15 @@
       this._updateFades();                         // grow freshly filled cells (~0.6 s each)
       this._updateCloseDetail(camPos, viewCamera);
       if (this.farBand) this._updateFar(camPos);   // band-3 forest patches out to ~6 km
+      // Publish once from the application camera. The resulting buffers are reused unchanged by
+      // shadow and reflection render passes later in the frame.
+      if (this._vegetationBatched) this._publishVegetationBatches(viewCamera);
       this._publishStreamTelemetry();
     }
 
     _retireCell(cell) {
       if (!cell) return;
       if (this._vegetationBatched) {
-        cell.records = [];
         this._vegetationRevision++;
         return;
       }
@@ -1378,60 +1376,79 @@
         batch.geometry.dispose();
       }
       this._vegetationBatches.set(species, replacement);
+      replacement.needsFullUpload = true;
       this._vegetationBatchStats.growths++;
       return replacement;
     }
 
+    _uploadVegetationAttribute(attribute, ranges, itemSize) {
+      attribute.clearUpdateRanges?.();
+      for (const range of ranges) attribute.addUpdateRange?.(range.start * itemSize, range.count * itemSize);
+      attribute.needsUpdate = true;
+    }
+
     _publishVegetationBatches(renderCamera) {
       if (!this._vegetationBatched || !renderCamera || !this.group.visible) return;
+      renderCamera.updateMatrixWorld?.();
       const projection = this._vegetationProjection || (this._vegetationProjection = new THREE.Matrix4());
       const frustum = this._vegetationFrustum || (this._vegetationFrustum = new THREE.Frustum());
       projection.multiplyMatrices(renderCamera.projectionMatrix, renderCamera.matrixWorldInverse);
       frustum.setFromProjectionMatrix(projection);
       const frame = this._vegetationBatchContract.buildVegetationBatchFrame(
         this.cells.values(), sphere => frustum.intersectsSphere(sphere));
-      const previousVisible = this._vegetationPublishedCells;
-      let unchanged = this._vegetationPublishedRevision === this._vegetationRevision &&
-        previousVisible?.length === frame.visible.length;
-      if (unchanged) for (let i = 0; i < frame.visible.length; i++) {
-        if (previousVisible[i] !== frame.visible[i]) { unchanged = false; break; }
-      }
-      if (unchanged) {
-        this._vegetationBatchStats.skippedPublications++;
-        this._vegetationBatchStats.uploadBytes = 0;
+      const publication = this._vegetationBatchContract.reconcileVegetationSubmission(
+        this._vegetationSubmission, frame.visible);
+      const stats = this._vegetationBatchStats;
+      let liveInstances = 0;
+      for (const cell of this.cells.values())
+        for (const record of cell.records) liveInstances += record.count;
+      stats.liveInstances = liveInstances;
+      stats.submittedInstances = publication.instances;
+      stats.visibleCells = publication.visibleCells;
+      if (!publication.dirtyInstances && !publication.membershipChanges) {
+        stats.skippedPublications++;
+        stats.uploadBytes = 0;
+        stats.dirtyRanges = 0;
         return;
       }
-      let drawCalls = 0, uploadBytes = 0;
+      let drawCalls = 0, uploadBytes = 0, dirtyRangeCount = 0;
       const occupied = new Set();
-      for (const [species, source] of frame.batches) {
+      for (const [species, source] of publication.species) {
         if (!source.count) continue;
         occupied.add(species);
         const batch = this._ensureVegetationBatch(species, source.count);
         const matrices = batch.mesh.instanceMatrix.array;
         const colors = batch.mesh.instanceColor.array;
         const uv = batch.geometry.getAttribute('aUvOff')?.array || null;
-        let at = 0;
-        for (const record of source.records) {
-          matrices.set(record.matrices, at * 16);
-          colors.set(record.colors, at * 3);
-          if (uv && record.uvs) uv.set(record.uvs, at);
-          at += record.count;
+        const ranges = batch.needsFullUpload ? [{ start: 0, count: source.count }] : source.ranges;
+        for (const range of ranges) for (let at = range.start; at < range.start + range.count; at++) {
+          const slot = source.slots[at], ordinal = slot.ordinal, record = slot.record;
+          matrices.set(record.matrices.subarray(ordinal * 16, ordinal * 16 + 16), at * 16);
+          colors.set(record.colors.subarray(ordinal * 3, ordinal * 3 + 3), at * 3);
+          if (uv && record.uvs) uv[at] = record.uvs[ordinal];
         }
         batch.mesh.count = source.count;
         batch.mesh.visible = true;
-        batch.mesh.instanceMatrix.needsUpdate = true;
-        batch.mesh.instanceColor.needsUpdate = true;
-        if (uv) batch.geometry.getAttribute('aUvOff').needsUpdate = true;
+        if (ranges.length) {
+          this._uploadVegetationAttribute(batch.mesh.instanceMatrix, ranges, 16);
+          this._uploadVegetationAttribute(batch.mesh.instanceColor, ranges, 3);
+          if (uv) this._uploadVegetationAttribute(batch.geometry.getAttribute('aUvOff'), ranges, 1);
+        }
         drawCalls++;
-        uploadBytes += source.count * (16 + 3 + (uv ? 1 : 0)) * 4;
+        uploadBytes += ranges.reduce((bytes, range) =>
+          bytes + range.count * (16 + 3 + (uv ? 1 : 0)) * 4, 0);
+        dirtyRangeCount += ranges.length;
+        batch.needsFullUpload = false;
       }
       for (const [species, batch] of this._vegetationBatches) {
         if (occupied.has(species)) continue;
         batch.mesh.count = 0; batch.mesh.visible = false;
       }
-      const stats = this._vegetationBatchStats;
-      stats.passes++; stats.visibleCells = frame.visibleCells; stats.instances = frame.instances;
+      stats.passes++; stats.visibleCells = publication.visibleCells;
+      stats.instances = publication.instances;
       stats.drawCalls = drawCalls; stats.uploadBytes = uploadBytes;
+      stats.dirtyRanges = dirtyRangeCount;
+      stats.compactions += publication.compactions;
       stats.totalUploadBytes += uploadBytes;
       stats.gpuBytes = [...this._vegetationBatches.values()].reduce((bytes, batch) =>
         bytes + batch.capacity * (16 + 3 + (batch.geometry.getAttribute('aUvOff') ? 1 : 0)) * 4, 0);
@@ -1439,7 +1456,6 @@
         count: batch.mesh.count, capacity: batch.capacity,
         gpuBytes: batch.capacity * (16 + 3 + (batch.geometry.getAttribute('aUvOff') ? 1 : 0)) * 4,
       }]));
-      this._vegetationPublishedCells = frame.visible.slice();
       this._vegetationPublishedRevision = this._vegetationRevision;
     }
 
@@ -2186,6 +2202,7 @@
         if (mesh) mesh.instanceMatrix.needsUpdate = true;
       }
       if (this._vegetationBatched) this._vegetationRevision++;
+      if (this._vegetationBatched) f.cell.batchDirty = true;
     }
 
     _updateFades() {
