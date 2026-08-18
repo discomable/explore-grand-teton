@@ -29,12 +29,20 @@
     // endurance gate so telemetry cadence and a newly protected tile cannot make a nominally
     // settled working set oscillate around 450 MiB.
     residentBytesMax: 440 * 1024 * 1024,
-    // Visible leaves, the CPU-query corridor and persistent ancestors overlap but can briefly
-    // protect more than 128 height sources. Keep enough headroom to prevent continual layer
-    // eviction/re-upload while retaining a much smaller allocation than the original 192/160.
-    heightArrayLayers: 160,
-    imageryArrayLayers: 128,
+    // Visible leaves, the CPU-query corridor, persistent ancestors and prediction warms overlap
+    // and can want more than 160 height sources at fast-flight poses (straight-350's start wants
+    // ~180). Anything less thrashes: every upload evicts another still-wanted layer, which
+    // re-requests and re-uploads next frame, so streams never go idle. The 160/128 experiment
+    // only looked settled because stuck-generation entries silently stopped re-uploading.
+    heightArrayLayers: 192,
+    imageryArrayLayers: 160,
     queryRadius: 2500,
+    // CPU consumers sample raw decoded tiles well beyond the GPU query corridor: WaterBuilder
+    // fine shorelines reach 4500 m and RoadRibbon/TrailBuilder drape against the same tiles.
+    // Releasing their decoded arrays re-signs chunks against coarse data with no way back until
+    // the camera enters queryRadius, so CPU height copies are retained (and rehydrated) out to
+    // this distance instead. Byte-pressure eviction still applies above residentBytesMax.
+    cpuHeightRadius: 4500,
     meshIdleFrames: 240,      // prune node meshes unseen for this many frames
     uploadsPerFrame: 6,       // near-field imagery must land fast (was a visible beige lag)
     maxConcurrentFetch: 12,
@@ -948,6 +956,15 @@
       if (e) {
         this._requestCounters.height.hits++;
         e.lastUsed = this.frame;
+        // A hit means the tile is wanted NOW: adopt the current generation, or entries that
+        // survived a teleport (retained decoded data, cancelled 'stale' fetches) are silently
+        // skipped by the generation guards in _pumpFetches/_pumpUploads forever.
+        if (e.state === 'stale') {
+          e.state = 'queued'; e.priority = priority; e.generation = this.generation;
+          this.fetchQueue.push(e);
+        } else if (e.state === 'decoded' || e.state === 'ready') {
+          e.generation = this.generation;
+        }
         if (e.state === 'decoded') this._queueUpload(e);
         return e;
       }
@@ -964,7 +981,19 @@
       if (!this.img) return null;
       const key = `${z}/${x}/${y}`;
       let e = this.iCache.get(key);
-      if (e) { this._requestCounters.imagery.hits++; e.lastUsed = this.frame; return e; }
+      if (e) {
+        this._requestCounters.imagery.hits++;
+        e.lastUsed = this.frame;
+        // Same revival contract as _reqHeight: a wanted tile cancelled by a teleport must
+        // re-enter the fetch queue under the current generation or it is stuck forever.
+        if (e.state === 'stale') {
+          e.state = 'queued'; e.priority = priority * 0.9; e.generation = this.generation;
+          this.fetchQueue.push(e);
+        } else if (e.state === 'decoded' || e.state === 'ready') {
+          e.generation = this.generation;
+        }
+        return e;
+      }
       this._requestCounters.imagery.misses++;
       e = { kind: 'i', key, z, x, y, state: 'queued', lastUsed: this.frame,
             priority: priority * 0.9, generation: this.generation }; // imagery slightly outranks heights
@@ -999,8 +1028,16 @@
               this._streamStats.heightDecoded++;
             } else e.bmp = bmp;
             if (e.generation !== this.generation) {
-              e.bmp?.close?.();
               this._streamStats.stale++;
+              // Do not strand the record in 'loading': decoded height data stays revivable (the
+              // next _reqHeight hit adopts the current generation and queues the upload); an
+              // imagery bitmap is released with its record so a later request refetches cleanly.
+              if (e.kind === 'h' && e.decoded) e.state = 'decoded';
+              else {
+                e.bmp?.close?.(); e.bmp = null;
+                const cache = e.kind === 'h' ? this.hCache : this.iCache;
+                if (cache.get(e.key) === e) cache.delete(e.key);
+              }
               return;
             }
             e.state = 'decoded';
@@ -1034,9 +1071,9 @@
           e.bmp?.close?.();
           continue;
         }
-        try {
         const counters = e.kind === 'h' ? this._requestCounters.height :
           this._requestCounters.imagery;
+        try {
         const wasUploaded = (e._uploadCount || 0) > 0;
         if (e.kind === 'h') {
           if (this._batched) {
@@ -1079,7 +1116,20 @@
             counters.capacityRetries++;
             continue;
           }
-          throw error;
+          // Any other upload failure is contained here: rethrowing would abort terrain.update()
+          // and everything animate() runs after it, freezing the world on the last frame while
+          // the entry re-queues each tick. Count it, drop the entry so a later request can
+          // refetch cleanly, and keep pumping.
+          counters.failures++;
+          if (!e._uploadErrorLogged) {
+            e._uploadErrorLogged = true;
+            console.warn(`[terrain] upload failed for ${e.kind}:${e.key}; dropping entry`, error);
+          }
+          e.bmp?.close?.(); e.bmp = null;
+          if (!e.persistent) {
+            this._disposeCacheEntry(e);
+            (e.kind === 'h' ? this.hCache : this.iCache).delete(e.key);
+          }
         }
       }
     }
@@ -1315,6 +1365,13 @@
         layers?.release(e.key);
       } else e?.tex?.dispose?.();
       e?.bmp?.close?.();
+      if (e) {
+        e.bmp = null;
+        // The entry may still sit in the uploadQueue (byte-pressure trim does not check).
+        // Leaving it 'decoded' would make the pump draw a now-detached bitmap (DOMException);
+        // any non-'decoded' state makes the pump's staleness guard skip it safely.
+        if (e._uploadQueued) e.state = 'stale';
+      }
       if (e?.kind === 'h') {
         this.worldIndex?.remove(e.key);
         this._worldHeightMirrors.delete(e.key);
@@ -1449,6 +1506,30 @@
       for (const cache of [this.hCache, this.iCache])
         for (const e of cache.values()) residentBytes += residentEntryBytes(e);
       if (residentBytes > this.o.residentBytesMax) {
+        // Tier 0: shed far CPU height copies first — the decoded arrays retained out to
+        // cpuHeightRadius for water/road/trail consumers. Releasing them keeps the GPU layer and
+        // an 8x8 relief mip, so this degrades those consumers gracefully under byte pressure
+        // instead of evicting whole still-wanted tiles and thrashing fetches. cpuBudgetReleased
+        // stops the query corridor from instantly rehydrating (and re-triggering the pressure);
+        // it clears when the tile enters the corridor proper.
+        const releasable = [];
+        for (const e of this.hCache.values()) {
+          if (e.persistent || e.queryProtected || !e.decoded || e.state !== 'ready' ||
+              e.lastUsed === this.frame) continue;
+          releasable.push(e);
+        }
+        releasable.sort((a, b) => a.lastUsed - b.lastUsed);
+        for (const e of releasable) {
+          if (residentBytes <= this.o.residentBytesMax) break;
+          const before = this._entryBytes(e);
+          this._windowRelief(e, { x: 0, y: 0, z: 1 });
+          e.decoded = null;
+          e.cpuBudgetReleased = true;
+          this.worldIndex?.remove(e.key); this._worldHeightMirrors.delete(e.key);
+          residentBytes -= before - this._entryBytes(e);
+        }
+      }
+      if (residentBytes > this.o.residentBytesMax) {
         const candidates = [];
         for (const cache of [this.hCache, this.iCache]) for (const e of cache.values()) {
           const pool = e.kind === 'h' ? this.arrayPool?.height : this.arrayPool?.imagery;
@@ -1492,8 +1573,12 @@
         this.workerPool?.supersede('terrain', this.generation);
         const retainedFetches = [];
         for (const e of this.fetchQueue) if (e.state === 'queued') {
-          if (e.persistent) retainedFetches.push(e);
-          else {
+          if (e.persistent) {
+            // Retained across the bump: adopt the new generation or _pumpFetches silently
+            // drops the entry while its cache record stays 'queued' forever.
+            e.generation = this.generation;
+            retainedFetches.push(e);
+          } else {
             e.state = 'stale';
             this._requestCounters[e.kind === 'h' ? 'height' : 'imagery'].cancellations++;
           }
@@ -2656,6 +2741,13 @@
       const ay = Math.floor((aheadZ + this.spanZ / 2) / span);
       if (ax >= 0 && ay >= 0 && ax < countX && ay < countY) desired.add(`${z}/${ax}/${ay}`);
 
+      const cpuRadius = this.o.cpuHeightRadius;
+      const withinCpuReach = e => {
+        const b = this.tileWorldBounds(e.z, e.x, e.y);
+        const dx = Math.max(b.minX - cx, 0, cx - (b.minX + b.wpt));
+        const dz = Math.max(b.minZ - cz, 0, cz - (b.minZ + b.hpt));
+        return dx * dx + dz * dz <= cpuRadius * cpuRadius;
+      };
       for (const e of this.hCache.values()) {
         const wanted = e.persistent || desired.has(e.key);
         e.queryProtected = wanted && !e.persistent;
@@ -2663,8 +2755,13 @@
           if (wanted) this.arrayPool.height.protect(e.key, 'query');
           else this.arrayPool.height.unprotect(e.key, 'query');
         }
-        if (wanted && !e.decoded) this._rehydrateHeight(e);
-        if (!wanted && !e.persistent && e.decoded && e.state === 'ready') {
+        // CPU consumers (WaterBuilder fine shorelines, RoadRibbon/TrailBuilder drapes) read raw
+        // decoded tiles out to cpuHeightRadius, beyond the GPU query corridor: keep their copies
+        // resident and rehydrate previously released ones as the camera brings them into reach.
+        const cpuWanted = wanted || withinCpuReach(e);
+        if (wanted) e.cpuBudgetReleased = false;
+        if (cpuWanted && !e.decoded && !e.cpuBudgetReleased) this._rehydrateHeight(e);
+        if (!cpuWanted && !e.persistent && e.decoded && e.state === 'ready') {
           e.cpuReleaseAt ||= performance.now() + 10000;
           if (performance.now() < e.cpuReleaseAt) continue;
           // The 8x8 relief mip is enough for future skirt calculations; GPU rendering no longer
@@ -2673,7 +2770,7 @@
           e.decoded = null;
           this.worldIndex?.remove(e.key); this._worldHeightMirrors.delete(e.key);
         }
-        if (wanted) e.cpuReleaseAt = 0;
+        if (cpuWanted) e.cpuReleaseAt = 0;
       }
       for (const key of desired) {
         const parts = key.split('/').map(Number);
@@ -2708,7 +2805,7 @@
         };
         this.hCache.set(key, e);
         this._requestCounters.height.misses++;
-        jobs.push(fetch(this._urlH(z, x, y))
+        jobs.push(fetch(this._urlH(level, x, y))
           .then(r => { if (!r.ok) throw new Error(`base tile ${key}: HTTP ${r.status}`); return r.blob(); })
           .then(blob => {
             this._requestCounters.height.downloadedBytes += blob.size;
