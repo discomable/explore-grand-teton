@@ -192,7 +192,11 @@ function addCarShadowProxy(){
   const geometry=THREE.mergeGeometries([lower,cabin],false); lower.dispose(); cabin.dispose();
   const material=new THREE.MeshBasicMaterial({color:0x000000,colorWrite:false,depthWrite:false});
   const proxy=new THREE.Mesh(geometry,material);
-  proxy.name='playerVehicleShadowProxy'; proxy.layers.set(2);
+  // Stays on layer 0: r184's WebGLShadowMap tests object.layers against the MAIN camera
+  // (renderObject's `object.layers.test(camera.layers)`), so a shadow-only layer never reaches
+  // the depth pass at all. The colorWrite/depthWrite-false material is what keeps this proxy
+  // invisible and non-occluding in every colour pass while still casting.
+  proxy.name='playerVehicleShadowProxy';
   proxy.castShadow=true; proxy.receiveShadow=false; proxy.frustumCulled=true;
   car.add(proxy); car.userData.shadowProxy=proxy;
 }

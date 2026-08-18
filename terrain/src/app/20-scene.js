@@ -73,9 +73,9 @@ sun.shadow.mapSize.set(SHADOW_CFG.texels, SHADOW_CFG.texels);
 sun.shadow.camera.left = -SHADOW_CFG.half; sun.shadow.camera.right = SHADOW_CFG.half;
 sun.shadow.camera.top = SHADOW_CFG.half; sun.shadow.camera.bottom = -SHADOW_CFG.half;
 sun.shadow.camera.near = 5; sun.shadow.camera.far = 1100;
-// Layer 2 is reserved for shadow-only proxy geometry. Layer 1 already belongs to the sky and is
-// enabled on the main camera, so using it here would let a colourless proxy occlude the road.
-sun.shadow.camera.layers.enable(2);
+// No shadow-only layer: r184's shadow pass culls against the MAIN camera's layers, so a layer
+// the main camera cannot see never casts. Shadow-only proxies (the car box) instead live on
+// layer 0 with colorWrite/depthWrite-false materials — invisible in colour passes, cast in depth.
 sun.shadow.camera.updateProjectionMatrix();
 sun.shadow.bias = -0.0002;                       // built-in receivers (walls, car body)
 sun.shadow.normalBias = 0.5;                     // kills flat-wall acne without peter-panning
