@@ -45,6 +45,42 @@
   'use strict';
   const THREE = global.THREE;
 
+  /* Pure policy/accounting helpers are deliberately exposed for deterministic node tests. The
+     runtime owns the BatchedMesh objects; this contract only decides whether the experiment is
+     allowed and materialises a stable chunk-membership plan. */
+  const WATER_BATCH_CONTRACT = Object.freeze({
+    decision(search, hasBatchedMesh, hasMultiDraw = true, hasTransparentSort = true) {
+      if (/(?:^|[?&])waterbatch=0(?:&|$)/.test(search || ''))
+        return { enabled: false, reason: 'url-disabled' };
+      if (!/(?:^|[?&])waterbatch=1(?:&|$)/.test(search || ''))
+        return { enabled: false, reason: 'experimental-not-requested' };
+      if (!hasBatchedMesh) return { enabled: false, reason: 'batched-mesh-unsupported' };
+      if (!hasMultiDraw) return { enabled: false, reason: 'multi-draw-unsupported' };
+      if (!hasTransparentSort) return { enabled: false, reason: 'transparent-sort-unsupported' };
+      return { enabled: true, reason: null };
+    },
+    plan(chunks) {
+      const members = [];
+      let vertices = 0, triangles = 0;
+      for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+        const geometry = chunks[chunkIndex].mesh?.geometry;
+        if (!geometry) continue;
+        const position = geometry.getAttribute?.('position');
+        if (!position || !geometry.getAttribute?.('aEdge') ||
+            !geometry.getAttribute?.('aDepth') || !geometry.getAttribute?.('aFlow')) {
+          return { valid: false, reason: 'incompatible-water-attributes', members: [] };
+        }
+        if (geometry.getIndex?.())
+          return { valid: false, reason: 'indexed-water-geometry', members: [] };
+        members.push({ chunkIndex, geometry, vertexCount: position.count });
+        vertices += position.count;
+        triangles += position.count / 3;
+      }
+      return { valid: true, reason: null, members, vertices, triangles };
+    },
+  });
+  global.GT_WATER_BATCH_CONTRACT = WATER_BATCH_CONTRACT;
+
   const FRAG = /* glsl */`
     uniform float uTime; uniform vec3 uSun; uniform vec3 uSunColor; uniform vec3 uAmb;
     uniform vec3 uFogColor;
@@ -205,10 +241,16 @@
       gl_FragColor = vec4(col, 0.92-0.37*shore+0.06*foam);
     }`;
   const VERT = /* glsl */`
+    #include <batching_pars_vertex>
     attribute float aEdge; attribute float aDepth; attribute vec2 aFlow;
     uniform mat4 uReflMatrix;
     varying vec3 vWorld; varying float vEdge; varying float vDepth; varying vec2 vFlow; varying vec4 vReflCoord;
-    void main(){ vec4 wp=modelMatrix*vec4(position,1.0); vWorld=wp.xyz; vEdge=aEdge;
+    void main(){
+      mat4 gtModel = modelMatrix;
+      #ifdef USE_BATCHING
+        gtModel = modelMatrix * getBatchingMatrix(getIndirectIndex(gl_DrawID));
+      #endif
+      vec4 wp=gtModel*vec4(position,1.0); vWorld=wp.xyz; vEdge=aEdge;
       vDepth=aDepth; vFlow=aFlow; vReflCoord=uReflMatrix*wp;
       gl_Position=projectionMatrix*viewMatrix*wp; }`;
 
@@ -406,10 +448,23 @@
       // non-re-entrant and robust. The per-mesh hook is kept as a no-op for safety.
       this._reflHook = () => {};
       this._chunks = [];                 // 256-px mask-grid chunks that contain water
+      const hasBatchedMesh = typeof THREE.BatchedMesh === 'function';
+      const hasMultiDraw = !!global.GT_APP?.renderer?.extensions?.has?.('WEBGL_multi_draw');
+      const hasTransparentSort = hasBatchedMesh &&
+        typeof THREE.BatchedMesh.prototype.setCustomSort === 'function';
+      const batchDecision = WATER_BATCH_CONTRACT.decision(
+        global.location ? global.location.search : '', hasBatchedMesh, hasMultiDraw,
+        hasTransparentSort);
+      this._batchRequested = batchDecision.enabled;
+      this._batchFallbackReason = batchDecision.reason;
+      this._surfaceBatch = null;
+      this._batchRebuilds = 0;
+      this._reflectionPasses = 0;
       this._surf = null;                 // Uint16 surface grid (0 = none), from the bake
       this._bias = null;                 // Int8 wet-rule bias (×0.01 m)
       this._lakeAreas = [];              // authoritative lake footprints from baked components
       this.wm = null;                    // water-meta.json
+      this._publishTelemetry();
     }
 
     /* kicks the async bake load; meshes appear when it lands. Fail = no water (loudly). */
@@ -534,7 +589,9 @@
       // boot build: coarse everywhere (only the z-base collision tiles are decoded anyway);
       // builtSig 0 = "coarse, no bands, no fine tiles seen" so the first refine tick only
       // rebuilds chunks that actually want more
-      for (const ch of this._chunks) { this._buildChunk(ch, false, false); ch.builtSig = 0; }
+      for (const ch of this._chunks) { this._buildChunk(ch, false, false, true); ch.builtSig = 0; }
+      if (this._batchRequested) this._rebuildSurfaceBatch();
+      else this._publishTelemetry();
     }
 
     /* distance from camera to a chunk's world rect */
@@ -545,7 +602,7 @@
       return Math.hypot(dx, dz);
     }
 
-    _buildChunk(ch, fine, bands) {
+    _buildChunk(ch, fine, bands, deferBatchRebuild = false) {
       if (ch.mesh) { this.group.remove(ch.mesh); ch.mesh.geometry.dispose(); ch.mesh = null; }
       if (ch.band) { this.group.remove(ch.band); ch.band.geometry.dispose(); ch.band = null; }
       if (ch.dress) { this.group.remove(ch.dress); ch.dress.geometry.dispose(); ch.dress = null; }
@@ -817,7 +874,7 @@
         // reflector driver: runs only when some water is actually on screen
         ch.mesh.onBeforeRender = this._reflHook;
         ch.mesh.matrixAutoUpdate = false; ch.mesh.updateMatrix();   // world-space verts, identity transform
-        this.group.add(ch.mesh);
+        if (!this._batchRequested) this.group.add(ch.mesh);
       }
       if (bandPos.length) {
         const g = new THREE.BufferGeometry();
@@ -855,6 +912,111 @@
       }
       ch.builtFine = fine; ch.builtBands = bands;
       ch.lastBuild = performance.now();
+      if (this._batchRequested && !deferBatchRebuild) this._rebuildSurfaceBatch();
+      else if (!deferBatchRebuild) this._publishTelemetry();
+    }
+
+    /* Build a complete replacement before swapping it into the scene. BatchedMesh owns copies
+       of the chunk attributes, so disposing or refining a detached source mesh cannot expose a
+       half-updated batch. Any capability/geometry/capacity failure restores the exact legacy
+       chunk submission path. */
+    _rebuildSurfaceBatch() {
+      const plan = WATER_BATCH_CONTRACT.plan(this._chunks);
+      if (!plan.valid || !plan.members.length) {
+        this._fallbackToLegacy(plan.reason || 'empty-water-batch');
+        return false;
+      }
+      let replacement = null;
+      try {
+        replacement = new THREE.BatchedMesh(plan.members.length, plan.vertices,
+          plan.vertices * 2, this.material);
+        replacement.name = 'waterSurfaceBatch';
+        replacement.renderOrder = 2;
+        replacement.sortObjects = true;             // transparent chunks remain back-to-front
+        // BatchedMesh r184's internal world-space bounds path does not match the legacy chunk
+        // cull for these already-world-space geometries. Apply the exact source-mesh frustum test
+        // first, then retain BatchedMesh's native transparent sort / indirect draw materialisation.
+        replacement.perObjectFrustumCulled = false;
+        replacement.matrixAutoUpdate = false; replacement.updateMatrix();
+        const visibilityMembers = [];
+        for (const member of plan.members) {
+          if (!member.geometry.boundingSphere) member.geometry.computeBoundingSphere();
+          if (!member.geometry.boundingBox) member.geometry.computeBoundingBox();
+          const geometryId = replacement.addGeometry(member.geometry, member.vertexCount);
+          const instanceId = replacement.addInstance(geometryId);
+          visibilityMembers.push({ instanceId, box: member.geometry.boundingBox });
+        }
+        const nativeBeforeRender = replacement.onBeforeRender.bind(replacement);
+        const frustum = new THREE.Frustum(), projection = new THREE.Matrix4();
+        replacement.onBeforeRender = (renderer, scene, camera, geometry, material, group) => {
+          frustum.setFromProjectionMatrix(
+            projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+          for (const member of visibilityMembers)
+            replacement.setVisibleAt(member.instanceId, frustum.intersectsBox(member.box));
+          nativeBeforeRender(renderer, scene, camera, geometry, material, group);
+        };
+        replacement.computeBoundingSphere();
+        this.group.add(replacement);
+      } catch (error) {
+        this._disposeSurfaceBatch(replacement);
+        this._fallbackToLegacy('batch-build-failed');
+        console.warn('[water] BatchedMesh unavailable for this geometry; using legacy chunks.', error);
+        return false;
+      }
+      const previous = this._surfaceBatch;
+      this._surfaceBatch = replacement;
+      this._disposeSurfaceBatch(previous);
+      this._batchRebuilds++;
+      this._publishTelemetry(plan);
+      return true;
+    }
+
+    _fallbackToLegacy(reason) {
+      this._batchRequested = false;
+      this._batchFallbackReason = reason || 'batch-fallback';
+      if (this._surfaceBatch) {
+        this._disposeSurfaceBatch(this._surfaceBatch);
+        this._surfaceBatch = null;
+      }
+      for (const ch of this._chunks) if (ch.mesh && ch.mesh.parent !== this.group) this.group.add(ch.mesh);
+      this._publishTelemetry();
+    }
+
+    /* BatchedMesh owns GPU data textures in addition to its combined geometry. Its dispose()
+       releases the entire allocation; calling geometry.dispose() alone leaks the matrix and
+       indirect textures. The WeakSet makes every internal teardown path idempotent. */
+    _disposeSurfaceBatch(batch) {
+      if (!batch) return;
+      const disposed = this._disposedSurfaceBatches || (this._disposedSurfaceBatches = new WeakSet());
+      if (disposed.has(batch)) return;
+      disposed.add(batch);
+      if (batch.parent) batch.parent.remove(batch);
+      batch.dispose();
+    }
+
+    _publishTelemetry(surfacePlan) {
+      const plan = surfacePlan?.valid ? surfacePlan : WATER_BATCH_CONTRACT.plan(this._chunks || []);
+      const surfaces = plan.valid ? plan.members.length : 0;
+      let calls = this._surfaceBatch ? (surfaces ? 1 : 0) : surfaces;
+      let triangles = plan.valid ? plan.triangles : 0;
+      for (const ch of this._chunks || []) {
+        if (ch.band) { calls++; triangles += ch.band.geometry.getAttribute('position').count / 3; }
+        if (ch.dress) {
+          calls++;
+          const position = ch.dress.geometry.getAttribute('position');
+          triangles += (position ? position.count / 3 : 0) * ch.dress.count;
+        }
+      }
+      global.GT_WATER_TELEMETRY = Object.freeze({
+        backend: this._surfaceBatch ? 'batched' : 'legacy',
+        surfaces,
+        batches: this._surfaceBatch ? 1 : 0,
+        calls,
+        triangles: Math.round(triangles),
+        rebuilds: this._batchRebuilds || 0,
+        reflectionPasses: this._reflectionPasses || 0,
+        fallbackReason: this._surfaceBatch ? null : (this._batchFallbackReason || null),
+      });
     }
 
     /* ================= lazy chunk refinement =================
@@ -914,10 +1076,11 @@
         const t0 = performance.now();
         while (pending.length) {
           const ch = pending.shift();
-          this._buildChunk(ch, ch._want.fine, ch._want.bands);
+          this._buildChunk(ch, ch._want.fine, ch._want.bands, this._batchRequested);
           ch.builtSig = ch._want.sig;
           if (performance.now() - t0 > budget) break;   // the rest re-queues next tick
         }
+        if (this._batchRequested) this._rebuildSurfaceBatch();
         this._refining = false;
       };
       if (global.requestIdleCallback) global.requestIdleCallback(run, { timeout: 150 });
@@ -1151,6 +1314,8 @@
       try {
         renderer.setRenderTarget(R.rt);
         renderer.render(this.scene, rc);
+        this._reflectionPasses++;
+        this._publishTelemetry();
       } finally {
         renderer.setRenderTarget(prevRT);
         renderer.toneMapping = prevTone;
