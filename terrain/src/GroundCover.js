@@ -9,7 +9,8 @@
  * Structure mirrors ScatterManager: the ring is divided into small cells (~32 m) filled
  * deterministically (seeded by cell coords), so cover re-grows identically and recycling is
  * smooth as the camera walks. All instances live in ONE pooled InstancedMesh (1 draw call):
- * each live cell owns a fixed block of instance slots; retired cells zero-scale their block.
+ * cells append variable-length ranges into one dense instance prefix; retiring a cell relocates
+ * the tail cell and keeps every remaining cell contiguous.
  * Distance fade is a vertex-shader size ramp (cards shrink into the ground 52->78 m), so the
  * ring boundary never pops.
  *
@@ -18,8 +19,8 @@
  * with occasional woody sage sprigs) — plus sparse dark understory tufts under 41/42/43 and
  * wildflowers dotted through the meadows. Nothing on water or above y≈950 (subalpine).
  *
- * Budget: 32 blocks x 2600 slots = 83 200 instances max (~500k tris worst case, most of it
- * zero-scaled and degenerate), 1 draw call, one 640x128 canvas texture.
+ * Budget: capacity for 32 worst-case cells (83 200 legacy instances), with only live instances
+ * submitted, 1 draw call, one 640x128 canvas texture.
  */
 (function (global) {
   'use strict';
@@ -376,9 +377,9 @@
         .catch(() => { this.tint = null; });     // absent / decode error -> keep class-based colour
       this.cellSize = o.cellSize || 32;
       this.ringCells = 3;                        // cells kept within this radius (~80-96 m)
-      // V2's clustered communities need fewer slots than the legacy continuous carpet. A smaller
-      // per-cell block cuts submitted zero/unused vertices as well as memory; dense V2 stands still
-      // reach the cap, while their intentional openings do not pay for legacy lawn density.
+      // V2's clustered communities need fewer potential instances than the legacy continuous
+      // carpet. This remains the deterministic per-cell generation ceiling; the renderer submits
+      // only the accepted variable-length ranges.
       const qualityPerCell = quality === 'low' ? 1050 :
         quality === 'balanced' ? 1300 : 2000;
       this.perCell = o.perCell || (this.v2 ? qualityPerCell : 2600);
@@ -491,19 +492,22 @@
 
       this.mesh = new THREE.InstancedMesh(geo, mat, cap);
       this.mesh.name = 'groundCoverScatter';
-      this.mesh.count = cap;                     // zero-scaled slots rasterize nothing
+      this.mesh.count = 0;                       // dense prefix: submitted always equals live
       this.mesh.frustumCulled = false;           // ring is around the camera by construction
       this.mesh.visible = !this.disabled;
       // instances carry world translations; the carpet mesh itself never moves
       this.mesh.matrixAutoUpdate = false; this.mesh.updateMatrix();
       this.mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(cap * 3).fill(1), 3);
-      this._zero = new THREE.Matrix4().makeScale(0, 0, 0);
-      for (let i = 0; i < cap; i++) this.mesh.setMatrixAt(i, this._zero);
       this.scene.add(this.mesh);
 
-      this.free = [];
-      for (let b = this.blocks - 1; b >= 0; b--) this.free.push(b);
-      this.cells = new Map();                    // "ix,iz" -> {block, used}
+      this.capacity = cap;
+      const Submission = global.GT_GROUND_COVER_SUBMISSION?.DenseGroundCoverSubmission;
+      if (!Submission) throw new Error('Ground-cover dense submission contract is unavailable');
+      this._submission = new Submission(cap);
+      this.cells = this._submission.cells;       // "ix,iz" -> tested {start, used} ranges
+      Object.defineProperty(this, 'liveInstances', {
+        get: () => this._submission.live,
+      });
       this._lastCell = null;
       this._pending = null;                      // queued cell fills, amortized across frames
       this._fillBudgetMs = o.fillBudgetMs || 2.0;
@@ -549,7 +553,6 @@
       this._col = new THREE.Color();
       this._viewDir = new THREE.Vector3(0, 0, -1);
       this._lastViewDir = new THREE.Vector3(0, 0, -1);
-      this._dirtyLo = Infinity; this._dirtyHi = -1;   // touched slot range for partial uploads
     }
 
     _rasterInstallOptions(id, source, data, extra) {
@@ -576,9 +579,18 @@
       }).catch(() => {});
     }
 
-    _markDirty(lo, hi) {
-      if (lo < this._dirtyLo) this._dirtyLo = lo;
-      if (hi > this._dirtyHi) this._dirtyHi = hi;
+    /* The imported, unit-tested contract owns relocation and range metadata. GroundCover supplies
+       only the Three.js attribute arrays that must move together. */
+    _removeCell(key) {
+      return !!this._submission.remove(key, [
+        { array: this.mesh.instanceMatrix.array, itemSize: 16 },
+        { array: this.mesh.instanceColor.array, itemSize: 3 },
+        { array: this.mesh.geometry.attributes.gcAtlas.array, itemSize: 1 },
+      ]);
+    }
+
+    _insertCell(key, used) {
+      return this._submission.insert(key, used);
     }
 
     /* Authoritative water rejection: true where the baked water surface (S+bias) sits above the
@@ -624,18 +636,11 @@
       // fills wait for the road/building indexes (built async by the app): filling first
       // would grow grass on carriageways and visibly cull it later
       if (this._exclusionReady()) this._fillBudget();
-      this._flushDirty();                        // one partial upload of whatever changed
-      let live = 0, maxBlock = -1;
-      for (const cell of this.cells.values()) {
-        live += cell.used;
-        if (cell.block > maxBlock) maxBlock = cell.block;
-      }
-      // Blocks allocate from zero upward. Avoid submitting the permanently empty tail blocks;
-      // recycled holes inside the active span remain zero-scaled exactly as before.
-      this.mesh.count = (maxBlock + 1) * this.perCell;
-      global.__GROUND_COVER_COUNT = live;
-      global.__GROUND_COVER_CAP = this.blocks * this.perCell;
-      this._publishWorkerTelemetry(live);
+      this._flushDirty();                        // one bounded upload of whatever changed
+      this.mesh.count = this.liveInstances;
+      global.__GROUND_COVER_COUNT = this.liveInstances;
+      global.__GROUND_COVER_CAP = this.capacity;
+      this._publishWorkerTelemetry(this.liveInstances);
     }
 
     /* roadQuery/buildingBlocked readiness gate — same contract as ScatterManager: defer cell
@@ -651,9 +656,9 @@
       return this._exclOk;
     }
 
-    /* On a crossing: zero + free the blocks of cells that left the ring (cheap), then rebuild the
-       nearest-first pending fill queue. Fills are deferred to _fillBudget so a ring shift never
-       spikes; the ~80-96 m ring tolerates a 1-2 frame fill latency invisibly. */
+    /* On a crossing: compact cells that left the ring, then rebuild the nearest-first pending fill
+       queue. Fills are deferred to _fillBudget so a ring shift never spikes; the ~80-96 m ring
+       tolerates a 1-2 frame fill latency invisibly. */
     _retireAndQueue(ix, iz, fx, fz) {
       this._candidateGeneration++;
       this._workerStats.cancelled += this._candidateJobs.size;
@@ -685,11 +690,7 @@
           // Camera-sector changes build their newly visible cells first. Old cells are harmless
           // behind the view and are retired once the queue drains, preventing turn-in gaps.
           if (this._sectorCull) continue;
-          const s0 = cell.block * this.perCell;
-          for (let i = 0; i < cell.used; i++) this.mesh.setMatrixAt(s0 + i, this._zero);
-          if (cell.used > 0) this._markDirty(s0, s0 + cell.used - 1);
-          this.free.push(cell.block);            // LIFO: growers below reuse this block, so the
-          this.cells.delete(k);                  // dirty span stays tight on a cell crossing
+          this._removeCell(k);
         }
       }
       const q = [];                              // queue missing cells, pop() takes the nearest
@@ -1027,15 +1028,14 @@
       }
     }
 
-    _applyCellBuffers(block, result) {
-      const s0 = block * this.perCell;
+    _applyCellBuffers(start, result) {
+      const s0 = start;
       const matrixArray = this.mesh.instanceMatrix.array;
       const colorArray = this.mesh.instanceColor.array;
       const atlasArray = this.mesh.geometry.attributes.gcAtlas.array;
       matrixArray.set(result.matrices.subarray(0, result.used * 16), s0 * 16);
       colorArray.set(result.colors.subarray(0, result.used * 3), s0 * 3);
       atlasArray.set(result.atlas.subarray(0, result.used), s0);
-      for (let i = result.used; i < this.perCell; i++) this.mesh.setMatrixAt(s0 + i, this._zero);
       return result.used;
     }
 
@@ -1071,22 +1071,27 @@
         if (this.cells.has(k)) continue;
         let result = this._candidateReady.get(k);
         if (result) this._candidateReady.delete(k);
-        let block = this.free.pop();
-        if (block === undefined && this.grassLod) {
+        const required = result ? result.used : this.perCell;
+        if (this.liveInstances + required > this.capacity && this.grassLod) {
           this._retireUndesired(1);
-          block = this.free.pop();
         }
-        if (block === undefined) break;
+        if (this.liveInstances + required > this.capacity) {
+          // Keep the atomic result authoritative until capacity becomes available; neither a
+          // worker completion nor its nearest-first queue position may disappear under churn.
+          if (result) this._candidateReady.set(k, result);
+          q.push(c);
+          break;
+        }
+        const start = this.liveInstances;
         const fillStart = performance.now();
         const used = result
-          ? this._applyCellBuffers(block, result)
-          : this._fillCell(c.cx, c.cz, block);
+          ? this._applyCellBuffers(start, result)
+          : this._fillCell(c.cx, c.cz, start);
         const fillMs = performance.now() - fillStart;
         this._workerStats.cellsBuilt++;
         this._workerStats.fillMs += fillMs;
         this._workerStats.worstFillMs = Math.max(this._workerStats.worstFillMs, fillMs);
-        this.cells.set(k, { block, used });
-        this._markDirty(block * this.perCell, (block + 1) * this.perCell - 1);
+        this._insertCell(k, used);
         built++;
         if (built >= 1 && performance.now() - t0 > this._fillBudgetMs) break;
       }
@@ -1111,6 +1116,7 @@
       global.GT_GROUND_COVER_STREAMING = {
         quality: this._quality,
         submittedInstances: this.mesh.count,
+        capacityInstances: this.capacity,
         perCell: this.perCell,
         generation: this._candidateGeneration,
         candidateWorker: !!this._candidateWorker,
@@ -1130,6 +1136,7 @@
           Math.max(this._sampleBudgetMs, 3),
         residentCells: this.cells.size,
         liveInstances,
+        ...this._submission.telemetry(this.mesh.count),
         ...stats,
         averageFillMs: stats.cellsBuilt ? stats.fillMs / stats.cellsBuilt : 0,
         averageSnapshotMs: stats.completed ? stats.snapshotMs / stats.completed : 0,
@@ -1142,24 +1149,21 @@
       const want = this._desired;
       if (!want) return;
       let retired = 0;
-      for (const [k, cell] of this.cells) {
+      for (const [k] of this.cells) {
         if (want.has(k)) continue;
-        const s0 = cell.block * this.perCell;
-        for (let i = 0; i < cell.used; i++) this.mesh.setMatrixAt(s0 + i, this._zero);
-        if (cell.used > 0) this._markDirty(s0, s0 + cell.used - 1);
-        this.free.push(cell.block);
-        this.cells.delete(k);
+        this._removeCell(k);
         if (limit && ++retired >= limit) break;
       }
     }
 
     _flushDirty() {
-      if (this._dirtyHi < 0) return;
+      const plan = this._submission.takeUploadPlan((16 + 3 + 1) * 4);
+      if (!plan) return;
       // Partial upload: only the touched slot span, not the whole 2.4 MB instance buffer.
       // r184 takes MULTIPLE ranges per attribute via addUpdateRange (offset/count in ARRAY
       // ELEMENTS) and does not clear them itself, so clear before adding on every dirty pass
       // or the ranges accumulate. (r128's single `updateRange`, which self-reset, is gone.)
-      const lo = this._dirtyLo, cnt = this._dirtyHi - this._dirtyLo + 1;
+      const lo = plan.start, cnt = plan.count;
       const im = this.mesh.instanceMatrix;
       im.clearUpdateRanges(); im.addUpdateRange(lo * 16, cnt * 16);
       im.needsUpdate = true;
@@ -1169,14 +1173,13 @@
       const ga = this.mesh.geometry.attributes.gcAtlas;
       ga.clearUpdateRanges(); ga.addUpdateRange(lo, cnt);
       ga.needsUpdate = true;
-      this._dirtyLo = Infinity; this._dirtyHi = -1;
     }
 
-    _fillCell(cx, cz, block, randoms) {
-      if (this.v2) return this._fillCellV2(cx, cz, block, randoms);
+    _fillCell(cx, cz, start, randoms) {
+      if (this.v2) return this._fillCellV2(cx, cz, start, randoms);
       const rng = mulberry32(((cx * 73856093) ^ (cz * 19349663) ^ 0x6C0FFEE) >>> 0);
       const S = this.cellSize, x0 = cx * S, z0 = cz * S;
-      const s0 = block * this.perCell;
+      const s0 = start;
       const atlas = this.mesh.geometry.attributes.gcAtlas;
       let n = 0;
       for (let i = 0; i < this.candidates && n < this.perCell; i++) {
@@ -1257,13 +1260,12 @@
         atlas.setX(slot, v);
         n++;
       }
-      for (let i = n; i < this.perCell; i++) this.mesh.setMatrixAt(s0 + i, this._zero);
       return n;
     }
 
-    _fillCellV2(cx, cz, block, randoms) {
+    _fillCellV2(cx, cz, start, randoms) {
       const rng = mulberry32(((cx * 73856093) ^ (cz * 19349663) ^ 0x62B10E) >>> 0);
-      const S = this.cellSize, x0 = cx * S, z0 = cz * S, s0 = block * this.perCell;
+      const S = this.cellSize, x0 = cx * S, z0 = cz * S, s0 = start;
       const atlas = this.mesh.geometry.attributes.gcAtlas;
       let n = 0;
       for (let i = 0; i < this.candidates && n < this.perCell; i++) {
@@ -1378,7 +1380,6 @@
         atlas.setX(slot, v);
         n++;
       }
-      for (let i = n; i < this.perCell; i++) this.mesh.setMatrixAt(s0 + i, this._zero);
       return n;
     }
   }
