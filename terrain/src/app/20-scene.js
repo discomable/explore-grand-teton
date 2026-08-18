@@ -73,6 +73,9 @@ sun.shadow.mapSize.set(SHADOW_CFG.texels, SHADOW_CFG.texels);
 sun.shadow.camera.left = -SHADOW_CFG.half; sun.shadow.camera.right = SHADOW_CFG.half;
 sun.shadow.camera.top = SHADOW_CFG.half; sun.shadow.camera.bottom = -SHADOW_CFG.half;
 sun.shadow.camera.near = 5; sun.shadow.camera.far = 1100;
+// No shadow-only layer: r184's shadow pass culls against the MAIN camera's layers, so a layer
+// the main camera cannot see never casts. Shadow-only proxies (the car box) instead live on
+// layer 0 with colorWrite/depthWrite-false materials — invisible in colour passes, cast in depth.
 sun.shadow.camera.updateProjectionMatrix();
 sun.shadow.bias = -0.0002;                       // built-in receivers (walls, car body)
 sun.shadow.normalBias = 0.5;                     // kills flat-wall acne without peter-panning
@@ -220,7 +223,9 @@ scene.onBeforeRender = function (_renderer, _scene, renderCamera) {
   // ---- caster/receiver opt-in at runtime (other modules' files untouched) ----
   if (car && !car.userData.shadowTagged) {
     car.userData.shadowTagged = true;
-    car.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true;
+    const proxy = car.userData.shadowProxy || null;
+    car.traverse(o => { if (o.isMesh) { o.castShadow = proxy ? o === proxy : true;
+      o.receiveShadow = o !== proxy;
       o.material.needsUpdate = true; } });
   }
   if (typeof buildingMgr !== 'undefined' && buildingMgr && buildingMgr.mesh) {

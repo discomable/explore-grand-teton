@@ -4,6 +4,28 @@
    CONSUMES: essentially everything above (runs the app). */
 let driveAccumulator=0;
 const DRIVE_FIXED_STEP=1/120;
+const terrainPrediction={position:new THREE.Vector3(),velocity:new THREE.Vector3(),
+  rawVelocity:new THREE.Vector3(),euler:new THREE.Euler(0,0,0,'YXZ'),yaw:0,pitch:0,ready:false};
+function updateTerrainPrediction(dt){
+  if(!terrain||!terrain.setPredictionState) return;
+  const p=terrainPrediction, safeDt=Math.max(1/240,dt);
+  p.euler.setFromQuaternion(camera.quaternion,'YXZ');
+  if(!p.ready){
+    p.position.copy(camera.position); p.yaw=p.euler.y; p.pitch=p.euler.x; p.ready=true;
+    terrain.setPredictionState({mode:drive.on?'drive':state.fly?'fly':'walk',velocity:p.velocity,
+      yawRate:0,pitchRate:0,teleported:false});
+    return;
+  }
+  const distance=camera.position.distanceTo(p.position), teleported=distance>2000;
+  p.rawVelocity.subVectors(camera.position,p.position).divideScalar(safeDt);
+  if(teleported) p.velocity.set(0,0,0); else p.velocity.lerp(p.rawVelocity,0.45);
+  const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
+  const yawRate=teleported?0:angleDelta(p.euler.y,p.yaw)/safeDt;
+  const pitchRate=teleported?0:angleDelta(p.euler.x,p.pitch)/safeDt;
+  terrain.setPredictionState({mode:drive.on?'drive':state.fly?'fly':'walk',velocity:p.velocity,
+    yawRate,pitchRate,teleported});
+  p.position.copy(camera.position); p.yaw=p.euler.y; p.pitch=p.euler.x;
+}
 function step(dt){
   if(drive.on){
     pollGamepad();                            // once per frame, not once per fixed substep
@@ -419,7 +441,7 @@ function animate(){
     // happened later already, but this ordering also prevents manager-side uniform copies and
     // newly compiled vegetation materials from observing the preceding TOD frame.
     if(day.play){ day.t=(day.t+dt/300)%1; updateSun(); }   // full 24 h in ~5 min
-    if(terrain) terrain.update();                 // stream tiles for the current view
+    if(terrain){ updateTerrainPrediction(dt); terrain.update(); } // render now + warm predicted view
     if(scatter) scatter.update(camera.position, camera);  // stream forest + prioritize visible close detail
     if(groundCover) groundCover.update(camera.position); // near-field grass & sage carpet
     if(propScatter) propScatter.update(camera.position); // sparse boulders/deadfall/fence props

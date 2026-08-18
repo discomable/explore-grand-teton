@@ -205,6 +205,19 @@ Chrome exposes `EXT_disjoint_timer_query_webgl2` (otherwise the backend is expli
 `benchmark` is deliberately a five-view gate intended to finish quickly. Use
 `python3 snap.py --suite full` for the broader visual review suite.
 
+The multi-minute terrain endurance certification is a separate local gate. It runs seven
+deterministic pathological movement scenarios twice in one browser, writes
+`benchmark-results/terrain-endurance.json`, and hard-fails only correctness, settling, ownership,
+and hang limits; p50/p95/p99 CPU and genuine-GPU timing remain hardware-neutral reports:
+
+```bash
+python3 benchmark.py --terrain-endurance
+python3 benchmark.py --terrain-endurance --endurance-route teleport-25km
+```
+
+Routes are versioned in `terrain-endurance-routes.json`; the z7 boundary route is materialized
+from `terrain/public/tiles.json`. The report schema is `grand-teton-terrain-endurance/v1`.
+
 The versioned route manifest covers highway and paved junctions, gravel and two-track, road and
 pedestrian structures, maintained and primitive trails, and the off-road/water/barrier recovery
 cases. Route captures are continuous diagnostic traversals, not teleports. They

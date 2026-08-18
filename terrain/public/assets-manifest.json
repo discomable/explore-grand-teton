@@ -2,6 +2,18 @@
   "schema": "grand-teton-assets/v1",
   "assets": [
     {
+      "id": "terrain-geometric-error",
+      "title": "Grand Teton terrain geometric-error pyramid",
+      "author": "Grand Teton project",
+      "source": "USGS 3DEP terrain-RGB pyramid described by terrain/public/tiles.json",
+      "license": "CC0-1.0",
+      "attribution": "Derived from USGS 3DEP public-domain elevation data; project metadata dedicated to the public domain under CC0-1.0.",
+      "files": [
+        "terrain/public/terrain-error.bin"
+      ],
+      "recipe": "terrain/pipeline/bake_terrain_error.py"
+    },
+    {
       "id": "pickup-quaternius",
       "title": "Pickup Truck",
       "author": "Quaternius",

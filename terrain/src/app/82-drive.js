@@ -41,6 +41,7 @@ let procParts=[], carFPHide=[], carLightMats={head:null,brake:null,dash:null}; /
     for(let i=0;i<n;i++){ arr[i*3]=c[0]; arr[i*3+1]=c[1]; arr[i*3+2]=c[2]; }
     g.setAttribute('color',new THREE.BufferAttribute(arr,3)); return g; };
   car=new THREE.Group();
+  car.name='playerVehicle';
   const add=(g,c,parent)=>{ const m=new THREE.Mesh(paint(g,c),mat); (parent||car).add(m);
     procParts.push(m); return m; };
   // body slabs — muted forest-service green over a tan chassis; low sedan stance, wheels tucked under
@@ -145,6 +146,60 @@ function ensureCarModel(){
     undefined,
     e=>{ console.warn('car model load failed',e); done(); });
 }
+/* Merge static car primitives that share a material. The GLB contains 34 primitives but only two
+   authored materials; baking node transforms into a few car-local geometries preserves the exact
+   visible surface while avoiding one renderer submission per exported Blender object. */
+function mergeCarMeshes(root){
+  if(!THREE.mergeGeometries) return {before:0,after:0};
+  root.updateWorldMatrix(true,true);
+  const rootInv=new THREE.Matrix4().copy(root.matrixWorld).invert();
+  const buckets=new Map(), originals=[];
+  root.traverse(o=>{
+    if(!o.isMesh||o.isSkinnedMesh||!o.geometry||Array.isArray(o.material)||
+       (o.morphTargetInfluences&&o.morphTargetInfluences.length)) return;
+    const attrs=Object.keys(o.geometry.attributes).sort().join(',');
+    const key=[o.material.uuid,attrs,o.geometry.index?'indexed':'plain'].join('|');
+    let b=buckets.get(key); if(!b){ b={material:o.material,geometries:[]}; buckets.set(key,b); }
+    const rel=new THREE.Matrix4().multiplyMatrices(rootInv,o.matrixWorld);
+    b.geometries.push(o.geometry.clone().applyMatrix4(rel)); originals.push(o);
+  });
+  const merged=[];
+  try{
+    for(const b of buckets.values()){
+      const geometry=b.geometries.length===1?b.geometries[0]:THREE.mergeGeometries(b.geometries,false);
+      if(!geometry) throw new Error('incompatible vehicle geometry attributes');
+      // mergeGeometries creates a new geometry; release its temporary inputs immediately.
+      if(b.geometries.length>1) for(const g of b.geometries) g.dispose();
+      const mesh=new THREE.Mesh(geometry,b.material);
+      mesh.name='playerVehicleBatch'; mesh.castShadow=false; mesh.receiveShadow=true;
+      merged.push(mesh);
+    }
+  }catch(error){
+    for(const b of buckets.values()) for(const g of b.geometries) g.dispose();
+    for(const m of merged) m.geometry.dispose();
+    console.warn('car mesh merge failed',error);
+    return {before:originals.length,after:originals.length};
+  }
+  const oldGeometries=new Set();
+  for(const o of originals){ oldGeometries.add(o.geometry); o.removeFromParent(); }
+  for(const g of oldGeometries) g.dispose();
+  for(const mesh of merged) root.add(mesh);
+  return {before:originals.length,after:merged.length};
+}
+function addCarShadowProxy(){
+  const lower=new THREE.BoxGeometry(1.82,0.62,4.72); lower.translate(0,0.55,0);
+  const cabin=new THREE.BoxGeometry(1.62,0.70,2.18); cabin.translate(0,1.18,0.18);
+  const geometry=THREE.mergeGeometries([lower,cabin],false); lower.dispose(); cabin.dispose();
+  const material=new THREE.MeshBasicMaterial({color:0x000000,colorWrite:false,depthWrite:false});
+  const proxy=new THREE.Mesh(geometry,material);
+  // Stays on layer 0: r184's WebGLShadowMap tests object.layers against the MAIN camera
+  // (renderObject's `object.layers.test(camera.layers)`), so a shadow-only layer never reaches
+  // the depth pass at all. The colorWrite/depthWrite-false material is what keeps this proxy
+  // invisible and non-occluding in every colour pass while still casting.
+  proxy.name='playerVehicleShadowProxy';
+  proxy.castShadow=true; proxy.receiveShadow=false; proxy.frustumCulled=true;
+  car.add(proxy); car.userData.shadowProxy=proxy;
+}
 function swapCarModel(gltf){
   const root=gltf.scene;
   for(const p of procParts) car.remove(p);              // procedural slab pickup out
@@ -230,6 +285,11 @@ function swapCarModel(gltf){
     lamp.position.set(lx,0.64,-2.40); lamp.rotation.y=Math.PI; // lens faces forward (-z, travel dir)
     lamp.castShadow=false; lamp.receiveShadow=false; car.add(lamp);
   }
+  const submission=mergeCarMeshes(car);
+  addCarShadowProxy();
+  window.GT_VEHICLE_RENDER={visibleMeshes:submission.after,sourceMeshes:submission.before,
+    shadowMeshes:1};
+  console.log(`[vehicle] merged ${submission.before} visible meshes into ${submission.after}; 1 shadow proxy`);
   car.userData.shadowTagged=false;
   return;   // (procedural cabin below is superseded by the real modeled interior)
 }

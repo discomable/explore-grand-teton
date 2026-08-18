@@ -139,6 +139,7 @@
       this.budgetMs = o.budgetMs || 2.0;
       this.caps = { boulder: 600, log: 300, fence: 500 };
       this.group = new THREE.Group();
+      this.group.name = 'terrainProps';
       this.scene.add(this.group);
       this.mat = new THREE.MeshLambertMaterial({ vertexColors: true });
       this._dummy = new THREE.Object3D();

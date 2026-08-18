@@ -24,13 +24,15 @@ const handlers = {
   async fetchImagery({ url, size, validX = size, validY = size }, isCancelled) {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`imagery HTTP ${response.status}`);
-    const bitmap = await createImageBitmap(await response.blob());
+    const blob = await response.blob();
+    const downloadedBytes = blob.size;
+    const bitmap = await createImageBitmap(blob);
     if (isCancelled()) {
       bitmap.close?.();
       throw new DOMException('cancelled', 'AbortError');
     }
     if (validX >= size && validY >= size) {
-      return { meta: { width: size, height: size }, buffers: [bitmap] };
+      return { meta: { width: size, height: size, downloadedBytes }, buffers: [bitmap] };
     }
     const canvas = new OffscreenCanvas(size, size);
     const context = canvas.getContext('2d');
@@ -39,7 +41,8 @@ const handlers = {
     if (validX < size) context.drawImage(canvas, validX - 1, 0, 1, size, validX, 0, size - validX, size);
     if (validY < size) context.drawImage(canvas, 0, validY - 1, size, 1, 0, validY, size, size - validY);
     const prepared = canvas.transferToImageBitmap();
-    return { meta: { width: size, height: size, edgePadded: true }, buffers: [prepared] };
+    return { meta: { width: size, height: size, edgePadded: true, downloadedBytes },
+      buffers: [prepared] };
   },
 
   async decodeHeight({ bitmap, size, encoding, datum, elevationMin, validX = size, validY = size }, isCancelled) {

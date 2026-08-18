@@ -41,6 +41,11 @@ def main():
         "encoding": {"scheme": "mapbox", "baseval": -10000.0, "interval": 0.1},
         "elevation": {"min": emin, "max": emax},
         "url": "tiles/{z}/{x}/{y}.webp",
+        "geometricError": {
+            "url": "terrain-error.bin",
+            "format": "grand-teton-terrain-error/v1",
+            "quantizationMeters": 0.1,
+        },
         # suggested world placement: center the park, datum at valley floor
         "world": {
             "centerEasting": gt[0] + w * gt[1] / 2.0,

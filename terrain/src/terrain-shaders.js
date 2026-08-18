@@ -701,3 +701,133 @@ window.TerrainShaders = {
       gl_FragColor = vec4(col, 1.0);
     }`
 };
+
+/* Instanced WebGL2 terrain path.
+ *
+ * Keep the legacy shader above authoritative: the batched sources are derived from those exact
+ * strings, replacing only per-draw uniforms with per-instance attributes and the two tile
+ * samplers with texture arrays.  This makes changes to morphing, stitching, normals, lighting,
+ * colour, shadows, fog, and detail automatically apply to both render paths.
+ *
+ * Attribute layout (one divisor-1 record per visible quadtree leaf):
+ *   aTerrainTile     = origin.x, origin.z, size, skirt
+ *   aTerrainUVMax    = validU, validV
+ *   aTerrainHeight   = heightWindow.u, .v, .scale, heightArrayLayer
+ *   aTerrainImagery  = imageryWindow.u, .v, .scale, imageryArrayLayer (-1 = unavailable)
+ *   aTerrainGeom     = sourceHeightTexelMeters, morphBase, gridSegments
+ *   aTerrainCUV      = ancestor lattice steps z-1 .. z-4
+ *   aTerrainEdgeR    = stitch ratios -x, +x, -z, +z
+ *
+ * THREE.GLSL3 must be assigned to ShaderMaterial.glslVersion by the batch owner. The traditional
+ * `vertex` / `fragment` strings remain GLSL1-compatible for ?terrainBatch=0 and capability
+ * fallback. Array layer readiness and residency are deliberately owned by TerrainStreamer.
+ */
+(function buildInstancedTerrainShaders(shaders) {
+  'use strict';
+
+  function replaceOnce(source, search, replacement, label) {
+    const at = source.indexOf(search);
+    if (at < 0 || source.indexOf(search, at + search.length) >= 0)
+      throw new Error(`Terrain batch shader anchor changed: ${label}`);
+    return source.slice(0, at) + replacement + source.slice(at + search.length);
+  }
+
+  function removeUniform(source, declaration, label) {
+    return replaceOnce(source, declaration, '', label);
+  }
+
+  const vertexHeader = `precision highp float;
+    uniform highp sampler2DArray uHeightArray;
+    attribute vec4 aTerrainTile;
+    attribute vec2 aTerrainUVMax;
+    attribute vec4 aTerrainHeight;
+    attribute vec4 aTerrainImagery;
+    attribute vec3 aTerrainGeom;
+    attribute vec4 aTerrainCUV;
+    attribute vec4 aTerrainEdgeR;
+    flat varying vec4 vTerrainImagery;
+    flat varying vec2 vTerrainUVMax;
+    #define uHWin       aTerrainHeight.xyz
+    #define uUVMax      aTerrainUVMax
+    #define uTileOrigin aTerrainTile.xy
+    #define uTileSize   aTerrainTile.z
+    #define uSkirt      aTerrainTile.w
+    #define uHTexelM    aTerrainGeom.x
+    #define uMorphBase  aTerrainGeom.y
+    #define uGridN      aTerrainGeom.z
+    #define uCUV        aTerrainCUV
+    #define uEdgeR      aTerrainEdgeR
+    float terrainHeightTex(vec2 terrainUV){
+      return texture(uHeightArray, vec3(terrainUV, aTerrainHeight.w)).r;
+    }`;
+
+  let vertex = replaceOnce(shaders.vertex, 'precision highp float;', vertexHeader,
+                           'vertex precision');
+  for (const [declaration, label] of [
+    ['    uniform sampler2D uHeight;\n', 'height sampler'],
+    ['    uniform vec3  uHWin;         // (offsetU, offsetV, scale) into the height source tile\n', 'height window'],
+    ['    uniform vec2  uUVMax;        // valid-data clamp in node uv ((1,1) except at the raster edge)\n', 'UV clamp'],
+    ['    uniform vec2  uTileOrigin;\n', 'tile origin'],
+    ['    uniform float uTileSize;\n', 'tile size'],
+    ['    uniform float uSkirt;\n', 'skirt'],
+    ['    uniform float uMorphBase;    // this node\'s LOD handoff distance h (ring = [h, 2h))\n', 'morph base'],
+    ['    uniform vec4  uCUV;          // ancestor-lattice steps in node uv toward z-1..z-4; 0 = none\n', 'ancestor lattice'],
+    ['    uniform vec4  uEdgeR;        // per-edge stitch ratio (-x,+x,-z,+z); 0 = no stitch, else\n', 'edge ratios'],
+    ['    uniform float uGridN;        // this tile\'s grid subdivisions (segments across a full edge)\n', 'grid segments'],
+    ['    uniform float uHTexelM;      // meters per source-height texel (extrapolation slope cap)\n', 'height texel size'],
+  ]) vertex = removeUniform(vertex, declaration, label);
+  vertex = replaceOnce(vertex, 'texture2D(uHeight, c).r', 'terrainHeightTex(c)',
+                       'center height read');
+  vertex = replaceOnce(vertex,
+    'texture2D(uHeight, vec2(c.x - sign(ex.x) / T, c.y)).r',
+    'terrainHeightTex(vec2(c.x - sign(ex.x) / T, c.y))', 'x height read');
+  vertex = replaceOnce(vertex,
+    'texture2D(uHeight, vec2(c.x, c.y - sign(ex.y) / T)).r',
+    'terrainHeightTex(vec2(c.x, c.y - sign(ex.y) / T))', 'y height read');
+  vertex = replaceOnce(vertex, '    void main(){\n      vec2 g = position.xz;',
+    `    void main(){
+      vTerrainImagery = aTerrainImagery;
+      vTerrainUVMax = aTerrainUVMax;
+      vec2 g = position.xz;`, 'vertex main');
+
+  const fragmentHeader = `precision highp float;
+    uniform highp sampler2DArray uImageryArray;
+    flat varying vec4 vTerrainImagery;
+    flat varying vec2 vTerrainUVMax;
+    layout(location = 0) out highp vec4 terrainFragColor;
+    #define uIWin    vTerrainImagery.xyz
+    #define uUVMax   vTerrainUVMax
+    #define uHasImg  step(-0.5, vTerrainImagery.w)`;
+
+  let fragment = replaceOnce(shaders.fragment, 'precision highp float;', fragmentHeader,
+                             'fragment precision');
+  for (const [declaration, label] of [
+    ['    uniform sampler2D uImagery;\n', 'imagery sampler'],
+    ['    uniform vec3  uIWin;\n', 'imagery window'],
+    ['    uniform vec2  uUVMax;        // valid-data clamp (see vertex): grey padding never sampled\n', 'fragment UV clamp'],
+    ['    uniform float uHasImg;\n', 'imagery availability'],
+  ]) fragment = removeUniform(fragment, declaration, label);
+  fragment = replaceOnce(fragment,
+    'texture2D(uImagery, uIWin.xy + min(vUv, uUVMax)*uIWin.z, mipBias).rgb',
+    'texture(uImageryArray, vec3(uIWin.xy + min(vUv, uUVMax)*uIWin.z, vTerrainImagery.w), mipBias).rgb',
+    'imagery array read');
+  fragment = replaceOnce(fragment, 'gl_FragColor = vec4(col, 1.0);',
+                         'terrainFragColor = vec4(col, 1.0);', 'fragment output');
+
+  shaders.batch = Object.freeze({
+    vertex,
+    fragment,
+    glslVersion: '300 es',
+    heightSampler: 'uHeightArray',
+    imagerySampler: 'uImageryArray',
+    attributes: Object.freeze({
+      tile: Object.freeze({ name: 'aTerrainTile', itemSize: 4 }),
+      uvMax: Object.freeze({ name: 'aTerrainUVMax', itemSize: 2 }),
+      height: Object.freeze({ name: 'aTerrainHeight', itemSize: 4 }),
+      imagery: Object.freeze({ name: 'aTerrainImagery', itemSize: 4 }),
+      geom: Object.freeze({ name: 'aTerrainGeom', itemSize: 3 }),
+      ancestorLattice: Object.freeze({ name: 'aTerrainCUV', itemSize: 4 }),
+      edgeRatios: Object.freeze({ name: 'aTerrainEdgeR', itemSize: 4 }),
+    }),
+  });
+})(window.TerrainShaders);

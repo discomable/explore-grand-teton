@@ -390,6 +390,7 @@
       };
 
       this.group = new THREE.Group();
+      this.group.name = 'waterSurfaces';
       this.scene.add(this.group);
       // build stamp — open DevTools console to confirm which reflection build a tab is running
       // (cuts through browser-cache ambiguity). PLANAR = the current correct build.
@@ -1128,9 +1129,12 @@
       // enough", which corrupted the RT and made the whole reflection blank out (persisting at
       // rest). Reflecting the terrain/mountains is what matters; forested banks reflect their
       // terrain, not individual trees — a fine trade for a reflection that never glitches out.
+      const terrainPass = this.terrain.beginReflectionPass ?
+        this.terrain.beginReflectionPass(rc, py) :
+        { active: false, group: this.terrain.group };
       const keep = this._keepSet || (this._keepSet = new Set());
       keep.clear();
-      keep.add(this.terrain.group);
+      keep.add(terrainPass.group);
       try { if (typeof sky !== 'undefined' && sky && sky.isMesh) keep.add(sky); } catch (e) {}
       const shown = [];
       for (const c of this.scene.children) {
@@ -1144,13 +1148,17 @@
       renderer.info.autoReset = false;      // keep the frame's call/tri stats accumulating
       renderer.shadowMap.autoUpdate = false; // skip a pointless depth pass (casters are hidden)
       renderer.toneMapping = THREE.NoToneMapping; // reflection target is always linear
-      renderer.setRenderTarget(R.rt);
-      renderer.render(this.scene, rc);
-      renderer.setRenderTarget(prevRT);
-      renderer.toneMapping = prevTone;
-      renderer.info.autoReset = prevAuto;
-      renderer.shadowMap.autoUpdate = prevShadow;
-      for (const c of shown) c.visible = true;
+      try {
+        renderer.setRenderTarget(R.rt);
+        renderer.render(this.scene, rc);
+      } finally {
+        renderer.setRenderTarget(prevRT);
+        renderer.toneMapping = prevTone;
+        renderer.info.autoReset = prevAuto;
+        renderer.shadowMap.autoUpdate = prevShadow;
+        for (const c of shown) c.visible = true;
+        this.terrain.endReflectionPass?.(terrainPass);
+      }
       U.uReflTex.value = R.rt.texture;
       U.uReflAmt.value = 1;
       U.uReflPlaneY.value = py;
@@ -1166,7 +1174,7 @@
       const byZ = []; let zTop = -1;
       for (const e of t.hCache.values()) {
         if (!e.decoded) continue;
-        (byZ[e.z] || (byZ[e.z] = new Map())).set(e.x * 4096 + e.y, e);
+        (byZ[e.z] || (byZ[e.z] = new Map())).set(e.x * 4096 + e.y, e.decoded);
         if (e.z > zTop) zTop = e.z;
       }
       const hx = t.spanX / 2, hz = t.spanZ / 2, root = t.rootSpan;
@@ -1183,9 +1191,8 @@
           const cx = Math.min(Math.max(x, -hx + pad), hx - pad);
           const cz = Math.min(Math.max(z, -hz + pad), hz - pad);
           const tx = Math.floor((cx + hx) / span), ty = Math.floor((cz + hz) / span);
-          const e = tiles.get(tx * 4096 + ty);
-          if (!e) continue;
-          const g = e.decoded;
+          const g = tiles.get(tx * 4096 + ty);
+          if (!g) continue;
           let u = ((cx + hx) / span - tx) * (S - 1), v = ((cz + hz) / span - ty) * (S - 1);
           u = Math.max(0, Math.min(uMax, u)); v = Math.max(0, Math.min(uMax, v));
           const i = u | 0, j = v | 0, fu = u - i, fv = v - j;

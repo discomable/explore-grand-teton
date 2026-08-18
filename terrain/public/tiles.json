@@ -25,6 +25,11 @@
     "max": 4198.0283203125
   },
   "url": "tiles/{z}/{x}/{y}.webp",
+  "geometricError": {
+    "url": "terrain-error.bin",
+    "format": "grand-teton-terrain-error/v1",
+    "quantizationMeters": 0.1
+  },
   "world": {
     "centerEasting": 522180.8068557632,
     "centerNorthing": 4842506.167973563,

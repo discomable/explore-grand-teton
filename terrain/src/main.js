@@ -1,5 +1,6 @@
 import * as ThreeModule from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { AppContext } from './app-context.js';
 import { WorkerPool } from './workers/WorkerPool.js';
 import { WorldIndexClient } from './workers/WorldIndexClient.js';
@@ -8,8 +9,32 @@ import { TransportSurface, transportFeatures } from './transport/TransportSurfac
 import { DrivingInput, activeGamepad } from './vehicle/DrivingInput.js';
 import { SUV_PROFILE, createVehicleState, stepVehicle } from './vehicle/ArcadeVehiclePhysics.js';
 import { summarizeVisibleTerrain } from './terrain-coverage.js';
+import {
+  accountTerrainOwnership, counterDelta, labelTimerSample, mergeCounterKinds, requestRates,
+} from './terrain-telemetry.js';
+import {
+  createTerrainTextureArrayPool,
+  TerrainTextureArrayCapacityError,
+} from './TerrainTextureArrayPool.js';
+import {
+  buildReflectionTerrainInstances, buildTerrainFrame,
+  compareTerrainSubmissions,
+  deriveReflectionTerrainInstance, reflectionTerrainGridN, REFLECTION_TERRAIN_GRIDS,
+  TERRAIN_INSTANCE_LAYOUT,
+} from './terrain-batch-contract.js';
+import {
+  applyVegetationFade,
+  buildVegetationBatchFrame,
+  compactVegetationRecord,
+  nextVegetationCapacity,
+  VEGETATION_SPECIES,
+} from './vegetation-batch-contract.js';
+import {
+  parseTerrainErrorPyramid, predictTerrainPoses, projectedTerrainError,
+  selectTerrainWarmSources, terrainShouldSubdivide,
+} from './terrain-visibility-contract.js';
 
-const THREE = { ...ThreeModule, GLTFLoader };
+const THREE = { ...ThreeModule, GLTFLoader, mergeGeometries };
 window.THREE = THREE;
 
 const params = new URLSearchParams(location.search);
@@ -36,6 +61,23 @@ window.DrivingInput = DrivingInput;
 window.GT_activeGamepad = activeGamepad;
 window.GT_VEHICLE_PHYSICS = { SUV_PROFILE, createVehicleState, stepVehicle };
 window.GT_TERRAIN_COVERAGE = { summarizeVisibleTerrain };
+window.GT_TERRAIN_TELEMETRY = {
+  accountTerrainOwnership, counterDelta, labelTimerSample, mergeCounterKinds, requestRates,
+};
+window.GT_TERRAIN_ARRAYS = { createTerrainTextureArrayPool, TerrainTextureArrayCapacityError };
+window.GT_TERRAIN_BATCH = {
+  buildReflectionTerrainInstances, buildTerrainFrame, compareTerrainSubmissions,
+  deriveReflectionTerrainInstance, reflectionTerrainGridN, REFLECTION_TERRAIN_GRIDS,
+  TERRAIN_INSTANCE_LAYOUT,
+};
+window.GT_VEGETATION_BATCH = {
+  applyVegetationFade, buildVegetationBatchFrame, compactVegetationRecord, nextVegetationCapacity,
+  VEGETATION_SPECIES,
+};
+window.GT_TERRAIN_VISIBILITY = {
+  parseTerrainErrorPyramid, predictTerrainPoses, projectedTerrainError,
+  selectTerrainWarmSources, terrainShouldSubdivide,
+};
 
 const rendererWorker = await startRenderWorkerIfRequested(context);
 if (!rendererWorker.active) {
@@ -54,6 +96,9 @@ if (!rendererWorker.active) {
   for (const path of scripts) await loadClassic(new URL(`terrain/src/${path}`, document.baseURI));
   if (params.get('benchmark') === '1') {
     await loadClassic(new URL('terrain/src/benchmark/runner-classic.js', document.baseURI));
+  }
+  if (params.get('terrainEndurance') === '1') {
+    await loadClassic(new URL('terrain/src/benchmark/terrain-endurance-classic.js', document.baseURI));
   }
   document.getElementById('gear').addEventListener('click', () => window.GT_toggleSettings?.());
   registerServiceWorker();

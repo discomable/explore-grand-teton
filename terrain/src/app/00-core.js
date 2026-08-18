@@ -29,7 +29,9 @@ const DEV = ['localhost','127.0.0.1',''].includes(location.hostname);
 
 /* page errors ride along in screenshot metadata — headless review shots diagnose themselves */
 const PAGE_ERRS=[];
-addEventListener('error',e=>{ if(PAGE_ERRS.length<8) PAGE_ERRS.push(String(e.message).slice(0,300)); });
+addEventListener('error',e=>{ if(PAGE_ERRS.length<8) PAGE_ERRS.push(
+  (String(e.message)+' @ '+String(e.filename||'').split('/').slice(-2).join('/')+':'+e.lineno+':'+e.colno+
+   (e.error&&e.error.stack?' '+e.error.stack:'' )).slice(0,500)); });
 { const _cerr=console.error.bind(console);
   console.error=(...a)=>{ if(PAGE_ERRS.length<8) PAGE_ERRS.push(a.map(String).join(' ').slice(0,300)); _cerr(...a); }; }
 

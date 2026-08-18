@@ -1109,6 +1109,26 @@
       this.group = new THREE.Group();
       this.group.name = 'vegetationScatter';
       this.scene.add(this.group);
+      let vegetationBatchDisabled = false;
+      try {
+        vegetationBatchDisabled = new URLSearchParams(global.location?.search || '')
+          .get('vegetationBatch') === '0';
+      } catch (_) {}
+      this._vegetationBatchContract = global.GT_VEGETATION_BATCH || null;
+      this._vegetationBatched = !!this._vegetationBatchContract && !vegetationBatchDisabled;
+      this._vegetationBatches = new Map();
+      this._vegetationRevision = 0;
+      this._vegetationBatchStats = {
+        passes: 0, growths: 0, visibleCells: 0, instances: 0, drawCalls: 0,
+        uploadBytes: 0, totalUploadBytes: 0, skippedPublications: 0, lodOmitted: 0,
+      };
+      if (this._vegetationBatched) {
+        const previousSceneBeforeRender = this.scene.onBeforeRender;
+        this.scene.onBeforeRender = (renderer, renderScene, renderCamera, renderTarget) => {
+          previousSceneBeforeRender?.call(this.scene, renderer, renderScene, renderCamera, renderTarget);
+          this._publishVegetationBatches(renderCamera);
+        };
+      }
       let detailOverride = null;
       try {
         const qp = new URLSearchParams(global.location.search);
@@ -1308,6 +1328,121 @@
       this._publishStreamTelemetry();
     }
 
+    _retireCell(cell) {
+      if (!cell) return;
+      if (this._vegetationBatched) {
+        cell.records = [];
+        this._vegetationRevision++;
+        return;
+      }
+      for (const record of cell.meshes || []) {
+        this.group.remove(record.mesh);
+        this.pools.get(record.sp)?.push(record.mesh);
+      }
+    }
+
+    _newVegetationBatch(species, capacity) {
+      const photo = species === 'bb' || PHOTO[species];
+      const base = species === 'bb' ? this.bbGeo : this.flora[species];
+      const geometry = base.clone();
+      if (photo) {
+        const uv = new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1);
+        uv.setUsage(THREE.DynamicDrawUsage);
+        geometry.setAttribute('aUvOff', uv);
+      }
+      const material = photo ? this.photoMat : this.material;
+      const mesh = new THREE.InstancedMesh(geometry, material, capacity);
+      mesh.name = `vegetationBatch-${species}`;
+      mesh.frustumCulled = false;
+      mesh.matrixAutoUpdate = false; mesh.updateMatrix();
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3);
+      mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+      mesh.count = 0; mesh.visible = false;
+      return {
+        species, capacity, geometry, mesh,
+        trianglesPerInstance: (geometry.index?.count || geometry.attributes.position.count) / 3,
+      };
+    }
+
+    _ensureVegetationBatch(species, required) {
+      const contract = this._vegetationBatchContract;
+      let batch = this._vegetationBatches.get(species);
+      if (batch && batch.capacity >= required) return batch;
+      const capacity = contract.nextVegetationCapacity(required, batch?.capacity || 0);
+      const replacement = this._newVegetationBatch(species, capacity);
+      this.group.add(replacement.mesh);
+      if (batch) {
+        this.group.remove(batch.mesh);
+        batch.mesh.dispose();
+        batch.geometry.dispose();
+      }
+      this._vegetationBatches.set(species, replacement);
+      this._vegetationBatchStats.growths++;
+      return replacement;
+    }
+
+    _publishVegetationBatches(renderCamera) {
+      if (!this._vegetationBatched || !renderCamera || !this.group.visible) return;
+      const projection = this._vegetationProjection || (this._vegetationProjection = new THREE.Matrix4());
+      const frustum = this._vegetationFrustum || (this._vegetationFrustum = new THREE.Frustum());
+      projection.multiplyMatrices(renderCamera.projectionMatrix, renderCamera.matrixWorldInverse);
+      frustum.setFromProjectionMatrix(projection);
+      const frame = this._vegetationBatchContract.buildVegetationBatchFrame(
+        this.cells.values(), sphere => frustum.intersectsSphere(sphere));
+      const previousVisible = this._vegetationPublishedCells;
+      let unchanged = this._vegetationPublishedRevision === this._vegetationRevision &&
+        previousVisible?.length === frame.visible.length;
+      if (unchanged) for (let i = 0; i < frame.visible.length; i++) {
+        if (previousVisible[i] !== frame.visible[i]) { unchanged = false; break; }
+      }
+      if (unchanged) {
+        this._vegetationBatchStats.skippedPublications++;
+        this._vegetationBatchStats.uploadBytes = 0;
+        return;
+      }
+      let drawCalls = 0, uploadBytes = 0;
+      const occupied = new Set();
+      for (const [species, source] of frame.batches) {
+        if (!source.count) continue;
+        occupied.add(species);
+        const batch = this._ensureVegetationBatch(species, source.count);
+        const matrices = batch.mesh.instanceMatrix.array;
+        const colors = batch.mesh.instanceColor.array;
+        const uv = batch.geometry.getAttribute('aUvOff')?.array || null;
+        let at = 0;
+        for (const record of source.records) {
+          matrices.set(record.matrices, at * 16);
+          colors.set(record.colors, at * 3);
+          if (uv && record.uvs) uv.set(record.uvs, at);
+          at += record.count;
+        }
+        batch.mesh.count = source.count;
+        batch.mesh.visible = true;
+        batch.mesh.instanceMatrix.needsUpdate = true;
+        batch.mesh.instanceColor.needsUpdate = true;
+        if (uv) batch.geometry.getAttribute('aUvOff').needsUpdate = true;
+        drawCalls++;
+        uploadBytes += source.count * (16 + 3 + (uv ? 1 : 0)) * 4;
+      }
+      for (const [species, batch] of this._vegetationBatches) {
+        if (occupied.has(species)) continue;
+        batch.mesh.count = 0; batch.mesh.visible = false;
+      }
+      const stats = this._vegetationBatchStats;
+      stats.passes++; stats.visibleCells = frame.visibleCells; stats.instances = frame.instances;
+      stats.drawCalls = drawCalls; stats.uploadBytes = uploadBytes;
+      stats.totalUploadBytes += uploadBytes;
+      stats.gpuBytes = [...this._vegetationBatches.values()].reduce((bytes, batch) =>
+        bytes + batch.capacity * (16 + 3 + (batch.geometry.getAttribute('aUvOff') ? 1 : 0)) * 4, 0);
+      stats.species = Object.fromEntries([...this._vegetationBatches].map(([species, batch]) => [species, {
+        count: batch.mesh.count, capacity: batch.capacity,
+        gpuBytes: batch.capacity * (16 + 3 + (batch.geometry.getAttribute('aUvOff') ? 1 : 0)) * 4,
+      }]));
+      this._vegetationPublishedCells = frame.visible.slice();
+      this._vegetationPublishedRevision = this._vegetationRevision;
+    }
+
     _updateCloseDetail(camPos, viewCamera) {
       const out = this._detailMesh;
       if (!out) return;
@@ -1354,15 +1489,18 @@
             Math.abs(mz - camPos.z) > this.cellSize * 0.65) continue;
         // exact integer identity for (cell, species, instance) — replaces "cx,cz|sp|i"
         const cellId = (ccx + 2048) * 4096 + (ccz + 2048);
-        for (const rec of cell.meshes) {
-          if (rec.sp !== 'conifer' && rec.sp !== 'spire') continue;
-          const mesh = rec.mesh, ma = mesh.instanceMatrix.array;
-          const uv = mesh.geometry.getAttribute('aUvOff');
-          const ca = mesh.instanceColor && mesh.instanceColor.array;
+        for (const rec of (this._vegetationBatched ? cell.records : cell.meshes)) {
+          const species = rec.species || rec.sp;
+          if (species !== 'conifer' && species !== 'spire') continue;
+          const mesh = rec.mesh, ma = this._vegetationBatched ? rec.matrices : mesh.instanceMatrix.array;
+          const uv = this._vegetationBatched ? rec.uvs : mesh.geometry.getAttribute('aUvOff');
+          const ca = this._vegetationBatched ? rec.colors : (mesh.instanceColor && mesh.instanceColor.array);
           const srcIdx = C.srcMa.length;
-          C.srcMa.push(ma); C.srcUv.push(uv ? uv.array : null); C.srcCa.push(ca || null);
-          const base = (cellId * 2 + (rec.sp === 'spire' ? 1 : 0)) * 65536;
-          for (let i = 0; i < mesh.count; i++) {
+          C.srcMa.push(ma); C.srcUv.push(this._vegetationBatched ? uv : (uv ? uv.array : null));
+          C.srcCa.push(ca || null);
+          const base = (cellId * 2 + (species === 'spire' ? 1 : 0)) * 65536;
+          const count = this._vegetationBatched ? rec.count : mesh.count;
+          for (let i = 0; i < count; i++) {
             const o = i * 16, dx = ma[o + 12] - camPos.x, dz = ma[o + 14] - camPos.z;
             const d2 = dx * dx + dz * dz;
             if (d2 > exit2) continue;
@@ -1507,7 +1645,7 @@
         const band = want.get(k);
         if (band === undefined) {
           cell.dead = true;                      // mid-fade retire: _updateFades drops it untouched
-          for (const m of cell.meshes) { this.group.remove(m.mesh); this.pools.get(m.sp).push(m.mesh); }
+          this._retireCell(cell);
           this.cells.delete(k);
           this._detailDirty = true;
         } else if (band !== cell.band) {
@@ -1948,7 +2086,11 @@
         const fillStart = performance.now();
         const prepared = this._candidateReady.get(c.k);
         this._candidateReady.delete(c.k);
-        const cell = { meshes: this._fillCell(c.cx, c.cz, c.band, prepared), band: c.band };
+        const payload = this._fillCell(c.cx, c.cz, c.band, prepared, c.k);
+        const cell = this._vegetationBatched
+          ? { records: payload.records, sphere: payload.sphere, meshes: [], band: c.band,
+              cellX: c.cx, cellZ: c.cz, key: c.k }
+          : { meshes: payload, band: c.band, cellX: c.cx, cellZ: c.cz, key: c.k };
         const fillMs = performance.now() - fillStart;
         this._streamStats.cellsBuilt++;
         if (c.replace) this._streamStats.cellsReplaced++;
@@ -1956,12 +2098,10 @@
         this._streamStats.worstFillMs = Math.max(this._streamStats.worstFillMs, fillMs);
         if (old) {
           old.dead = true;
-          for (const m of old.meshes) {
-            this.group.remove(m.mesh);
-            this.pools.get(m.sp).push(m.mesh);
-          }
+          this._retireCell(old);
         }
         this.cells.set(c.k, cell);
+        if (this._vegetationBatched) this._vegetationRevision++;
         this._detailDirty = true;
         // A replacement is already covered by the old LOD up to this atomic swap. Growing the new
         // matrices would reintroduce a coverage hole; only genuinely new edge cells fade in.
@@ -2007,6 +2147,13 @@
         farCanopyQueuedCells: this._farQueue?.length || 0,
         farCanopyPendingCells: this._farPending.size,
         farCanopy: { ...this._farStats },
+        submission: this._vegetationBatched ? {
+          mode: 'species-batches',
+          residentCells: this.cells.size,
+          batches: this._vegetationBatches.size,
+          capacity: [...this._vegetationBatches.values()].reduce((n, batch) => n + batch.capacity, 0),
+          ...this._vegetationBatchStats,
+        } : { mode: 'cell-meshes' },
         generation: this._candidateGeneration,
       };
     }
@@ -2020,19 +2167,25 @@
     _beginFade(cell) {
       if (!this.fadeIn) return;
       cell.fading = true;
-      const orig = cell.meshes.map(m => m.mesh.instanceMatrix.array.slice(0, m.mesh.count * 16));
+      const orig = this._vegetationBatched
+        ? cell.records.map(record => record.matrices.slice())
+        : cell.meshes.map(m => m.mesh.instanceMatrix.array.slice(0, m.mesh.count * 16));
       const f = { cell, orig, t0: performance.now() };
       this._fading.push(f);
       this._applyFade(f, 0.001);                 // present but sub-pixel on the fill frame
     }
 
     _applyFade(f, g) {
-      for (let mi = 0; mi < f.cell.meshes.length; mi++) {
-        const mesh = f.cell.meshes[mi].mesh, src = f.orig[mi], dst = mesh.instanceMatrix.array;
-        for (let o = 0; o < src.length; o += 16)
+      const records = this._vegetationBatched ? f.cell.records : f.cell.meshes;
+      for (let mi = 0; mi < records.length; mi++) {
+        const mesh = records[mi].mesh, src = f.orig[mi];
+        const dst = this._vegetationBatched ? records[mi].matrices : mesh.instanceMatrix.array;
+        if (this._vegetationBatched) this._vegetationBatchContract.applyVegetationFade(src, dst, g);
+        else for (let o = 0; o < src.length; o += 16)
           for (let c = 0; c < 12; c++) dst[o + c] = src[o + c] * g;
-        mesh.instanceMatrix.needsUpdate = true;
+        if (mesh) mesh.instanceMatrix.needsUpdate = true;
       }
+      if (this._vegetationBatched) this._vegetationRevision++;
     }
 
     _updateFades() {
@@ -2416,7 +2569,7 @@
       return mesh;
     }
 
-    _fillCell(cx, cz, band, prepared) {
+    _fillCell(cx, cz, band, prepared, cellKey = `${cx},${cz}`) {
       const rng = mulberry32((cx * 73856093) ^ (cz * 19349663) ^ 0x9E3779B9);
       let treeRandomAt = 0;
       const nextTreeRandom = prepared?.tree
@@ -2701,6 +2854,23 @@
       const hy = isFinite(yLo) ? (yHi - yLo) / 2 : 1;
       const sphC = new THREE.Vector3(x0 + S / 2, cyw, z0 + S / 2);
       const sphR = Math.sqrt(2 * half * half + hy * hy);
+
+      if (this._vegetationBatched) {
+        const records = [];
+        for (const [species, rec] of put) {
+          const count = Math.min(rec.n, rec.cap);
+          if (!count) continue;
+          const photo = species === 'bb' || PHOTO[species];
+          const compact = this._vegetationBatchContract.compactVegetationRecord({
+            cellX: cx, cellZ: cz, band, species, count,
+            matrices: rec.mats, colors: rec.cols, uvs: photo ? rec.uvs : null,
+          });
+          if (!compact.count) continue;
+          records.push(compact);
+          this._vegetationBatchStats.lodOmitted += compact.omitted;
+        }
+        return { records, sphere: new THREE.Sphere(sphC, sphR), cellKey };
+      }
 
       /* —— one InstancedMesh per species actually present (all far billboards are ONE species) —— */
       const meshes = [];

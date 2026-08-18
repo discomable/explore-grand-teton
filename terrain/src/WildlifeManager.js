@@ -194,6 +194,7 @@
       this.lodNear = o.lodNear || 340;        // full mesh inside, billboard beyond
       this.budgetMs = o.budgetMs || 1.5;
       this.group = new THREE.Group();
+      this.group.name = 'wildlife';
       this.scene.add(this.group);
 
       this.nearMat = new THREE.MeshLambertMaterial({ vertexColors: true, emissive: 0x000000 });
